@@ -1,0 +1,335 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ USERS & AUTH ============
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // hashed
+  nom       String
+  prenom    String
+  entreprise String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  affaires Affaire[]
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+// ============ AFFAIRES ============
+
+model Affaire {
+  id                      String   @id @default(cuid())
+  userId                  String
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  reference               String
+  nomClient               String
+  adresse                 String?
+  ville                   String
+  departement             String
+  villeMonotone           String   // Bourges, Chartres, etc.
+  tempExtBase             Float    @default(-7)
+  tempIntBase             Float    @default(19)
+  djuRetenu               Float
+  augmentationFossile     Float    @default(0.04) // 4%
+  augmentationBiomasse    Float    @default(0.02) // 2%
+  tauxEmprunt             Float    @default(0.02) // 2%
+  dureeEmprunt            Int      @default(15)
+  
+  statut                  AffaireStatut @default(BROUILLON)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  batiments Batiment[]
+  parcs     Parc[]
+  historique HistoriqueAffaire[]
+
+  @@unique([userId, reference])
+  @@map("affaires")
+}
+
+enum AffaireStatut {
+  BROUILLON
+  EN_COURS
+  TERMINE
+}
+
+model HistoriqueAffaire {
+  id        String   @id @default(cuid())
+  affaireId String
+  affaire   Affaire  @relation(fields: [affaireId], references: [id], onDelete: Cascade)
+  
+  action    String   // "modification", "creation", etc.
+  details   String?  // JSON string of changes
+  createdAt DateTime @default(now())
+
+  @@map("historique_affaires")
+}
+
+// ============ BUILDINGS ============
+
+model Batiment {
+  id                    String   @id @default(cuid())
+  affaireId             String
+  affaire               Affaire  @relation(fields: [affaireId], references: [id], onDelete: Cascade)
+  
+  numero                Int
+  designation           String
+  typeBatiment          TypeBatiment
+  surfaceChauffee       Float
+  volumeChauffe         Float
+  parc                  Int      // 1-4
+  
+  // État initial
+  deperditions          Float    // kW
+  rendementProduction   Float    // %
+  rendementDistribution Float    // %
+  rendementEmission     Float    // %
+  rendementRegulation   Float    // %
+  coefIntermittence     Float    @default(1)
+  consommationsCalculees Float?  // kWh/an (calculated or input)
+  consommationsReelles  Float?   // kWh/an (optional user input)
+  typeEnergie           TypeEnergie
+  tarification          Float    // €/kWh PCS
+  abonnement            Float    // €/an
+  
+  // État de référence
+  refDeperditions       Float?
+  refTypeEnergie        TypeEnergie?
+  refRendementProduction Float?
+  refRendementDistribution Float?
+  refRendementEmission  Float?
+  refRendementRegulation Float?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([affaireId, numero])
+  @@map("batiments")
+}
+
+enum TypeBatiment {
+  LOGEMENTS
+  BUREAUX
+  OCCUPATION_CONTINUE
+  AUTRES
+}
+
+enum TypeEnergie {
+  FUEL
+  GAZ_NATUREL
+  GAZ_PROPANE
+  ELECTRICITE
+  BOIS_DECHIQUETTE
+  BOIS_GRANULES
+}
+
+// ============ PARCS (Réseaux de chaleur) ============
+
+model Parc {
+  id                      String   @id @default(cuid())
+  affaireId               String
+  affaire                 Affaire  @relation(fields: [affaireId], references: [id], onDelete: Cascade)
+  
+  numero                  Int      // 1-4
+  
+  // Données biomasse
+  puissanceChaudiereBois  Float?   // kW
+  rendementChaudiereBois  Float?   // %
+  puissanceChaudiere2     Float?   // kW (appoint)
+  rendementChaudiere2     Float?   // %
+  typeBiomasse            TypeBiomasse?
+  longueurReseau          Float?   // ml
+  sectionReseau           String?  // DN25, DN32, DN40, DN50
+  pourcentageCouvertureBois Float? // %
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  chiffrageRef ChiffragReference?
+  chiffrageBio ChiffrageBiomasse?
+
+  @@unique([affaireId, numero])
+  @@map("parcs")
+}
+
+enum TypeBiomasse {
+  PLAQUETTE
+  GRANULES
+  MISCANTHUS
+  BUCHES
+}
+
+// ============ COSTING - REFERENCE SOLUTION ============
+
+model ChiffragReference {
+  id                    String   @id @default(cuid())
+  parcId                String   @unique
+  parc                  Parc     @relation(fields: [parcId], references: [id], onDelete: Cascade)
+  
+  // JSON arrays of cost lines
+  lignesIsolation       String   // JSON: {designation, unite, qte, prixUnitaire, dejaRealise}[]
+  lignesChaufferie      String   // JSON: {designation, unite, qte, prixUnitaire}[]
+  
+  // Annexes fees (%)
+  tauxBureauControle    Float    @default(0)
+  tauxMaitriseOeuvre    Float    @default(0.13)
+  tauxFraisDivers       Float    @default(0.02)
+  tauxAleas             Float    @default(0.05)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("chiffrage_reference")
+}
+
+// ============ COSTING - BIOMASS SOLUTION ============
+
+model ChiffrageBiomasse {
+  id                      String   @id @default(cuid())
+  parcId                  String   @unique
+  parc                    Parc     @relation(fields: [parcId], references: [id], onDelete: Cascade)
+  
+  // Cost items (€)
+  vrd                     Float?
+  grosOeuvre              Float?
+  charpenteCouverture     Float?
+  processBois             Float?
+  chaudiereAppoint        Float?
+  hydrauliqueChaufferie   Float?
+  reseauChaleurQte        Float?   // ml
+  reseauChaleurPU         Float?   // €/ml
+  sousStation             Float?
+  installationReseau      Float?
+  autresTravaux           Float?
+  
+  // Annexes fees (%)
+  tauxBureauControle      Float    @default(0.03)
+  tauxMaitriseOeuvre      Float    @default(0.09)
+  tauxFraisDivers         Float    @default(0.02)
+  tauxAleas               Float    @default(0.05)
+  
+  // Subventions (%)
+  tauxSubventionCotEnr    Float?
+  tauxAideDepartementale  Float?
+  tauxDetrDsil            Float?
+  subventionComplementaire Float?
+  
+  // Exploitation (€)
+  montantP2               Float    @default(1200)
+  consoElecSupplementaire Float?
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("chiffrage_biomasse")
+}
+
+// ============ REFERENCE TABLES ============
+
+model Energie {
+  id              String   @id @default(cuid())
+  nom             String   @unique
+  abonnement      Float    // € TTC
+  tarification    Float    // € TTC / kWh PCS
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("energies")
+}
+
+model CaracteristiqueBiomasse {
+  id              String   @id @default(cuid())
+  type            TypeBiomasse @unique
+  pci             Float    // MWh/t
+  masseVolumique  Float    // kg/m³
+  tauxHumidite    Float    // %
+  tauxCendre      Float    // %
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("caracteristiques_biomasse")
+}
+
+model FacteurEmission {
+  id              String   @id @default(cuid())
+  combustible     String   @unique
+  co2PerKwh       Float    // kg CO2/kWh
+  so2PerKwh       Float    // kg SO2/kWh
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("facteurs_emission")
+}
+
+model BddCout {
+  id              String   @id @default(cuid())
+  categorie       CostCategory
+  designation     String
+  unite           String
+  prixUnitaire    Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([categorie, designation])
+  @@map("bdd_couts")
+}
+
+enum CostCategory {
+  ISOLATION
+  EQUIPEMENTS
+  VRD
+  GROS_OEUVRE
+  CHAUFFERIE_BIOMASSE
+  CHAUFFAGE_BATIMENTS
+}
+
+model MeteoMoyenne {
+  id              String   @id @default(cuid())
+  departement     String   @unique
+  code            String
+  djuMoyenne      Float    // moyenne 1996-2022
+  // dju2023, dju2024, etc. could be added as additional columns
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("meteo_moyenne")
+}
+
+model MeteoMonotone {
+  id              String   @id @default(cuid())
+  ville           String
+  heure           Int      // 0-8759
+  temperatureExt  Float    // °C
+  createdAt       DateTime @default(now())
+
+  @@unique([ville, heure])
+  @@map("meteo_monotone")
+}
+
+model PertesReseau {
+  id              String   @id @default(cuid())
+  section         String   @unique // DN25, DN32, DN40, DN50
+  pertesKwPerMl   Float    // kW/ml
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("pertes_reseau")
+}
