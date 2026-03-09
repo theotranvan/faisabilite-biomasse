@@ -10,7 +10,7 @@ import {
   calculStockage10jours,
   calculVolumeCendres,
   calculHeuresPP,
-} from '@/lib/calculs/parc';
+} from '@/lib/calculs';
 
 interface Parc {
   id: string;

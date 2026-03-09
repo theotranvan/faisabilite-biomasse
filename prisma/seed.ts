@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -184,6 +186,7 @@ async function main() {
   await prisma.caracteristiqueBiomasse.deleteMany({});
   await prisma.energie.deleteMany({});
   await prisma.meteoMoyenne.deleteMany({});
+  await prisma.meteoMonotone.deleteMany({});
 
   // Seed Énergies
   for (const energie of energiesData) {
@@ -220,6 +223,33 @@ async function main() {
     await prisma.meteoMoyenne.create({ data: meteo });
   }
   console.log('✓ Météo Moyenne seeded');
+
+  // Seed MeteoMonotone (8760 hours × 11 cities)
+  const monotoneCsvPath = path.join(__dirname, 'data', 'meteo_monotone_toutes_villes.csv');
+  if (fs.existsSync(monotoneCsvPath)) {
+    const monotoneCsv = fs.readFileSync(monotoneCsvPath, 'utf-8');
+    const lines = monotoneCsv.split('\n').slice(1); // skip header
+    const villes = ['Bourges','Chartres','Chateauroux','Gueret','Limoges','Nevers','Orleans','Paris','Poitiers','Tours','Vichy'];
+
+    for (const ville of villes) {
+      const villeIndex = villes.indexOf(ville) + 2; // columns C to M = index 2 to 12
+      const records = lines
+        .filter(l => l.trim())
+        .map((line, heure) => {
+          const cols = line.split(',');
+          return {
+            ville,
+            heure,
+            temperatureExt: parseFloat(cols[villeIndex]) || 0,
+          };
+        });
+
+      await prisma.meteoMonotone.createMany({ data: records });
+    }
+    console.log('✓ MeteoMonotone seeded (8760 × 11 villes)');
+  } else {
+    console.log('⚠ MeteoMonotone CSV not found at prisma/data/meteo_monotone_toutes_villes.csv — skipping');
+  }
 
   // Create Default User for mono-client app
   // First delete if exists

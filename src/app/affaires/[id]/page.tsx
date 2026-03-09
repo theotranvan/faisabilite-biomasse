@@ -18,6 +18,7 @@ import { PDFExportButton } from '@/components/affaire/PDFExportButton';
 import { AffaireActions } from '@/components/affaire/AffaireActions';
 import { ProjectSharing } from '@/components/affaire/ProjectSharing';
 import { VersionHistory } from '@/components/affaire/VersionHistory';
+import { calculConsoSortieParcChaudieresRef } from '@/lib/calculs';
 
 export const dynamic = 'force-dynamic';
 
@@ -137,9 +138,10 @@ export default function AffaireDetailPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    const numericFields = ['latitude', 'longitude', 'tarifFuelExploitation', 'tarifGazExploitation', 'tarifBoisExploitation', 'tarifElecExploitation'];
     setEditData({
       ...editData,
-      [name]: name === 'latitude' || name === 'longitude' ? parseFloat(value) || null : value,
+      [name]: numericFields.includes(name) ? parseFloat(value) || null : value,
     });
   };
 
@@ -342,6 +344,33 @@ export default function AffaireDetailPage() {
                     onChange={handleEditChange}
                     rows={4}
                   />
+
+                  {/* Ville monotone et tarifs exploitation */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Paramètres monotone & tarifs</h3>
+                    <div className="grid grid-cols-2 gap-6">
+                      <Select
+                        label="Ville monotone"
+                        name="villeMonotone"
+                        value={(editData as any).villeMonotone || 'Bourges'}
+                        onChange={handleEditChange}
+                        options={[
+                          {value:'Bourges',label:'Bourges'}, {value:'Chartres',label:'Chartres'},
+                          {value:'Chateauroux',label:'Châteauroux'}, {value:'Gueret',label:'Guéret'},
+                          {value:'Limoges',label:'Limoges'}, {value:'Nevers',label:'Nevers'},
+                          {value:'Orleans',label:'Orléans'}, {value:'Paris',label:'Paris'},
+                          {value:'Poitiers',label:'Poitiers'}, {value:'Tours',label:'Tours'},
+                          {value:'Vichy',label:'Vichy'},
+                        ]}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 mt-4">
+                      <Input label="Tarif fuel (€/kWh)" type="number" name="tarifFuelExploitation" step="0.001" value={(editData as any).tarifFuelExploitation || ''} onChange={handleEditChange} />
+                      <Input label="Tarif gaz (€/kWh)" type="number" name="tarifGazExploitation" step="0.001" value={(editData as any).tarifGazExploitation || ''} onChange={handleEditChange} />
+                      <Input label="Tarif bois (€/kWh)" type="number" name="tarifBoisExploitation" step="0.001" value={(editData as any).tarifBoisExploitation || ''} onChange={handleEditChange} />
+                      <Input label="Tarif élec (€/kWh)" type="number" name="tarifElecExploitation" step="0.001" value={(editData as any).tarifElecExploitation || ''} onChange={handleEditChange} />
+                    </div>
+                  </div>
                 </form>
               ) : (
                 <div className="p-6 space-y-4">
@@ -388,6 +417,33 @@ export default function AffaireDetailPage() {
                       <p className="text-gray-900 mt-1">{affaire.notes}</p>
                     </div>
                   )}
+
+                  {/* Ville monotone et tarifs (lecture) */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Paramètres monotone & tarifs</h3>
+                    <div className="grid grid-cols-5 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Ville monotone</label>
+                        <p className="text-gray-900 mt-1">{(affaire as any).villeMonotone || 'Bourges'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Tarif fuel</label>
+                        <p className="text-gray-900 mt-1">{(affaire as any).tarifFuelExploitation ?? 0.10} €/kWh</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Tarif gaz</label>
+                        <p className="text-gray-900 mt-1">{(affaire as any).tarifGazExploitation ?? 0.1502} €/kWh</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Tarif bois</label>
+                        <p className="text-gray-900 mt-1">{(affaire as any).tarifBoisExploitation ?? 0.05316} €/kWh</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Tarif élec</label>
+                        <p className="text-gray-900 mt-1">{(affaire as any).tarifElecExploitation ?? 0.1788} €/kWh</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </Card>
@@ -445,16 +501,31 @@ export default function AffaireDetailPage() {
             </div>
           )}
 
-          {activeTab === 'parc' && (
-            <ParcConfig
-              affaireId={affaire.id}
-              parcs={parcs}
-              onSave={async (p) => {
-                await saveParcs(affaire.id, p);
-                setParcs(p);
-              }}
-            />
-          )}
+          {activeTab === 'parc' && (() => {
+            const consoBatimentsParParc: Record<number, number> = {};
+            [1, 2, 3, 4].forEach(parcNum => {
+              const batsParc = batiments.filter((b: any) => b.parc === parcNum && b.etatReference);
+              if (batsParc.length > 0) {
+                consoBatimentsParParc[parcNum] = calculConsoSortieParcChaudieresRef(
+                  batsParc, parcNum,
+                  (affaire as any).djuRetenu || 1977,
+                  (affaire as any).tempIntBase || 19,
+                  (affaire as any).tempExtBase || -7
+                );
+              }
+            });
+            return (
+              <ParcConfig
+                affaireId={affaire.id}
+                parcs={parcs}
+                consoBatimentsParParc={consoBatimentsParParc}
+                onSave={async (p) => {
+                  await saveParcs(affaire.id, p);
+                  setParcs(p);
+                }}
+              />
+            );
+          })()}
 
           {activeTab === 'chiffrage' && (
             <div className="space-y-6">

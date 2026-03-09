@@ -55,15 +55,15 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
     installationReseauBat: 0,
     autreTravaux: 0,
     // Frais annexes
-    bureauControle: 0.05,
-    maitriseOeuvre: 0.13,
+    bureauControle: 0.03,
+    maitriseOeuvre: 0.09,
     fraisDivers: 0.02,
     aleas: 0.05,
-    // Subventions
-    cotEnr: 0,
-    aideDepartementale: 0,
-    detrDsil: 0,
-    subventionComplementaire: 0,
+    // Subventions (en %)
+    cotEnr: 45,
+    aideDepartementale: 20,
+    detrDsil: 50,
+    subventionComplementaire: 25,
     // Exploitation
     p2: 0,
     consoElecSupplement: 0,
@@ -114,11 +114,16 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
   const fraisAnnexes = sousTotalChaufferie * totalFeeRates;
   const sousTotalTravaux = sousTotalChaufferie + fraisAnnexes;
 
-  const totalSubventions =
-    (formData.cotEnr || 0) +
-    (formData.aideDepartementale || 0) +
-    (formData.detrDsil || 0) +
-    (formData.subventionComplementaire || 0);
+  const totalSubventionsBrut =
+    sousTotalTravaux * ((formData.cotEnr || 0) / 100) +
+    sousTotalTravaux * ((formData.aideDepartementale || 0) / 100) +
+    sousTotalTravaux * ((formData.detrDsil || 0) / 100) +
+    sousTotalTravaux * ((formData.subventionComplementaire || 0) / 100);
+
+  // Plafonner à 80% de l'investissement
+  const maxSubventions = sousTotalTravaux * 0.80;
+  const totalSubventions = Math.min(totalSubventionsBrut, maxSubventions);
+  const isPlafonne = totalSubventionsBrut > maxSubventions;
 
   const investissementHTNetSubventions = sousTotalTravaux - totalSubventions;
   const investissementTTC = investissementHTNetSubventions * 1.2;
@@ -219,30 +224,50 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
 
           {/* Subventions */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">3. Subventions (€)</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">3. Subventions (%)</h4>
             <div className="grid grid-cols-2 gap-4 bg-green-50 p-4 rounded-lg">
               {[
                 { key: 'cotEnr', label: 'COT ENR' },
                 { key: 'aideDepartementale', label: 'Aide Départementale' },
                 { key: 'detrDsil', label: 'DETR/DSIL' },
                 { key: 'subventionComplementaire', label: 'Subvention Complémentaire' },
-              ].map(item => (
-                <div key={item.key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{item.label}</label>
-                  <input
-                    type="number"
-                    value={formData[item.key as keyof typeof formData] || ''}
-                    onChange={(e) => handleChange(item.key, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                    placeholder="0"
-                  />
-                </div>
-              ))}
+              ].map(item => {
+                const taux = (formData[item.key as keyof typeof formData] as number) || 0;
+                const montant = sousTotalTravaux * (taux / 100);
+                return (
+                  <div key={item.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{item.label}</label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        max="100"
+                        value={formData[item.key as keyof typeof formData] || ''}
+                        onChange={(e) => handleChange(item.key, e.target.value)}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded text-sm"
+                        placeholder="0"
+                      />
+                      <span className="text-sm text-gray-500">%</span>
+                      <span className="text-sm text-green-700 font-semibold ml-auto">
+                        = {montant.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <div className="mt-4 flex justify-end">
-              <div className="w-64 flex justify-between py-2 border-t-2 border-green-500 font-semibold">
-                <span>Total Subventions :</span>
-                <span className="text-green-600">-{totalSubventions.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span>
+              <div className="w-64 space-y-1">
+                <div className="flex justify-between py-2 border-t-2 border-green-500 font-semibold">
+                  <span>Total Subventions :</span>
+                  <span className="text-green-600">-{totalSubventions.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €</span>
+                </div>
+                {isPlafonne && (
+                  <div className="text-xs text-red-600 font-medium">
+                    ⚠️ Plafonné à 80% du sous-total travaux ({maxSubventions.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €)
+                  </div>
+                )}
               </div>
             </div>
           </div>

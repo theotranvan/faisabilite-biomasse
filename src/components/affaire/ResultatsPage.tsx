@@ -42,13 +42,13 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         if (!response.ok) throw new Error('Impossible de charger l\'affaire');
         const affaire = await response.json();
 
-        // Get metrological parameters (DJU, tempInt, tempExt)
-        const DJU = affaire.DJU || 1977;
-        const tempInt = affaire.temperatureInterieure || 19;
-        const tempExt = affaire.temperatureExterieure || -7;
+        // Get metrological parameters (DJU, tempInt, tempExt) — Prisma field names
+        const DJU = affaire.djuRetenu || 1977;
+        const tempInt = affaire.tempIntBase || 19;
+        const tempExt = affaire.tempExtBase || -7;
         const dureeEmprunt = affaire.dureeEmprunt || 15;
-        const tauxAugmentationFossile = affaire.tauxAugmentationFossile || 0.04;
-        const tauxAugmentationBiomasse = affaire.tauxAugmentationBiomasse || 0.02;
+        const tauxAugmentationFossile = affaire.augmentationFossile || 0.04;
+        const tauxAugmentationBiomasse = affaire.augmentationBiomasse || 0.02;
 
         // Calculate complete results for each building
         const calculsBatiments = batiments.map(bat => ({
@@ -86,8 +86,14 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         const investissementTTC = calculInvestissementTTCRef(investissementHT);
         const annuiteRef = calculAnnuiteRef(investissementHT, chiffrage?.emprunt_ref, dureeEmprunt);
 
-        // Calculate initial biomass cost (sum of all building initial costs for reference)
-        const coutInitialBiomasse = coutInitialRef;
+        // TODO: Calculate real biomass exploitation cost from:
+        // - Conso entrée chaudière bois × tarif bois
+        // - Conso entrée chaudière appoint × tarif appoint
+        // - Conso élec supplémentaire
+        // - P2 biomasse (entretien)
+        // - Annuité emprunt biomasse
+        // For now, use a rough estimate: biomass is typically 60-70% of reference cost
+        const coutInitialBiomasse = coutInitialRef * 0.65; // Placeholder until biomass data is connected
 
         // Calculate 20-year balance
         const bilan20ans = calculBilan20Ans(

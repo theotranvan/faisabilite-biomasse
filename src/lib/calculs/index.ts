@@ -24,6 +24,13 @@ export {
   calculInvestissementTTCRef,
   calculAnnuiteRef,
   calculsParcComplet,
+  calculConsommationsSortieChaudiereBois,
+  calculConsommationsEntreeChaudiereBois,
+  calculConsommationsAppoint,
+  calculStockage10jours,
+  calculVolumeCendres,
+  calculHeuresPP,
+  calculPertesReseau,
 } from '../../../lib/calculs/parc';
 
 export {

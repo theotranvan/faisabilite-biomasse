@@ -68,6 +68,11 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
         tauxEmprunt: data.tauxEmprunt,
         dureeEmprunt: data.dureeEmprunt,
         statut: data.statut,
+        villeMonotone: data.villeMonotone,
+        tarifFuelExploitation: data.tarifFuelExploitation != null ? parseFloat(data.tarifFuelExploitation) : undefined,
+        tarifGazExploitation: data.tarifGazExploitation != null ? parseFloat(data.tarifGazExploitation) : undefined,
+        tarifBoisExploitation: data.tarifBoisExploitation != null ? parseFloat(data.tarifBoisExploitation) : undefined,
+        tarifElecExploitation: data.tarifElecExploitation != null ? parseFloat(data.tarifElecExploitation) : undefined,
       },
       include: {
         batiments: true,

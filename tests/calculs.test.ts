@@ -30,9 +30,12 @@ import {
   calculPuissanceAppeleePourTemp,
 } from '../lib/calculs/monotone';
 
-import { Batiment, ChiffrageParcRef } from '../lib/calculs/types';
+import {
+  calculPuissanceChauffageParc,
+  calculConsoSortieParcChaudieresRef,
+} from '../lib/calculs/parc';
 
-// Tolerance for floating-point comparisons (0.01% difference)
+import { Batiment, ChiffrageParcRef } from '../lib/calculs/types';
 const TOLERANCE = 0.0001;
 
 function expect(value: number, expected: number, tolerance = TOLERANCE): boolean {
@@ -321,11 +324,15 @@ function testBatimentComplet() {
   console.log(`  Conso PCS EI: ${calculs.consoPCSEI.toFixed(0)} kWh`);
   console.log(`  Coût annuel EI: ${calculs.coutAnnuelEI.toFixed(2)}€`);
   
-  if (calculs.consoRefCalculees) {
-    console.log(`  Conso ref calculées: ${calculs.consoRefCalculees.toFixed(2)} kWh`);
-  }
+  // Assertions on reference state
+  assert(expect(calculs.consoRefCalculees || 0, 58901.74, 0.1),
+    `Conso ref calculées = 58901.74 (got ${(calculs.consoRefCalculees || 0).toFixed(2)})`);
+  assert(expect(calculs.consoRefPCS || 0, 64791.91, 0.1),
+    `Conso ref PCS = 64791.91 (got ${(calculs.consoRefPCS || 0).toFixed(2)})`);
+  assert(expect(calculs.consoSortieChaudieresRef || 0, 50066.48, 0.1),
+    `Conso sortie chaudières = 50066.48 (got ${(calculs.consoSortieChaudieresRef || 0).toFixed(2)})`);
 
-  console.log(`  ✓ All initial state calculations validated`);
+  console.log(`  ✓ All calculations validated (initial + reference)`);
 }
 
 /**
@@ -380,6 +387,65 @@ function testBilan20Ans() {
 }
 
 /**
+ * TEST 9: Park aggregation
+ */
+function testAgregationParcs() {
+  console.log('\n### TEST 9: Agrégation par parc');
+
+  const batiments: Batiment[] = [
+    {
+      numero: 3, designation: 'essai ajout bât', typeBatiment: 'Logements',
+      surfaceChauffee: 100, volumeChauffe: 300, parc: 1,
+      etatInitial: { deperditions_kW: 20, rendementProduction: 80, rendementDistribution: 85,
+        rendementEmission: 85, rendementRegulation: 90, coefIntermittence: 1,
+        consommationsCalculees: 70189, consommationsReelles: 71000,
+        typeEnergie: 'Fuel', tarification: 0.13, abonnement: 0 },
+      etatReference: null, // pas de ref pour bât 3
+    },
+    {
+      numero: 1, designation: 'Bâtiment 1', typeBatiment: 'Logements',
+      surfaceChauffee: 100, volumeChauffe: 300, parc: 1,
+      etatInitial: { deperditions_kW: 10, rendementProduction: 80, rendementDistribution: 90,
+        rendementEmission: 90, rendementRegulation: 90, coefIntermittence: 1,
+        consommationsCalculees: 31464, consommationsReelles: 32000,
+        typeEnergie: 'Fuel', tarification: 0.13, abonnement: 0 },
+      etatReference: { deperditions_kW: 10, typeEnergie: 'Gaz naturel',
+        rendementProduction: 0.80, rendementDistribution: 0.90,
+        rendementEmission: 0.90, rendementRegulation: 0.90,
+        tarification: 0.978, abonnement: 0, consommationsCalculees: 0 },
+    },
+    {
+      numero: 2, designation: 'Bâtiment 2', typeBatiment: 'Bureaux',
+      surfaceChauffee: 200, volumeChauffe: 500, parc: 2,
+      etatInitial: { deperditions_kW: 20, rendementProduction: 85, rendementDistribution: 90,
+        rendementEmission: 90, rendementRegulation: 90, coefIntermittence: 1,
+        consommationsCalculees: 58868, consommationsReelles: 60000,
+        typeEnergie: 'Électricité', tarification: 0.226, abonnement: 0 },
+      etatReference: { deperditions_kW: 20, typeEnergie: 'Gaz naturel',
+        rendementProduction: 0.85, rendementDistribution: 0.90,
+        rendementEmission: 0.90, rendementRegulation: 0.90,
+        tarification: 0.978, abonnement: 0, consommationsCalculees: 0 },
+    },
+  ];
+
+  // Parc 1 : seul Bât 1 a une ref (Bât 3 n'en a pas)
+  const puissanceParc1 = calculPuissanceChauffageParc(batiments, 1);
+  assert(puissanceParc1 === 10, `Puissance Parc 1 = 10 kW (got ${puissanceParc1})`);
+
+  const consoParc1 = calculConsoSortieParcChaudieresRef(batiments, 1, 1977, 19, -7);
+  assert(expect(consoParc1, 25033.24, 1), `Conso Parc 1 = 25033.24 kWh (got ${consoParc1.toFixed(2)})`);
+
+  // Parc 2 : Bât 2
+  const puissanceParc2 = calculPuissanceChauffageParc(batiments, 2);
+  assert(puissanceParc2 === 20, `Puissance Parc 2 = 20 kW (got ${puissanceParc2})`);
+
+  const consoParc2 = calculConsoSortieParcChaudieresRef(batiments, 2, 1977, 19, -7);
+  assert(expect(consoParc2, 50066.48, 1), `Conso Parc 2 = 50066.48 kWh (got ${consoParc2.toFixed(2)})`);
+
+  console.log('  ✓ Park aggregation validated');
+}
+
+/**
  * Run all tests
  */
 export function runAllTests() {
@@ -397,6 +463,7 @@ export function runAllTests() {
     testMonotone();
     testBatimentComplet();
     testBilan20Ans();
+    testAgregationParcs();
 
     console.log('\n═══════════════════════════════════════════════════════════');
     console.log('✓ TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS!');
@@ -410,4 +477,7 @@ export function runAllTests() {
 }
 
 // Export for Jest if used
-export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans };
+export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans, testAgregationParcs };
+
+// Auto-run when executed directly
+runAllTests();

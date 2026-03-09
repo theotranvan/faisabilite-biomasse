@@ -103,6 +103,87 @@ export function calculAnnuiteRef(
   return montantTotal / dureeEmprunt;
 }
 
+// ============ BIOMASS CALCULATION FUNCTIONS ============
+
+/**
+ * Calculate boiler outlet consumption for biomass
+ */
+export function calculConsommationsSortieChaudiereBois(
+  consommationsBatimentsParc: number,
+  pourcentageCouvertureBois: number
+): number {
+  return (consommationsBatimentsParc * pourcentageCouvertureBois) / 100;
+}
+
+/**
+ * Calculate boiler inlet consumption for biomass
+ */
+export function calculConsommationsEntreeChaudiereBois(
+  consommationsSortieChaudiereBois: number,
+  rendementChaudiereBois: number
+): number {
+  return consommationsSortieChaudiereBois / (rendementChaudiereBois / 100);
+}
+
+/**
+ * Calculate backup boiler consumption
+ */
+export function calculConsommationsAppoint(
+  consommationsBatimentsParc: number,
+  pourcentageCouvertureBois: number,
+  rendementChaudiere2: number
+): number {
+  const sortie =
+    (consommationsBatimentsParc * (100 - pourcentageCouvertureBois)) / 100;
+  return sortie / (rendementChaudiere2 / 100);
+}
+
+/**
+ * Calculate 10-day storage requirements
+ */
+export function calculStockage10jours(
+  consommation10joursKwh: number,
+  pci: number,
+  masseVolumique: number
+): { tonnes: number; m3: number } {
+  const tonnes = consommation10joursKwh / (pci * 1000);
+  const m3 = (tonnes * 1000) / masseVolumique;
+  return { tonnes, m3 };
+}
+
+/**
+ * Calculate ash volume
+ */
+export function calculVolumeCendres(
+  consommationsEntreeChaudiereBois: number,
+  tauxCendre: number,
+  masseVolumique: number
+): { m3: number; kg: number } {
+  const m3 = (consommationsEntreeChaudiereBois * tauxCendre) / masseVolumique;
+  const kg = m3 * masseVolumique;
+  return { m3, kg };
+}
+
+/**
+ * Calculate full-power hours
+ */
+export function calculHeuresPP(
+  consommationsSortieChaudiereBois: number,
+  puissanceChaudiereBois: number
+): number {
+  return consommationsSortieChaudiereBois / puissanceChaudiereBois;
+}
+
+/**
+ * Calculate network losses
+ */
+export function calculPertesReseau(
+  longueurReseau: number,
+  pertesKwPerMl: number
+): number {
+  return longueurReseau * pertesKwPerMl;
+}
+
 /**
  * Complete aggregated calculations for a park
  */
