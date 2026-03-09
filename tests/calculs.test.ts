@@ -8,17 +8,9 @@ import {
   calculConsoKWhep,
   calculConsoPCS,
   calculCoutAnnuel,
-  calculConsoRefCalculees,
-  calculConsoRefPCS,
-  calculConsoSortieChaudieresRef,
-  calculCoutAnnuelRef,
   calculsBatimentComplet,
+  calculsBatimentReference,
 } from '../lib/calculs/batiment';
-
-import {
-  calculPuissanceChauffageParc,
-  calculConsoSortieParcChaudieresRef,
-} from '../lib/calculs/parc';
 
 import {
   calculBilan20Ans,
@@ -31,16 +23,11 @@ import {
   calculTVA,
   calculTotalInvestissementTTC,
   calculAnnuite,
-  calculChiffrageComplet,
 } from '../lib/calculs/chiffrage';
 
 import {
   calculDeperditionsParDegre,
   calculPuissanceAppeleePourTemp,
-  calculPartBase,
-  calculBesoinsGenerateurBase,
-  calculBesoinsTotaux,
-  calculMonotoneComplet,
 } from '../lib/calculs/monotone';
 
 import { Batiment, ChiffrageParcRef } from '../lib/calculs/types';
@@ -271,7 +258,6 @@ function testMonotone() {
   const deperditionsTotales_W = 30000;
   const tempInt = 19;
   const tempExt = -7;
-  const puissanceGenerateur_kW = 25;
 
   const deperditionsParDegre = calculDeperditionsParDegre(deperditionsTotales_W, tempInt, tempExt);
   const expected_dpd = 30000 / 26;

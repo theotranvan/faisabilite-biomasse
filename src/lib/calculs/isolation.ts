@@ -37,7 +37,7 @@ export interface ResultatIsolationParc {
   sousTotalIsolation: number;
   totalDejaRealise: number;
   resteARealiser: number;
-  batiemts: BatimentIsolationRecap[];
+  batiments: BatimentIsolationRecap[];
 }
 
 /**
@@ -95,7 +95,7 @@ export function calculerIsolationParc(batimentsData: {
     sousTotalIsolation: Math.round(sousTotalIsolation * 100) / 100,
     totalDejaRealise: Math.round(totalDejaRealise * 100) / 100,
     resteARealiser: Math.round((sousTotalIsolation - totalDejaRealise) * 100) / 100,
-    batiemts: batimentsRecap,
+    batiments: batimentsRecap,
   };
 }
 

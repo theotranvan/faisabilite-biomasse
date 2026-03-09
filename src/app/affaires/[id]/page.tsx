@@ -480,7 +480,8 @@ export default function AffaireDetailPage() {
           {activeTab === 'resultats' && (
             <ResultatsPage
               affaireId={affaire.id}
-              data={{ batiments, parcs, chiffrageRef, chiffrageBio }}
+              batiments={batiments}
+              chiffrage={chiffrageRef}
             />
           )}
 

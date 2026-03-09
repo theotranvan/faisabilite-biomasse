@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
@@ -12,11 +11,9 @@ import {
   calculInvestissementTTCRef,
   calculAnnuiteRef,
   calculBilan20Ans,
-  EMISSION_FACTORS,
   calculCO2Emissions,
-  calculSO2Emissions,
 } from '@/lib/calculs';
-import type { Batiment, ChiffrageParcRef } from '@/lib/calculs/types';
+import type { Batiment, ChiffrageParcRef } from '@/lib/calculs';
 
 interface ResultatsProps {
   affaireId: string;
@@ -107,9 +104,8 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         // Calculate environmental impact
         // Use estimated consumption based on reference state
         const co2Factor = 0.314; // Fuel factor
-        const so2Factor = 0.00074; // Fuel factor
         const emissionsCO2Totales = bilan20ans.reduce(
-          (sum, year) => sum + calculCO2Emissions(year.coutRef * 100, co2Factor), // Rough estimate
+          (sum: number, year: { coutRef: number }) => sum + calculCO2Emissions(year.coutRef * 100, co2Factor),
           0
         );
         const totalEconomies = bilan20ans[19]?.economie || 0;
@@ -139,7 +135,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         });
 
         setProjections(
-          bilan20ans.map(year => ({
+          bilan20ans.map((year: { year: number; coutActuel: number; coutRef: number; coutBiomasse: number; economie: number }) => ({
             year: year.year,
             coutActuel: year.coutActuel,
             coutRef: year.coutRef,

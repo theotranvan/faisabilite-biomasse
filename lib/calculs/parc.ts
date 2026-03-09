@@ -4,7 +4,8 @@
  */
 
 import { Batiment, CalculsParc, ChiffrageParcRef, FraisAnnexes } from './types';
-import { calculConsoSortieChaudieresRef, calculRendementMoyenRef } from './batiment';
+// Note: calculations are done inline in calculConsoSortieParcChaudieresRef
+// with rendement detection logic
 
 /**
  * Calculate park power (heating power) = sum of reference deperditions for buildings in that park

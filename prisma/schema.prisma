@@ -53,6 +53,15 @@ model Affaire {
   tauxEmprunt             Float    @default(0.02) // 2%
   dureeEmprunt            Int      @default(15)
   
+  // Ville pour la monotone de charge
+  villeMonotone           String?  @default("Bourges")
+  
+  // Tarifs exploitation (solution biomasse vs référence)
+  tarifFuelExploitation   Float?   @default(0.10)
+  tarifGazExploitation    Float?   @default(0.1502)
+  tarifBoisExploitation   Float?   @default(0.05316)
+  tarifElecExploitation   Float?   @default(0.1788)
+  
   statut                  String @default("BROUILLON") // BROUILLON | EN_COURS | TERMINE
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

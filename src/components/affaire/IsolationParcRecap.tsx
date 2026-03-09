@@ -38,7 +38,7 @@ export function IsolationParcRecap({
 
   const resultat = calculerIsolationParc(batimentsData);
 
-  if (resultat.batiemts.length === 0) {
+  if (resultat.batiments.length === 0) {
     return null; // Pas de bâtiments, ne pas afficher
   }
 
@@ -61,7 +61,7 @@ export function IsolationParcRecap({
             <div className="col-span-3 text-center">Action</div>
           </div>
 
-          {resultat.batiemts.map((bat: BatimentIsolationRecap) => (
+          {resultat.batiments.map((bat: BatimentIsolationRecap) => (
             <div
               key={bat.numero}
               className="grid grid-cols-12 gap-2 text-sm items-center p-2 border-b border-gray-200 hover:bg-gray-50"

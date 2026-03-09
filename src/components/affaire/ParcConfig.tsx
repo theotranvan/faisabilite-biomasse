@@ -3,12 +3,22 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Form';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
+import {
+  calculConsommationsSortieChaudiereBois,
+  calculConsommationsEntreeChaudiereBois,
+  calculConsommationsAppoint,
+  calculStockage10jours,
+  calculVolumeCendres,
+  calculHeuresPP,
+} from '@/lib/calculs/parc';
 
 interface Parc {
   id: string;
   numero: number;
   puissanceChaudiereBois?: number;
   rendementChaudiereBois?: number;
+  puissanceChaudiere2?: number;
+  rendementChaudiere2?: number;
   typeBiomasse?: string;
   longueurReseau?: number;
   sectionReseau?: string;
@@ -18,6 +28,7 @@ interface Parc {
 interface ParcConfigProps {
   affaireId: string;
   parcs: Parc[];
+  consoBatimentsParParc?: Record<number, number>; // conso sortie chaudières ref par parc
   onSave: (parcs: Parc[]) => Promise<void>;
 }
 
@@ -35,7 +46,14 @@ const SECTIONS_RESEAU = [
   { value: 'DN50', label: 'DN50' },
 ];
 
-export function ParcConfig({ parcs: initialParcs, onSave }: ParcConfigProps) {
+const BIOMASSE_CHARACTERISTICS: Record<string, { pci: number; masseVolumique: number; tauxCendre: number }> = {
+  PLAQUETTE: { pci: 3.8, masseVolumique: 225, tauxCendre: 0.01 },
+  GRANULES: { pci: 4.6, masseVolumique: 650, tauxCendre: 0.005 },
+  MISCANTHUS: { pci: 4.2, masseVolumique: 120, tauxCendre: 0.03 },
+  BUCHES: { pci: 4.0, masseVolumique: 420, tauxCendre: 0.01 },
+};
+
+export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, onSave }: ParcConfigProps) {
   const [parcs, setParcs] = useState<Parc[]>(initialParcs.length > 0 ? initialParcs : [{ id: '1', numero: 1 }]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -125,6 +143,31 @@ export function ParcConfig({ parcs: initialParcs, onSave }: ParcConfigProps) {
                   placeholder="0.80"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Puissance chaudière appoint (kW)</label>
+                <input
+                  type="number"
+                  value={parc.puissanceChaudiere2 || ''}
+                  onChange={(e) => updateParc(parc.numero, 'puissanceChaudiere2', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rendement chaudière appoint (%)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  value={parc.rendementChaudiere2 || ''}
+                  onChange={(e) => updateParc(parc.numero, 'rendementChaudiere2', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="0.85"
+                />
+              </div>
             </div>
 
             {/* Réseau de chaleur */}
@@ -155,6 +198,68 @@ export function ParcConfig({ parcs: initialParcs, onSave }: ParcConfigProps) {
                 </div>
               </div>
             </div>
+
+            {/* Résultats calculés automatiquement */}
+            {(() => {
+              const consoBatiments = consoBatimentsParParc[parc.numero] || 0;
+              const couverture = parc.pourcentageCouvertureBois || 0;
+              const rendBois = parc.rendementChaudiereBois || 0;
+              const rendAppoint = parc.rendementChaudiere2 || 0;
+              const puissanceBois = parc.puissanceChaudiereBois || 0;
+              const characteristics = BIOMASSE_CHARACTERISTICS[parc.typeBiomasse || ''];
+
+              if (!consoBatiments || !couverture || !rendBois) return null;
+
+              const consoSortieBois = calculConsommationsSortieChaudiereBois(consoBatiments, couverture * 100);
+              const consoEntreeBois = rendBois > 0 ? calculConsommationsEntreeChaudiereBois(consoSortieBois, rendBois * 100) : 0;
+              const consoAppoint = rendAppoint > 0 ? calculConsommationsAppoint(consoBatiments, couverture * 100, rendAppoint * 100) : 0;
+              const heuresPP = puissanceBois > 0 ? calculHeuresPP(consoSortieBois, puissanceBois) : 0;
+
+              const stockage = characteristics
+                ? calculStockage10jours((consoEntreeBois / 365) * 10, characteristics.pci, characteristics.masseVolumique)
+                : null;
+              const cendres = characteristics
+                ? calculVolumeCendres(consoEntreeBois, characteristics.tauxCendre, characteristics.masseVolumique)
+                : null;
+
+              return (
+                <div className="mt-6 pt-6 border-t-2 border-green-300">
+                  <h5 className="font-semibold text-green-800 mb-4">Résultats calculés</h5>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-white p-3 rounded border border-green-200">
+                      <span className="text-gray-600">Conso sortie chaudière bois</span>
+                      <div className="font-bold text-green-700">{consoSortieBois.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-green-200">
+                      <span className="text-gray-600">Conso entrée chaudière bois</span>
+                      <div className="font-bold text-green-700">{consoEntreeBois.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-orange-200">
+                      <span className="text-gray-600">Conso appoint</span>
+                      <div className="font-bold text-orange-700">{consoAppoint.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-blue-200">
+                      <span className="text-gray-600">Heures pleine puissance</span>
+                      <div className="font-bold text-blue-700">{heuresPP.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} h</div>
+                    </div>
+                    {stockage && (
+                      <>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <span className="text-gray-600">Stockage 10 jours</span>
+                          <div className="font-bold text-yellow-700">{stockage.tonnes.toFixed(1)} t / {stockage.m3.toFixed(1)} m³</div>
+                        </div>
+                      </>
+                    )}
+                    {cendres && (
+                      <div className="bg-white p-3 rounded border border-gray-300">
+                        <span className="text-gray-600">Volume de cendres</span>
+                        <div className="font-bold text-gray-700">{cendres.m3.toFixed(2)} m³ / {cendres.kg.toFixed(0)} kg</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         ))}
 

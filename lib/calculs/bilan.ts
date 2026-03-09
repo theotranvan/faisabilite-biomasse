@@ -137,6 +137,51 @@ export function calculSO2Evolution(
 }
 
 /**
+ * Calculate 20-year balance sheet (iterative model matching Excel)
+ * Annuity is deducted ONE TIME ONLY at year dureeEmprunt + 1
+ */
+export function calculBilan20Ans(
+  coutInitialActuel: number,
+  coutInitialRef: number,
+  coutInitialBiomasse: number,
+  tauxAugmentationFossile: number,
+  tauxAugmentationBiomasse: number,
+  annuiteRef: number,
+  annuiteBiomasse: number,
+  dureeEmprunt: number = 15
+): AnnualCost[] {
+  const years: AnnualCost[] = [];
+
+  let coutActuel = coutInitialActuel;
+  let coutRef = coutInitialRef;
+  let coutBiomasse = coutInitialBiomasse;
+
+  for (let year = 1; year <= 20; year++) {
+    if (year > 1) {
+      coutActuel = coutActuel * (1 + tauxAugmentationFossile);
+      coutRef = coutRef * (1 + tauxAugmentationFossile);
+      coutBiomasse = coutBiomasse * (1 + tauxAugmentationBiomasse);
+    }
+
+    // Année dureeEmprunt+1 = fin d'emprunt → soustraction de l'annuité UNE SEULE FOIS
+    if (year === dureeEmprunt + 1) {
+      coutRef = coutRef - annuiteRef;
+      coutBiomasse = coutBiomasse - annuiteBiomasse;
+    }
+
+    years.push({
+      year,
+      coutActuel,
+      coutRef,
+      coutBiomasse,
+      economie: coutRef - coutBiomasse,
+    });
+  }
+
+  return years;
+}
+
+/**
  * Complete 20-year balance sheet calculation
  */
 export function calculBilanComplet(

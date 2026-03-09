@@ -113,9 +113,9 @@ describe('Isolation Calculations', () => {
       expect(result.sousTotalIsolation).toBe(501140);
       expect(result.totalDejaRealise).toBe(0);
       expect(result.resteARealiser).toBe(501140);
-      expect(result.batiemts).toHaveLength(2);
-      expect(result.batiemts[0].totalIsolation).toBe(501140);
-      expect(result.batiemts[1].totalIsolation).toBe(0);
+      expect(result.batiments).toHaveLength(2);
+      expect(result.batiments[0].totalIsolation).toBe(501140);
+      expect(result.batiments[1].totalIsolation).toBe(0);
     });
 
     it('should aggregate correctly for Parc 2 case: Bât 2', () => {

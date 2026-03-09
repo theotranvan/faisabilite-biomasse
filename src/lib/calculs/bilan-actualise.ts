@@ -25,15 +25,21 @@ export function calculBilan20ans(
   const bilan: BilanAnnualBreakdown[] = [];
   let cumulEconomies = 0;
 
-  for (let annee = 1; annee <= 20; annee++) {
-    let coutActuel = coutActuelAnnee1 * Math.pow(1 + tauxAugmentationFossile, annee - 1);
-    let coutRef = coutRefAnnee1 * Math.pow(1 + tauxAugmentationFossile, annee - 1);
-    let coutBiomasse = coutBiomasseAnnee1 * Math.pow(1 + tauxAugmentationBiomasse, annee - 1);
+  let coutActuel = coutActuelAnnee1;
+  let coutRef = coutRefAnnee1;
+  let coutBiomasse = coutBiomasseAnnee1;
 
-    // At year 15 (end of loan), subtract annuity
-    if (annee > dureeEmprunt) {
-      coutRef -= annuiteEmpruntRef; // no more payments
-      coutBiomasse -= annuiteEmpruntBio;
+  for (let annee = 1; annee <= 20; annee++) {
+    if (annee > 1) {
+      coutActuel = coutActuel * (1 + tauxAugmentationFossile);
+      coutRef = coutRef * (1 + tauxAugmentationFossile);
+      coutBiomasse = coutBiomasse * (1 + tauxAugmentationBiomasse);
+    }
+
+    // Année dureeEmprunt+1 = fin d'emprunt → soustraction de l'annuité UNE SEULE FOIS
+    if (annee === dureeEmprunt + 1) {
+      coutRef = coutRef - annuiteEmpruntRef;
+      coutBiomasse = coutBiomasse - annuiteEmpruntBio;
     }
 
     const economieBioVsRef = coutRef - coutBiomasse;
