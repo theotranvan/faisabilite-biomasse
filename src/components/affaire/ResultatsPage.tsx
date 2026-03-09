@@ -12,6 +12,9 @@ import {
   calculAnnuiteRef,
   calculBilan20Ans,
   calculCO2Emissions,
+  calculConsommationsEntreeChaudiereBois,
+  calculConsommationsSortieChaudiereBois,
+  calculConsommationsAppoint,
 } from '@/lib/calculs';
 import type { Batiment, ChiffrageParcRef } from '@/lib/calculs';
 
@@ -86,14 +89,66 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         const investissementTTC = calculInvestissementTTCRef(investissementHT);
         const annuiteRef = calculAnnuiteRef(investissementHT, chiffrage?.emprunt_ref, dureeEmprunt);
 
-        // TODO: Calculate real biomass exploitation cost from:
-        // - Conso entrée chaudière bois × tarif bois
-        // - Conso entrée chaudière appoint × tarif appoint
-        // - Conso élec supplémentaire
-        // - P2 biomasse (entretien)
-        // - Annuité emprunt biomasse
-        // For now, use a rough estimate: biomass is typically 60-70% of reference cost
-        const coutInitialBiomasse = coutInitialRef * 0.65; // Placeholder until biomass data is connected
+        // Fetch chiffrage biomasse data
+        const resBio = await fetch(`/api/affaires/${affaireId}/chiffrage-biomasse`);
+        const chiffrageBio = resBio.ok ? await resBio.json() : null;
+
+        // Get parc config for the primary park
+        const parcConfig = affaire.parcs?.find((p: any) => p.numero === primaryPay);
+
+        // Calculate real biomass annual exploitation cost
+        let coutInitialBiomasse = 0;
+        let annuiteBiomasse = 0;
+
+        if (parcConfig && consoParc > 0) {
+          const pourcentageBois = parcConfig.pourcentageCouvertureBois || 80;
+          const rendementBois = parcConfig.rendementChaudiereBois || 85;
+          const rendementAppoint = parcConfig.rendementChaudiere2 || 90;
+
+          // Biomass fuel consumption
+          const consoSortieChaudiereBois = calculConsommationsSortieChaudiereBois(consoParc, pourcentageBois);
+          const consoEntreeBois = calculConsommationsEntreeChaudiereBois(consoSortieChaudiereBois, rendementBois);
+
+          // Backup boiler consumption
+          const consoEntreeAppoint = calculConsommationsAppoint(consoParc, pourcentageBois, rendementAppoint);
+
+          // Tarifs
+          const tarifBois = affaire.tarifBoisExploitation || 0.05316;
+          const tarifAppoint = affaire.tarifGazExploitation || affaire.tarifFuelExploitation || 0.1502;
+          const tarifElec = affaire.tarifElecExploitation || 0.1788;
+
+          // Annual costs
+          const coutBois = consoEntreeBois * tarifBois;
+          const coutAppoint = consoEntreeAppoint * tarifAppoint;
+          const p2Bio = chiffrageBio?.p2 || 0;
+          const coutElec = (chiffrageBio?.consoElecSupplement || 0) * tarifElec;
+
+          coutInitialBiomasse = coutBois + coutAppoint + p2Bio + coutElec;
+
+          // Biomass investment and annuity
+          if (chiffrageBio) {
+            const sousTotalChaufBio =
+              (chiffrageBio.vrd || 0) + (chiffrageBio.grosOeuvre || 0) +
+              (chiffrageBio.charpente || 0) + (chiffrageBio.processBois || 0) +
+              (chiffrageBio.chaudierAppoint || 0) + (chiffrageBio.hydraulique || 0) +
+              (chiffrageBio.reseauChaleur || 0) + (chiffrageBio.sousStation || 0) +
+              (chiffrageBio.installationReseauBat || 0) + (chiffrageBio.autreTravaux || 0);
+
+            const fraisRateBio =
+              (chiffrageBio.bureauControle || 0) + (chiffrageBio.maitriseOeuvre || 0) +
+              (chiffrageBio.fraisDivers || 0) + (chiffrageBio.aleas || 0);
+            const investBioHT = sousTotalChaufBio * (1 + fraisRateBio);
+
+            const subRates =
+              (chiffrageBio.cotEnr || 0) + (chiffrageBio.aideDepartementale || 0) +
+              (chiffrageBio.detrDsil || 0) + (chiffrageBio.subventionComplementaire || 0);
+            const subBrut = investBioHT * (subRates / 100);
+            const subventions = Math.min(subBrut, investBioHT * 0.80);
+            const investBioNet = investBioHT - subventions;
+
+            annuiteBiomasse = (investBioNet + (chiffrageBio.emprunt_biomasse || 0)) / dureeEmprunt;
+          }
+        }
 
         // Calculate 20-year balance
         const bilan20ans = calculBilan20Ans(
@@ -103,7 +158,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
           tauxAugmentationFossile,
           tauxAugmentationBiomasse,
           annuiteRef,
-          0, // Biomass doesn't have additional annuity in this model
+          annuiteBiomasse,
           dureeEmprunt
         );
 
