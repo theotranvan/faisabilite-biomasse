@@ -21,6 +21,10 @@ import {
 } from '../lib/calculs/parc';
 
 import {
+  calculBilan20Ans,
+} from '../lib/calculs/bilan';
+
+import {
   calculSousTotalChaufferie,
   calculFraisAnnexes,
   calculTotalInvestissementHT,
@@ -134,35 +138,53 @@ function testBatiment2Reference() {
   const tempInt = 19;
   const tempExt = -7;
 
-  const etatRef = {
-    deperditions_kW: 20,
-    typeEnergie: 'Gaz naturel',
-    rendementProduction: 0.85,
-    rendementDistribution: 0.90,
-    rendementEmission: 0.90,
-    rendementRegulation: 0.90,
+  const batiment: Batiment = {
+    numero: 2,
+    designation: 'Bâtiment 2',
+    typeBatiment: 'Bureaux',
+    surfaceChauffee: 200,
+    volumeChauffe: 500,
+    parc: 2,
+    etatInitial: {
+      deperditions_kW: 20,
+      rendementProduction: 85,
+      rendementDistribution: 90,
+      rendementEmission: 90,
+      rendementRegulation: 90,
+      coefIntermittence: 1,
+      consommationsCalculees: 58868,
+      consommationsReelles: 60000,
+      typeEnergie: 'Electricité',
+      tarification: 0.226,
+      abonnement: 0,
+    },
+    etatReference: {
+      deperditions_kW: 20,
+      typeEnergie: 'Gaz naturel',
+      rendementProduction: 0.85,  // Decimal format
+      rendementDistribution: 0.90,
+      rendementEmission: 0.90,
+      rendementRegulation: 0.90,
+      tarification: 0.1502,
+      abonnement: 0,
+      consommationsCalculees: 0,
+    },
   };
 
-  const rendementMoyenRef = etatRef.rendementProduction * 
-                            etatRef.rendementDistribution * 
-                            etatRef.rendementEmission * 
-                            etatRef.rendementRegulation;
+  // Use calculsBatimentReference directly
+  const resultRef = calculsBatimentReference(batiment, DJU, tempInt, tempExt);
+  
+  assert(expect(resultRef.consoRefCalculees || 0, 58901.74, 0.1), 
+    `Conso ref = 58901.74 kWh (got ${(resultRef.consoRefCalculees || 0).toFixed(2)})`);
 
-  const consoRefCalculees = calculConsoRefCalculees(
-    etatRef.deperditions_kW,
-    DJU,
-    tempInt,
-    tempExt,
-    rendementMoyenRef,
-    1
-  );
-  assert(expect(consoRefCalculees, 58901.74, 0.1), `Conso ref = 58901.74 kWh (got ${consoRefCalculees.toFixed(2)})`);
+  assert(expect(resultRef.consoRefPCS || 0, 64791.91, 0.1), 
+    `Conso ref PCS = 64791.91 kWh (got ${(resultRef.consoRefPCS || 0).toFixed(2)})`);
 
-  const consoRefPCS = calculConsoRefPCS(consoRefCalculees, 'Gaz naturel');
-  assert(expect(consoRefPCS, 64791.91, 0.1), `Conso ref PCS = 64791.91 kWh (got ${consoRefPCS.toFixed(2)})`);
+  assert(expect(resultRef.consoSortieChaudieresRef || 0, 50066.48, 0.1), 
+    `Conso sortie chaudières = 50066.48 kWh (got ${(resultRef.consoSortieChaudieresRef || 0).toFixed(2)})`);
 
-  const coutAnnuelRef = calculCoutAnnuelRef(consoRefPCS, 1502 / 10000, 0); // tarification = 0.1502 in sheet
-  console.log(`  Conso sortie chaudières = ${calculConsoSortieChaudieresRef(consoRefCalculees, etatRef.rendementProduction).toFixed(2)} kWh`);
+  console.log(`  Rendement moyen ref: ${(resultRef.rendementMoyenRef || 0).toFixed(4)}`);
+  console.log(`  ✓ Reference state calculations validated`);
 }
 
 /**
@@ -321,6 +343,57 @@ function testBatimentComplet() {
 }
 
 /**
+ * TEST 8: 20-year balance sheet (bilan 20 ans)
+ */
+function testBilan20Ans() {
+  console.log('\n### TEST 8: Bilan 20 ans - vérification annuité année 16');
+
+  const coutInitialActuel = 10000;
+  const coutInitialRef = 10000;
+  const coutInitialBiomasse = 8000;
+  const tauxAugmentationFossile = 0.04;
+  const tauxAugmentationBiomasse = 0.02;
+  const annuiteRef = 2000;
+  const annuiteBiomasse = 1500;
+  const dureeEmprunt = 15;
+
+  const bilan = calculBilan20Ans(
+    coutInitialActuel,
+    coutInitialRef,
+    coutInitialBiomasse,
+    tauxAugmentationFossile,
+    tauxAugmentationBiomasse,
+    annuiteRef,
+    annuiteBiomasse,
+    dureeEmprunt
+  );
+
+  // Check that year 15 is normal growth
+  const annee15 = bilan[14]; // 0-indexed
+  const annee16 = bilan[15]; // year 16
+  const annee17 = bilan[16]; // year 17
+
+  // Year 16 should show the annuity deduction ONE TIME
+  const diff16 = annee16.coutRef - annee15.coutRef; // Should be negative (drop)
+  assert(diff16 < 0, 
+    `Year 16: Cost should drop due to annuity deduction (diff=${diff16.toFixed(2)}€)`);
+
+  // Year 17 should resume normal growth from the new level
+  const diff17 = annee17.coutRef - annee16.coutRef; // Should be positive (increase)
+  assert(diff17 > 0, 
+    `Year 17: Cost should increase normally from new level (diff=${diff17.toFixed(2)}€)`);
+
+  // Verify the deduction happened only once
+  assert(Math.abs(annee16.coutRef - (annee15.coutRef * (1 + tauxAugmentationFossile) - annuiteRef)) < 1,
+    `Year 16 calculation correct: applied annuity deduction once`);
+
+  console.log(`  Année 15 coûts ref: ${annee15.coutRef.toFixed(2)}€`);
+  console.log(`  Année 16 coûts ref: ${annee16.coutRef.toFixed(2)}€ (baisse de ${Math.abs(diff16).toFixed(2)}€ = annuité)`);
+  console.log(`  Année 17 coûts ref: ${annee17.coutRef.toFixed(2)}€ (hausse de ${diff17.toFixed(2)}€)`);
+  console.log(`  ✓ 20-year balance sheet annuity handling validated`);
+}
+
+/**
  * Run all tests
  */
 export function runAllTests() {
@@ -337,6 +410,7 @@ export function runAllTests() {
     testChiffrageParcRef();
     testMonotone();
     testBatimentComplet();
+    testBilan20Ans();
 
     console.log('\n═══════════════════════════════════════════════════════════');
     console.log('✓ TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS!');
@@ -350,4 +424,4 @@ export function runAllTests() {
 }
 
 // Export for Jest if used
-export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet };
+export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans };
