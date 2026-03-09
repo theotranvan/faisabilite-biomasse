@@ -23,7 +23,7 @@ export interface ResultatIsolationParc {
   sousTotalIsolation: number;
   totalDejaRealise: number;
   resteARealiser: number;
-  batiemts: {
+  batiments: {
     numero: number;
     designation: string;
     totalIsolation: number;

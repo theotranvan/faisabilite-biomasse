@@ -36,7 +36,14 @@ export function calculConsoSortieParcChaudieresRef(
     .filter(b => b.parc === parcNumber && b.etatReference)
     .reduce((sum, b) => {
       const etatRef = b.etatReference!;
-      const rendementMoyenRef = calculRendementMoyenRef(etatRef);
+      
+      // Detect if rendements are in % or decimal format
+      const rp = etatRef.rendementProduction > 1 ? etatRef.rendementProduction / 100 : etatRef.rendementProduction;
+      const rd = etatRef.rendementDistribution > 1 ? etatRef.rendementDistribution / 100 : etatRef.rendementDistribution;
+      const re = etatRef.rendementEmission > 1 ? etatRef.rendementEmission / 100 : etatRef.rendementEmission;
+      const rr = etatRef.rendementRegulation > 1 ? etatRef.rendementRegulation / 100 : etatRef.rendementRegulation;
+      
+      const rendementMoyenRef = rp * rd * re * rr;
       
       // Calculate consumption leaving boiler
       const consoRefCalculees = 
@@ -44,42 +51,34 @@ export function calculConsoSortieParcChaudieresRef(
         ((tempInt - tempExt) * rendementMoyenRef * 1000) *
         (b.etatInitial.coefIntermittence || 1);
       
-      const consoSortie = calculConsoSortieChaudieresRef(consoRefCalculees, etatRef.rendementProduction);
+      const consoSortie = consoRefCalculees * rp; // rendement production en décimal
       return sum + consoSortie;
     }, 0);
 }
 
 /**
  * Calculate total investment HT for a park reference scenario
- * sousTotalChaufferie + fraisAnnexes
+ * sousTotalChaufferie + fraisAnnexes (isolation is "for information only" - NOT included)
  */
 export function calculInvestissementHTRef(
   travauxChaufferie: Array<{ qte: number; pu: number }>,
-  isolation: Array<{ dejaRealise: number; total: number }>,
   fraisAnnexes: FraisAnnexes
 ): number {
-  // Sum chaufferie work
+  // Sous-total chaufferie SEULE
   const sousTotalChaufferie = travauxChaufferie.reduce((sum, item) => {
     return sum + (item.qte * item.pu);
   }, 0);
 
-  // Sum isolation work (only non-already-done parts)
-  const sousTotalIsolation = isolation.reduce((sum, item) => {
-    return sum + Math.max(0, item.total - item.dejaRealise);
-  }, 0);
-
-  const totalBeforeFees = sousTotalChaufferie + sousTotalIsolation;
-
-  // Calculate fees
+  // Frais annexes calculés SUR CHAUFFERIE uniquement (PAS sur isolation)
   const totalFeeRates = 
     (fraisAnnexes.bureauControle || 0) +
     (fraisAnnexes.maitriseOeuvre || 0) +
     (fraisAnnexes.fraisDivers || 0) +
     (fraisAnnexes.aleas || 0);
 
-  const fees = totalBeforeFees * totalFeeRates;
+  const fees = sousTotalChaufferie * totalFeeRates;
 
-  return totalBeforeFees + fees;
+  return sousTotalChaufferie + fees;
 }
 
 /**
@@ -130,7 +129,6 @@ export function calculsParcComplet(
 
   const investissementHT = calculInvestissementHTRef(
     chiffrage.travauxChaufferie,
-    chiffrage.isolation,
     chiffrage.fraisAnnexes
   );
 

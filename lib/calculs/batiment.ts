@@ -138,23 +138,48 @@ export function calculsBatimentInitial(batiment: Batiment): CalculsBatiment {
 
 /**
  * Complete calculation for a building reference state
+ * Now takes DJU, tempInt, tempExt parameters needed for accurate calculations
  */
 export function calculsBatimentReference(
-  batiment: Batiment
+  batiment: Batiment,
+  DJU: number,
+  tempInt: number,
+  tempExt: number
 ): Partial<CalculsBatiment> {
   if (!batiment.etatReference) {
     return {};
   }
 
   const etatRef = batiment.etatReference;
-  const rendementMoyenRef = calculRendementMoyenRef(etatRef);
   
+  // ATTENTION: dans l'Excel, les rendements ref sont en décimal (0.85)
+  // pas en pourcentage (85). Il faut détecter le format.
+  const rp = etatRef.rendementProduction > 1 ? etatRef.rendementProduction / 100 : etatRef.rendementProduction;
+  const rd = etatRef.rendementDistribution > 1 ? etatRef.rendementDistribution / 100 : etatRef.rendementDistribution;
+  const re = etatRef.rendementEmission > 1 ? etatRef.rendementEmission / 100 : etatRef.rendementEmission;
+  const rr = etatRef.rendementRegulation > 1 ? etatRef.rendementRegulation / 100 : etatRef.rendementRegulation;
+  
+  const rendementMoyenRef = rp * rd * re * rr;
+
+  const consoRefCalculees = calculConsoRefCalculees(
+    etatRef.deperditions_kW,
+    DJU,
+    tempInt,
+    tempExt,
+    rendementMoyenRef,
+    batiment.etatInitial.coefIntermittence || 1
+  );
+
+  const consoRefPCS = calculConsoRefPCS(consoRefCalculees, etatRef.typeEnergie);
+  const consoSortieChaudieresRef = calculConsoSortieChaudieresRef(consoRefCalculees, rp);
+  const coutAnnuelRef = calculCoutAnnuelRef(consoRefPCS, etatRef.tarification, etatRef.abonnement);
+
   return {
     rendementMoyenRef,
-    consoRefCalculees: 0,
-    consoRefPCS: 0,
-    consoSortieChaudieresRef: 0,
-    coutAnnuelRef: 0,
+    consoRefCalculees,
+    consoRefPCS,
+    consoSortieChaudieresRef,
+    coutAnnuelRef,
   };
 }
 
@@ -162,10 +187,13 @@ export function calculsBatimentReference(
  * Complete calculation for a building (both initial and reference states)
  */
 export function calculsBatimentComplet(
-  batiment: Batiment
+  batiment: Batiment,
+  DJU: number = 1977,
+  tempInt: number = 19,
+  tempExt: number = -7
 ): CalculsBatiment {
   const calcEI = calculsBatimentInitial(batiment);
-  const calcRef = calculsBatimentReference(batiment);
+  const calcRef = calculsBatimentReference(batiment, DJU, tempInt, tempExt);
 
   return {
     ...calcEI,
