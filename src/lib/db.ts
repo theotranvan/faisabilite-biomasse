@@ -33,7 +33,10 @@ export async function getSessionUserId(): Promise<string> {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user && (session.user as any).id) {
-      return (session.user as any).id;
+      const sessionId = (session.user as any).id;
+      // Verify the user still exists in the database (handles DB resets)
+      const exists = await db.user.findUnique({ where: { id: sessionId }, select: { id: true } });
+      if (exists) return sessionId;
     }
   } catch {
     // Session not available (e.g. no auth configured) — fall back
