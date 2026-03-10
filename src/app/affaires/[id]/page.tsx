@@ -565,10 +565,10 @@ export default function AffaireDetailPage() {
           {activeTab === 'export' && (
             <div className="space-y-6">
               <PDFExportButton
+                affaireId={affaire.id}
                 referenceAffaire={affaire.referenceAffaire}
                 nomClient={affaire.nomClient}
                 ville={affaire.ville}
-                data={{ batiments, parcs, chiffrageRef, chiffrageBio }}
               />
               <Card>
                 <CardHeader>

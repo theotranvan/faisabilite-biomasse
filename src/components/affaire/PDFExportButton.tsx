@@ -10,15 +10,9 @@ interface PDFExportProps {
   referenceAffaire: string;
   nomClient: string;
   ville: string;
-  data?: {
-    batiments?: any[];
-    parcs?: any[];
-    chiffrageRef?: any;
-    chiffrageBio?: any;
-  };
 }
 
-export function PDFExportButton({ referenceAffaire, nomClient, ville, data }: Omit<PDFExportProps, 'affaireId'>) {
+export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville }: PDFExportProps) {
   const [isGeneratingLabel, setIsGeneratingLabel] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [error, setError] = useState('');
@@ -113,6 +107,13 @@ export function PDFExportButton({ referenceAffaire, nomClient, ville, data }: Om
     setIsGeneratingReport(true);
 
     try {
+      // Fetch real calculation results from API
+      let calcData: any = null;
+      try {
+        const res = await fetch(`/api/calculs/${affaireId}`);
+        if (res.ok) calcData = await res.json();
+      } catch { /* continue without data */ }
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -157,20 +158,26 @@ export function PDFExportButton({ referenceAffaire, nomClient, ville, data }: Om
       pdf.text(`Ville: ${ville}`, 25, yPosition);
 
       // Buildings Section
-      if (data?.batiments && data.batiments.length > 0) {
+      if (calcData?.batiments && calcData.batiments.length > 0) {
         yPosition += 12;
         pdf.setFontSize(14);
         pdf.text('2. Bâtiments analysés', 20, yPosition);
         yPosition += 8;
 
-        data.batiments.slice(0, 5).forEach((bat: any) => {
+        calcData.batiments.slice(0, 10).forEach((bat: any) => {
           if (yPosition > pageHeight - 30) {
             pdf.addPage();
             yPosition = 20;
           }
           pdf.setFontSize(10);
           pdf.text(
-            `Bâtiment ${bat.numero}: ${bat.surfaceEtat?.toLocaleString() || 'N/A'} m² | ${bat.volumeEtat?.toLocaleString() || 'N/A'} m³`,
+            `Bâtiment ${bat.numero} (${bat.designation}): ${bat.surface_chauffee?.toLocaleString() || 'N/A'} m² | DPE: ${bat.etiquette_dpe || 'N/A'}`,
+            25,
+            yPosition
+          );
+          yPosition += 6;
+          pdf.text(
+            `  Coût EI: ${bat.cout_annuel?.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) || 'N/A'} €/an | Coût Ref: ${bat.cout_annuel_ref?.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) || 'N/A'} €/an`,
             25,
             yPosition
           );
@@ -179,51 +186,42 @@ export function PDFExportButton({ referenceAffaire, nomClient, ville, data }: Om
       }
 
       // Financial Summary
-      if (data?.chiffrageBio) {
+      if (calcData?.chiffrage?.[0]) {
+        const chiff = calcData.chiffrage[0];
+        const bilan = calcData.bilanActualize || [];
+        const totalEconomies = bilan.reduce((s: number, y: any) => s + (y.economies_bio_vs_ref || 0), 0);
+
         yPosition += 12;
         pdf.setFontSize(14);
         pdf.text('3. Analyse financière', 20, yPosition);
         yPosition += 8;
 
         pdf.setFontSize(10);
-        const investTotal =
-          (data.chiffrageBio.coutInstallationChaudieres || 0) +
-          (data.chiffrageBio.coutInstallationReseau || 0) +
-          (data.chiffrageBio.coutInstallateurLocalBois || 0);
-
-        pdf.text(`Investissement total: ${investTotal.toLocaleString('fr-FR')} €`, 25, yPosition);
+        pdf.text(`Investissement biomasse HT: ${(chiff.investissement_bio_ht || 0).toLocaleString('fr-FR')} €`, 25, yPosition);
         yPosition += 6;
-        pdf.text(
-          `Maintenance annuelle: ${((data.chiffrageBio.coutMaintenanceAnnuelleChaudieres || 0) + (data.chiffrageBio.coutMaintenanceAnnuelleReseau || 0) + (data.chiffrageBio.coutMaintenanceAnnuelleEntreprise || 0)).toLocaleString('fr-FR')} €`,
-          25,
-          yPosition
-        );
+        pdf.text(`Subventions: ${(chiff.subventions_bio || 0).toLocaleString('fr-FR')} €`, 25, yPosition);
+        yPosition += 6;
+        pdf.text(`Net à investir: ${((chiff.investissement_bio_ht || 0) - (chiff.subventions_bio || 0)).toLocaleString('fr-FR')} €`, 25, yPosition);
         yPosition += 6;
 
-        const aideTotal =
-          (investTotal * ((data.chiffrageBio.tauxCreditImpot || 0) / 100) +
-            investTotal * ((data.chiffrageBio.tauxEco || 0) / 100)) /
-          2;
-        pdf.text(`Aides potentielles: ${aideTotal.toLocaleString('fr-FR')} €`, 25, yPosition);
+        const coutRef = calcData.parcAgregation?.reduce((s: number, p: any) => s + (p.cout_total || 0), 0) || 0;
+        const coutBio = calcData.parcAgregation?.reduce((s: number, p: any) => s + (p.cout_biomasse || 0), 0) || 0;
+        pdf.text(`Coût exploitation référence: ${coutRef.toLocaleString('fr-FR')} €/an`, 25, yPosition);
         yPosition += 6;
-        pdf.text(
-          `Net à investir: ${(investTotal - aideTotal).toLocaleString('fr-FR')} €`,
-          25,
-          yPosition
-        );
+        pdf.text(`Coût exploitation biomasse: ${coutBio.toLocaleString('fr-FR')} €/an`, 25, yPosition);
+        yPosition += 6;
+        pdf.text(`Gain annuel: ${(coutRef - coutBio).toLocaleString('fr-FR')} €/an`, 25, yPosition);
+        yPosition += 6;
+        pdf.text(`Économies cumulées (20 ans): ${totalEconomies.toLocaleString('fr-FR')} €`, 25, yPosition);
       }
 
       // Environmental Impact
       yPosition += 12;
       pdf.setFontSize(14);
-      pdf.text('4. Impact environnemental (20 ans)', 20, yPosition);
+      pdf.text('4. Impact environnemental', 20, yPosition);
       yPosition += 8;
       pdf.setFontSize(10);
-      pdf.text('CO₂ évitées: ~4500 tonnes', 25, yPosition);
-      yPosition += 6;
-      pdf.text('Équivalent: 7500 arbres plantés', 25, yPosition);
-      yPosition += 6;
-      pdf.text('Énergie renouvelable: 85% de couverture', 25, yPosition);
+      pdf.text('Données CO₂ disponibles dans l\'onglet Résultats', 25, yPosition);
 
       // Footer
       const footerY = pageHeight - 10;

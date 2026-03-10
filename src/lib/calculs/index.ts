@@ -15,6 +15,8 @@ export {
   calculsBatimentInitial,
   calculsBatimentReference,
   calculsBatimentComplet,
+  calculEtiquetteEnergetique,
+  getEtiquetteCouleur,
 } from '../../../lib/calculs/batiment';
 
 export {

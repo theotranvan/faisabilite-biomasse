@@ -200,3 +200,29 @@ export function calculsBatimentComplet(
     ...calcRef,
   } as CalculsBatiment;
 }
+
+/**
+ * Étiquette énergétique (DPE-like) based on kWhep/m²/an
+ */
+export function calculEtiquetteEnergetique(consommationKwhepPerM2: number): string {
+  if (consommationKwhepPerM2 <= 50) return 'A';
+  if (consommationKwhepPerM2 <= 90) return 'B';
+  if (consommationKwhepPerM2 <= 150) return 'C';
+  if (consommationKwhepPerM2 <= 230) return 'D';
+  if (consommationKwhepPerM2 <= 330) return 'E';
+  if (consommationKwhepPerM2 <= 450) return 'F';
+  return 'G';
+}
+
+export function getEtiquetteCouleur(letter: string): string {
+  const colors: Record<string, string> = {
+    A: '#10b981',
+    B: '#84cc16',
+    C: '#eab308',
+    D: '#f97316',
+    E: '#ef4444',
+    F: '#dc2626',
+    G: '#7f1d1d',
+  };
+  return colors[letter] || '#6b7280';
+}
