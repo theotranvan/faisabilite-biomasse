@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { db, getDefaultUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
@@ -6,7 +6,7 @@ import { generateAffaireReference } from '@/lib/utils';
 export async function GET(_req: NextRequest) {
   try {
     // Mono-client app - use default user
-    const userId = 'cmmgnvghb0044qugjmoilecnq';
+    const userId = await getDefaultUserId();
 
     const affaires = await db.affaire.findMany({
       where: { userId },
@@ -31,12 +31,12 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Mono-client app - use default user
-    const userId = 'cmmgnvghb0044qugjmoilecnq';
+    const userId = await getDefaultUserId();
 
     const data = await req.json();
 
     // Validate required fields
-    if (!data.nomClient || !data.adresse || !data.ville || !data.departement) {
+    if (!data.nomClient || !data.ville || !data.departement) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
