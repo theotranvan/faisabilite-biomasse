@@ -26,20 +26,9 @@ export async function getDefaultUserId(): Promise<string> {
 }
 
 /**
- * Get user ID from NextAuth session if logged in, otherwise fall back to default user.
- * This enables multi-user: each logged-in user sees their own affaires.
+ * Always returns the shared default user ID.
+ * All users share the same projects (single shared account).
  */
 export async function getSessionUserId(): Promise<string> {
-  try {
-    const session = await getServerSession(authOptions);
-    if (session?.user && (session.user as any).id) {
-      const sessionId = (session.user as any).id;
-      // Verify the user still exists in the database (handles DB resets)
-      const exists = await db.user.findUnique({ where: { id: sessionId }, select: { id: true } });
-      if (exists) return sessionId;
-    }
-  } catch {
-    // Session not available (e.g. no auth configured) — fall back
-  }
   return getDefaultUserId();
 }
