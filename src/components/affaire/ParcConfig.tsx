@@ -23,6 +23,11 @@ interface Parc {
   longueurReseau?: number;
   sectionReseau?: string;
   pourcentageCouvertureBois?: number;
+  volumeCamion?: number;
+  volumeSilo?: number;
+  kmHaieAn?: number;
+  stereAn?: number;
+  combustibleAppoint?: string;
 }
 
 interface ParcConfigProps {
@@ -196,6 +201,69 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                     {SECTIONS_RESEAU.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Combustible appoint</label>
+                  <select
+                    value={parc.combustibleAppoint || ''}
+                    onChange={(e) => updateParc(parc.numero, 'combustibleAppoint', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option value="GAZ_NATUREL">Gaz naturel</option>
+                    <option value="FUEL">Fuel</option>
+                    <option value="GAZ_PROPANE">Gaz propane</option>
+                    <option value="ELECTRICITE">Électricité</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Paramètres logistiques */}
+            <div className="mt-6 pt-6 border-t border-gray-300">
+              <h5 className="font-medium text-gray-900 mb-4">Logistique</h5>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Volume camion (m³)</label>
+                  <input
+                    type="number"
+                    value={parc.volumeCamion ?? 90}
+                    onChange={(e) => updateParc(parc.numero, 'volumeCamion', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    placeholder="90"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Volume silo (m³)</label>
+                  <input
+                    type="number"
+                    value={parc.volumeSilo || ''}
+                    onChange={(e) => updateParc(parc.numero, 'volumeSilo', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    placeholder="200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Km haie / an</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={parc.kmHaieAn || ''}
+                    onChange={(e) => updateParc(parc.numero, 'kmHaieAn', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                {parc.typeBiomasse === 'BUCHES' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stère / an</label>
+                    <input
+                      type="number"
+                      value={parc.stereAn || ''}
+                      onChange={(e) => updateParc(parc.numero, 'stereAn', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

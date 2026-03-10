@@ -8,6 +8,7 @@ import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { Button, Input, Select, TextArea } from '@/components/ui/Form';
 import { BatimentTable } from '@/components/affaire/BatimentTable';
 import { ParcConfig } from '@/components/affaire/ParcConfig';
+import { SchemaSynoptiqueBiomasse } from '@/components/affaire/SchemaSynoptiqueBiomasse';
 import { IsolationBatimentForm } from '@/components/affaire/IsolationBatimentForm';
 import { IsolationParcRecap } from '@/components/affaire/IsolationParcRecap';
 import { ChiffrageReferenceForm } from '@/components/affaire/ChiffrageReferenceForm';
@@ -75,6 +76,7 @@ export default function AffaireDetailPage() {
   const { fetchBatiments, saveBatiments, fetchParcs, saveParcs, fetchChiffrageReference, saveChiffrageReference, fetchChiffrageBiomasse, saveChiffrageBiomasse, fetchIsolation, duplicateAffaire } = useAffaires();
   
   const [activeTab, setActiveTab] = useState('info');
+  const [parcSubTab, setParcSubTab] = useState<'chaufferie' | 'silo'>('chaufferie');
   const [affaire, setAffaire] = useState<Affaire | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -504,10 +506,8 @@ export default function AffaireDetailPage() {
           {activeTab === 'parc' && (() => {
             const consoBatimentsParParc: Record<number, number> = {};
             [1, 2, 3, 4].forEach(parcNum => {
-              // Filter batiments for this parc that have reference data (flat DB fields)
               const batsParc = batiments.filter((b: any) => b.parc === parcNum && (b.refDeperditions != null || b.refRendementProduction != null));
               if (batsParc.length > 0) {
-                // Convert flat DB batiments to calc format for calculConsoSortieParcChaudieresRef
                 const calcBats = batsParc.map((b: any) => ({
                   numero: b.numero,
                   designation: b.designation || '',
@@ -543,16 +543,140 @@ export default function AffaireDetailPage() {
                 );
               }
             });
+
             return (
-              <ParcConfig
-                affaireId={affaire.id}
-                parcs={parcs}
-                consoBatimentsParParc={consoBatimentsParParc}
-                onSave={async (p) => {
-                  await saveParcs(affaire.id, p);
-                  setParcs(p);
-                }}
-              />
+              <div className="space-y-4">
+                {/* Sous-onglets */}
+                <div className="flex gap-1 border-b border-gray-200">
+                  {([
+                    { id: 'chaufferie' as const, label: 'Chaufferie' },
+                    { id: 'silo' as const, label: 'Silo' },
+                  ]).map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setParcSubTab(tab.id)}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                        parcSubTab === tab.id
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {parcSubTab === 'chaufferie' && (
+                  <>
+                    <ParcConfig
+                      affaireId={affaire.id}
+                      parcs={parcs}
+                      consoBatimentsParParc={consoBatimentsParParc}
+                      onSave={async (p) => {
+                        await saveParcs(affaire.id, p);
+                        setParcs(p);
+                      }}
+                    />
+                    {/* Schéma synoptique pour chaque parc configuré */}
+                    {parcs.filter(p => p.puissanceChaudiereBois).map(parc => (
+                      <div key={parc.id} className="mt-4">
+                        <h4 className="text-sm font-semibold text-gray-600 mb-2">Synoptique - Réseau {parc.numero}</h4>
+                        <SchemaSynoptiqueBiomasse
+                          puissanceChaudiereBois={parc.puissanceChaudiereBois || 0}
+                          rendementChaudiereBois={parc.rendementChaudiereBois || 0}
+                          puissanceChaudiere2={parc.puissanceChaudiere2 || 0}
+                          rendementChaudiere2={parc.rendementChaudiere2 || 0}
+                          pourcentageCouvertureBois={parc.pourcentageCouvertureBois || 0}
+                          typeBiomasse={parc.typeBiomasse || 'PLAQUETTE'}
+                          combustibleAppoint={(parc as any).combustibleAppoint || ''}
+                          longueurReseau={parc.longueurReseau || 0}
+                          sectionReseau={parc.sectionReseau || ''}
+                          volumeCamion={(parc as any).volumeCamion ?? 90}
+                          volumeSilo={(parc as any).volumeSilo || 0}
+                          kmHaieAn={(parc as any).kmHaieAn || 0}
+                          stereAn={(parc as any).stereAn || 0}
+                          consoBatimentsParc={consoBatimentsParParc[parc.numero] || 0}
+                        />
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {parcSubTab === 'silo' && (
+                  <Card>
+                    <CardHeader>
+                      <h3 className="text-lg font-semibold text-gray-900">Détails Silo</h3>
+                    </CardHeader>
+                    <div className="p-6">
+                      {parcs.filter(p => p.puissanceChaudiereBois).length === 0 ? (
+                        <p className="text-gray-500 text-sm">Configurez au moins un parc dans l'onglet Chaufferie.</p>
+                      ) : (
+                        <div className="space-y-6">
+                          {parcs.filter(p => p.puissanceChaudiereBois).map(parc => {
+                            const chars: Record<string, { pci: number; masseVol: number; tauxCendre: number }> = {
+                              PLAQUETTE:  { pci: 3.8, masseVol: 225, tauxCendre: 0.01 },
+                              GRANULES:   { pci: 4.6, masseVol: 650, tauxCendre: 0.005 },
+                              MISCANTHUS: { pci: 4.2, masseVol: 120, tauxCendre: 0.03 },
+                              BUCHES:     { pci: 4.0, masseVol: 420, tauxCendre: 0.01 },
+                            };
+                            const c = chars[parc.typeBiomasse || 'PLAQUETTE'] || chars.PLAQUETTE;
+                            const consoBat = consoBatimentsParParc[parc.numero] || 0;
+                            const couv = (parc.pourcentageCouvertureBois || 0) * 100;
+                            const consoSortie = consoBat * (couv / 100);
+                            const consoEntree = (parc.rendementChaudiereBois || 0) > 0 ? consoSortie / (parc.rendementChaudiereBois || 1) : 0;
+                            const consoT = consoEntree / (c.pci * 1000);
+                            const consoM3 = c.masseVol > 0 ? (consoT * 1000) / c.masseVol : 0;
+                            const stock10T = (consoEntree / 365 * 10) / (c.pci * 1000);
+                            const stock10M3 = c.masseVol > 0 ? (stock10T * 1000) / c.masseVol : 0;
+                            const volSilo = (parc as any).volumeSilo || 0;
+                            const volCamion = (parc as any).volumeCamion || 90;
+                            const nbLiv = volCamion > 0 ? Math.ceil(consoM3 / volCamion) : 0;
+                            const autonomie = consoM3 > 0 ? Math.round(volSilo / consoM3 * 365) : 0;
+
+                            return (
+                              <div key={parc.id} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                <h4 className="font-semibold text-gray-900 mb-3">Silo - Réseau {parc.numero}</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                  <div className="bg-white p-3 rounded border">
+                                    <span className="text-gray-500">Volume silo</span>
+                                    <div className="font-bold text-gray-900">{volSilo > 0 ? `${volSilo} m3` : 'Non défini'}</div>
+                                  </div>
+                                  <div className="bg-white p-3 rounded border">
+                                    <span className="text-gray-500">Consommation annuelle</span>
+                                    <div className="font-bold text-gray-900">{consoM3.toFixed(1)} m3/an ({consoT.toFixed(2)} t/an)</div>
+                                  </div>
+                                  <div className="bg-white p-3 rounded border">
+                                    <span className="text-gray-500">Stockage 10 jours</span>
+                                    <div className="font-bold text-yellow-700">{stock10M3.toFixed(1)} m3 ({stock10T.toFixed(2)} t)</div>
+                                  </div>
+                                  <div className="bg-white p-3 rounded border">
+                                    <span className="text-gray-500">Livraisons/an</span>
+                                    <div className="font-bold text-green-700">{nbLiv} (camion {volCamion} m3)</div>
+                                  </div>
+                                  {volSilo > 0 && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <span className="text-gray-500">Autonomie silo</span>
+                                      <div className="font-bold text-blue-700">{autonomie} jours</div>
+                                    </div>
+                                  )}
+                                  {volSilo > 0 && stock10M3 > 0 && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <span className="text-gray-500">Silo vs stock 10j</span>
+                                      <div className={`font-bold ${volSilo >= stock10M3 ? 'text-green-700' : 'text-red-600'}`}>
+                                        {volSilo >= stock10M3 ? 'OK' : 'Insuffisant'} ({(volSilo / stock10M3).toFixed(1)}x)
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )}
+              </div>
             );
           })()}
 

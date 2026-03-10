@@ -187,6 +187,11 @@ model Parc {
   longueurReseau          Float?   // ml
   sectionReseau           String?  // DN25, DN32, DN40, DN50
   pourcentageCouvertureBois Float? // %
+  volumeCamion            Float?   @default(90)   // m3
+  volumeSilo              Float?                   // m3
+  kmHaieAn                Float?                   // km/an
+  stereAn                 Float?                   // stere/an
+  combustibleAppoint      String?                  // Gaz naturel, Fuel...
   
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

@@ -13,6 +13,11 @@ function normalizeParc(data: any) {
     longueurReseau: data.longueurReseau != null ? parseFloat(data.longueurReseau) : null,
     sectionReseau: data.sectionReseau || null,
     pourcentageCouvertureBois: data.pourcentageCouvertureBois != null ? parseFloat(data.pourcentageCouvertureBois) : null,
+    volumeCamion: data.volumeCamion != null ? parseFloat(data.volumeCamion) : null,
+    volumeSilo: data.volumeSilo != null ? parseFloat(data.volumeSilo) : null,
+    kmHaieAn: data.kmHaieAn != null ? parseFloat(data.kmHaieAn) : null,
+    stereAn: data.stereAn != null ? parseFloat(data.stereAn) : null,
+    combustibleAppoint: data.combustibleAppoint || null,
   };
 }
 
