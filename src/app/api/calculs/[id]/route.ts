@@ -168,7 +168,12 @@ export async function GET(
       let annuiteRefParc = 0;
 
       if (chiffrageRef) {
-        const lignesChaufferie = JSON.parse(chiffrageRef.lignesChaufferie || '[]');
+        const rawLignes = JSON.parse(chiffrageRef.lignesChaufferie || '[]');
+        // Normalize field names: prixUnitaire → pu, quantite → qte
+        const lignesChaufferie = rawLignes.map((l: any) => ({
+          qte: l.qte || l.quantite || 0,
+          pu: l.pu || l.prixUnitaire || 0,
+        }));
         const fraisAnnexes = {
           bureauControle: chiffrageRef.tauxBureauControle,
           maitriseOeuvre: chiffrageRef.tauxMaitriseOeuvre,
@@ -209,7 +214,7 @@ export async function GET(
           (chiffrageBio.vrd || 0) + (chiffrageBio.grosOeuvre || 0) +
           (chiffrageBio.charpenteCouverture || 0) + (chiffrageBio.processBois || 0) +
           (chiffrageBio.chaudiereAppoint || 0) + (chiffrageBio.hydrauliqueChaufferie || 0) +
-          ((chiffrageBio.reseauChaleurQte || 0) * (chiffrageBio.reseauChaleurPU || 0)) +
+          ((chiffrageBio.reseauChaleurQte || 0) * (chiffrageBio.reseauChaleurPU || 1)) +
           (chiffrageBio.sousStation || 0) + (chiffrageBio.installationReseau || 0) +
           (chiffrageBio.autresTravaux || 0);
         const fraisRateBio =

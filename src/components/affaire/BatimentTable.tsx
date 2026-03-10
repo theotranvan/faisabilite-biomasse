@@ -11,6 +11,7 @@ interface Batiment {
   typeBatiment: string;
   surfaceChauffee: number;
   volumeChauffe: number;
+  parc: number;
   deperditions: number;
   rendementProduction: number;
   rendementDistribution: number;
@@ -22,6 +23,13 @@ interface Batiment {
   typeEnergie: string;
   tarification: number;
   abonnement: number;
+  // État de référence
+  refDeperditions?: number | null;
+  refTypeEnergie?: string | null;
+  refRendementProduction?: number | null;
+  refRendementDistribution?: number | null;
+  refRendementEmission?: number | null;
+  refRendementRegulation?: number | null;
 }
 
 interface BatimentTableProps {
@@ -60,6 +68,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
       typeBatiment: 'LOGEMENTS',
       surfaceChauffee: 1000,
       volumeChauffe: 3000,
+      parc: 1,
       deperditions: 50,
       rendementProduction: 0.85,
       rendementDistribution: 0.95,
@@ -142,21 +151,22 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">N°</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Désignation</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Type</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Surface (m²)</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Volume (m³)</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Déperditions (kW)</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Type énergie</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">N°</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Désignation</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Type</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Parc</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Surface (m²)</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Volume (m³)</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Déperditions (kW)</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Type énergie</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {batiments.map((batiment) => (
                     <tr key={batiment.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-4 py-2 text-gray-900 font-mono">{batiment.numero}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2 text-gray-900 font-mono">{batiment.numero}</td>
+                      <td className="px-3 py-2">
                         <input
                           type="text"
                           value={batiment.designation}
@@ -164,7 +174,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           className="w-full px-2 py-1 border border-gray-300 rounded"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
                         <select
                           value={batiment.typeBatiment}
                           onChange={(e) => updateBatiment(batiment.id, 'typeBatiment', e.target.value)}
@@ -173,7 +183,19 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           {TYPES_BATIMENT.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
+                        <select
+                          value={(batiment as any).parc || 1}
+                          onChange={(e) => updateBatiment(batiment.id, 'parc', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                        >
+                          <option value={1}>1</option>
+                          <option value={2}>2</option>
+                          <option value={3}>3</option>
+                          <option value={4}>4</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-2">
                         <input
                           type="number"
                           value={batiment.surfaceChauffee}
@@ -181,7 +203,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
                         <input
                           type="number"
                           value={batiment.volumeChauffe}
@@ -189,7 +211,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
                         <input
                           type="number"
                           value={batiment.deperditions}
@@ -197,7 +219,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
                         <select
                           value={batiment.typeEnergie}
                           onChange={(e) => updateBatiment(batiment.id, 'typeEnergie', e.target.value)}
@@ -206,7 +228,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           {TYPES_ENERGIE.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-3 py-2">
                         <button
                           onClick={() => deleteBatiment(batiment.id)}
                           className="px-3 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 transition"
@@ -220,27 +242,113 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
               </table>
             </div>
 
-            {/* Onglet État de référence - champs supplémentaires */}
+            {/* Détails rendements par bâtiment - État initial */}
+            {activeTab === 'etat_initial' && (
+              <div className="mt-6 p-4 bg-gray-50 rounded border border-gray-200">
+                <p className="text-sm text-gray-600 mb-4">Rendements et tarifs par bâtiment (état initial)</p>
+                {batiments.map((batiment) => (
+                  <div key={batiment.id} className="mb-4 p-4 bg-white rounded border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">{batiment.designation}</h4>
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt production</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.rendementProduction}
+                          onChange={(e) => updateBatiment(batiment.id, 'rendementProduction', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt distribution</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.rendementDistribution}
+                          onChange={(e) => updateBatiment(batiment.id, 'rendementDistribution', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt émission</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.rendementEmission}
+                          onChange={(e) => updateBatiment(batiment.id, 'rendementEmission', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt régulation</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.rendementRegulation}
+                          onChange={(e) => updateBatiment(batiment.id, 'rendementRegulation', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Coef intermittence</label>
+                        <input type="number" step="0.01" min="0" max="2" value={batiment.coefIntermittence}
+                          onChange={(e) => updateBatiment(batiment.id, 'coefIntermittence', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Tarification (€/kWh)</label>
+                        <input type="number" step="0.001" value={batiment.tarification}
+                          onChange={(e) => updateBatiment(batiment.id, 'tarification', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Abonnement (€/an)</label>
+                        <input type="number" value={batiment.abonnement}
+                          onChange={(e) => updateBatiment(batiment.id, 'abonnement', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Onglet État de référence - champs ref* contrôlés */}
             {activeTab === 'etat_ref' && (
               <div className="mt-6 p-4 bg-blue-50 rounded border border-blue-200">
-                <p className="text-sm text-gray-600 mb-4">Modifier les valeurs de référence pour chaque bâtiment</p>
+                <p className="text-sm text-gray-600 mb-4">Modifier les valeurs de référence pour chaque bâtiment (après travaux d'isolation)</p>
                 {batiments.map((batiment) => (
                   <div key={batiment.id} className="mb-4 p-4 bg-white rounded border border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-3">{batiment.designation}</h4>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <label className="block text-gray-600 mb-1">Déperditions (kW)</label>
-                        <input type="number" defaultValue={batiment.deperditions} className="w-full px-2 py-1 border border-gray-300 rounded" />
+                        <label className="block text-gray-600 mb-1">Déperditions ref (kW)</label>
+                        <input type="number" value={batiment.refDeperditions ?? ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refDeperditions', e.target.value || null)}
+                          placeholder={String(batiment.deperditions)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
-                        <label className="block text-gray-600 mb-1">Type énergie</label>
-                        <select defaultValue={batiment.typeEnergie} className="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                        <label className="block text-gray-600 mb-1">Type énergie ref</label>
+                        <select value={batiment.refTypeEnergie || ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refTypeEnergie', e.target.value || null)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                          <option value="">Identique initial</option>
                           {TYPES_ENERGIE.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-gray-600 mb-1">Rendement production (%)</label>
-                        <input type="number" step="0.01" defaultValue={batiment.rendementProduction} className="w-full px-2 py-1 border border-gray-300 rounded" />
+                        <label className="block text-gray-600 mb-1">Rdt production ref</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.refRendementProduction ?? ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementProduction', e.target.value || null)}
+                          placeholder={String(batiment.rendementProduction)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt distribution ref</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.refRendementDistribution ?? ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementDistribution', e.target.value || null)}
+                          placeholder={String(batiment.rendementDistribution)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt émission ref</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.refRendementEmission ?? ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementEmission', e.target.value || null)}
+                          placeholder={String(batiment.rendementEmission)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-600 mb-1">Rdt régulation ref</label>
+                        <input type="number" step="0.01" min="0" max="1" value={batiment.refRendementRegulation ?? ''}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementRegulation', e.target.value || null)}
+                          placeholder={String(batiment.rendementRegulation)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                     </div>
                   </div>

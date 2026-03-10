@@ -453,8 +453,8 @@ export default function AffaireDetailPage() {
             <BatimentTable
               batiments={batiments}
               onSave={async (bats) => {
-                await saveBatiments(affaire.id, bats);
-                setBatiments(bats);
+                const savedBats = await saveBatiments(affaire.id, bats);
+                setBatiments(savedBats);
               }}
             />
           )}
@@ -504,10 +504,34 @@ export default function AffaireDetailPage() {
           {activeTab === 'parc' && (() => {
             const consoBatimentsParParc: Record<number, number> = {};
             [1, 2, 3, 4].forEach(parcNum => {
-              const batsParc = batiments.filter((b: any) => b.parc === parcNum && b.etatReference);
+              // Filter batiments for this parc that have reference data (flat DB fields)
+              const batsParc = batiments.filter((b: any) => b.parc === parcNum && (b.refDeperditions != null || b.refRendementProduction != null));
               if (batsParc.length > 0) {
+                // Convert flat DB batiments to calc format for calculConsoSortieParcChaudieresRef
+                const calcBats = batsParc.map((b: any) => ({
+                  parc: b.parc,
+                  etatInitial: {
+                    deperditions_kW: b.deperditions,
+                    rendementProduction: b.rendementProduction,
+                    rendementDistribution: b.rendementDistribution,
+                    rendementEmission: b.rendementEmission,
+                    rendementRegulation: b.rendementRegulation,
+                    coefIntermittence: b.coefIntermittence,
+                    typeEnergie: b.typeEnergie,
+                    tarification: b.tarification,
+                    abonnement: b.abonnement,
+                  },
+                  etatReference: {
+                    deperditions_kW: b.refDeperditions ?? b.deperditions,
+                    rendementProduction: b.refRendementProduction ?? b.rendementProduction,
+                    rendementDistribution: b.refRendementDistribution ?? b.rendementDistribution,
+                    rendementEmission: b.refRendementEmission ?? b.rendementEmission,
+                    rendementRegulation: b.refRendementRegulation ?? b.rendementRegulation,
+                    typeEnergie: b.refTypeEnergie ?? b.typeEnergie,
+                  },
+                }));
                 consoBatimentsParParc[parcNum] = calculConsoSortieParcChaudieresRef(
-                  batsParc, parcNum,
+                  calcBats, parcNum,
                   (affaire as any).djuRetenu || 1977,
                   (affaire as any).tempIntBase || 19,
                   (affaire as any).tempExtBase || -7

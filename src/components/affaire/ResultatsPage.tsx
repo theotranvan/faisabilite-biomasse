@@ -186,8 +186,8 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
             const sousTotalChaufferie = Array.isArray(lignes)
               ? lignes.reduce((s: number, l: any) => s + ((l.qte || 0) * (l.prixUnitaire || l.pu || 0)), 0)
               : 0;
-            const feeRate = ((chiffrage.tauxBureauControle || 0) + (chiffrage.tauxMaitriseOeuvre || 0) +
-              (chiffrage.tauxFraisDivers || 0) + (chiffrage.tauxAleas || 0)) / 100;
+            const feeRate = (chiffrage.tauxBureauControle || 0) + (chiffrage.tauxMaitriseOeuvre || 0) +
+              (chiffrage.tauxFraisDivers || 0) + (chiffrage.tauxAleas || 0);
             investHT = sousTotalChaufferie * (1 + feeRate);
             annuiteRefParc = investHT / dureeEmprunt;
           }
@@ -228,17 +228,17 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
               reseauChaleurTotal + (chiffrageBio.sousStation || 0) +
               (chiffrageBio.installationReseau || chiffrageBio.installationReseauBat || 0) + (chiffrageBio.autresTravaux || chiffrageBio.autreTravaux || 0);
             const fraisRateBio =
-              ((chiffrageBio.tauxBureauControle || chiffrageBio.bureauControle || 0) +
+              (chiffrageBio.tauxBureauControle || chiffrageBio.bureauControle || 0) +
               (chiffrageBio.tauxMaitriseOeuvre || chiffrageBio.maitriseOeuvre || 0) +
               (chiffrageBio.tauxFraisDivers || chiffrageBio.fraisDivers || 0) +
-              (chiffrageBio.tauxAleas || chiffrageBio.aleas || 0)) / 100;
+              (chiffrageBio.tauxAleas || chiffrageBio.aleas || 0);
             investBioHT = sousTotalChaufBio * (1 + fraisRateBio);
             const subRates =
               (chiffrageBio.tauxSubventionCotEnr || chiffrageBio.cotEnr || 0) +
               (chiffrageBio.tauxAideDepartementale || chiffrageBio.aideDepartementale || 0) +
-              (chiffrageBio.tauxDetrDsil || chiffrageBio.detrDsil || 0);
-            const subComplement = chiffrageBio.subventionComplementaire || 0;
-            const subBrut = investBioHT * (subRates / 100) + subComplement;
+              (chiffrageBio.tauxDetrDsil || chiffrageBio.detrDsil || 0) +
+              (chiffrageBio.subventionComplementaire || 0);
+            const subBrut = investBioHT * (subRates / 100);
             subventionsBio = Math.min(subBrut, investBioHT * 0.80);
             const investBioNet = investBioHT - subventionsBio;
             annuiteBiomasse = investBioNet / dureeEmprunt;

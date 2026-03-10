@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Normalize parc data to match schema (whitelist valid fields only)
+function normalizeParc(data: any) {
+  return {
+    numero: data.numero || 1,
+    puissanceChaudiereBois: data.puissanceChaudiereBois != null ? parseFloat(data.puissanceChaudiereBois) : null,
+    rendementChaudiereBois: data.rendementChaudiereBois != null ? parseFloat(data.rendementChaudiereBois) : null,
+    puissanceChaudiere2: data.puissanceChaudiere2 != null ? parseFloat(data.puissanceChaudiere2) : null,
+    rendementChaudiere2: data.rendementChaudiere2 != null ? parseFloat(data.rendementChaudiere2) : null,
+    typeBiomasse: data.typeBiomasse || null,
+    longueurReseau: data.longueurReseau != null ? parseFloat(data.longueurReseau) : null,
+    sectionReseau: data.sectionReseau || null,
+    pourcentageCouvertureBois: data.pourcentageCouvertureBois != null ? parseFloat(data.pourcentageCouvertureBois) : null,
+  };
+}
+
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Mono-client app - no auth required
@@ -30,12 +45,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (Array.isArray(data)) {
       const results = [];
       for (const parc of data) {
-        // Strip non-updatable and relation fields
-        const { id: parcId, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = parc;
+        const parcData = normalizeParc(parc);
+        const parcId = parc.id;
         if (!parcId || parcId.startsWith('new-') || parcId === '1') {
           // New parc - upsert by affaireId + numero
           const existing = await db.parc.findFirst({
-            where: { affaireId: params.id, numero: parcData.numero || 1 }
+            where: { affaireId: params.id, numero: parcData.numero }
           });
           if (existing) {
             const updated = await db.parc.update({
@@ -45,7 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             results.push(updated);
           } else {
             const created = await db.parc.create({
-              data: { affaireId: params.id, ...parcData, numero: parcData.numero || 1 }
+              data: { affaireId: params.id, ...parcData }
             });
             results.push(created);
           }
@@ -60,9 +75,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json(results);
     }
 
-    // Single parc - strip non-schema fields and upsert
-    const { id: _id, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = data;
-    const numero = parcData.numero || 1;
+    // Single parc - normalize and upsert
+    const parcData = normalizeParc(data);
+    const numero = parcData.numero;
 
     const existing = await db.parc.findFirst({
       where: { affaireId: params.id, numero }
@@ -96,7 +111,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Mono-client app - no auth required
 
     const data = await req.json();
-    const { id: _id, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = data;
+    const parcData = normalizeParc(data);
 
     const result = await db.parc.updateMany({
       where: { affaireId: params.id },
