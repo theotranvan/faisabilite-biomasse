@@ -41,94 +41,113 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       // Title
       pdf.setFontSize(20);
       pdf.setTextColor(0, 102, 204);
-      pdf.text('Etiquettes Energétiques DPE', pageWidth / 2, y, { align: 'center' });
+      pdf.text('Etiquettes Energetiques DPE', pageWidth / 2, y, { align: 'center' });
       y += 10;
       pdf.setFontSize(11);
       pdf.setTextColor(80);
       pdf.text(`${referenceAffaire} - ${nomClient} - ${ville}`, pageWidth / 2, y, { align: 'center' });
       y += 15;
 
-      // DPE scale definition
+      // DPE scale definition (official French thresholds)
       const dpeClasses = [
-        { label: 'A', max: 50, color: [0, 128, 0] },
-        { label: 'B', max: 90, color: [50, 180, 50] },
-        { label: 'C', max: 150, color: [180, 200, 0] },
-        { label: 'D', max: 230, color: [255, 215, 0] },
-        { label: 'E', max: 330, color: [255, 165, 0] },
-        { label: 'F', max: 450, color: [255, 100, 0] },
-        { label: 'G', max: 9999, color: [220, 0, 0] },
+        { label: 'A', min: 0, max: 50, color: [0, 128, 0] },
+        { label: 'B', min: 51, max: 90, color: [50, 180, 50] },
+        { label: 'C', min: 91, max: 150, color: [180, 200, 0] },
+        { label: 'D', min: 151, max: 230, color: [255, 215, 0] },
+        { label: 'E', min: 231, max: 330, color: [255, 165, 0] },
+        { label: 'F', min: 331, max: 450, color: [255, 100, 0] },
+        { label: 'G', min: 451, max: 9999, color: [220, 0, 0] },
       ];
 
       const batiments = calcData?.batiments || [];
       if (batiments.length === 0) {
         pdf.setFontSize(12);
         pdf.setTextColor(150, 0, 0);
-        pdf.text('Aucun bâtiment disponible pour générer les étiquettes.', pageWidth / 2, y, { align: 'center' });
+        pdf.text('Aucun batiment disponible pour generer les etiquettes.', pageWidth / 2, y, { align: 'center' });
       }
 
       for (const bat of batiments) {
-        if (y > 220) { pdf.addPage(); y = 20; }
+        if (y > 200) { pdf.addPage(); y = 20; }
 
         const consoPerM2 = bat.conso_kwhep_per_m2 || 0;
         const dpeLabel = bat.etiquette_dpe || 'N/A';
 
         // Building header
-        pdf.setFontSize(13);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`Bâtiment ${bat.numero} : ${bat.designation} (${bat.surface_chauffee} m²)`, 20, y);
-        y += 8;
+        pdf.setFontSize(14);
+        pdf.setTextColor(0, 102, 204);
+        pdf.text(`Batiment ${bat.numero} : ${bat.designation} (${bat.surface_chauffee} m${String.fromCharCode(178)})`, 20, y);
+        y += 10;
 
-        // Draw DPE bar chart
-        const barStartX = 25;
-        const barHeight = 7;
+        // Draw DPE arrow bars
+        const barStartX = 20;
+        const barHeight = 10;
+        const barSpacing = 2;
+        const arrowTipW = 6;
 
-        for (const cls of dpeClasses) {
-          const barWidth = 40 + dpeClasses.indexOf(cls) * 13;
+        for (let i = 0; i < dpeClasses.length; i++) {
+          const cls = dpeClasses[i];
+          const barWidth = 45 + i * 14;
           const isActive = cls.label === dpeLabel;
 
-          // Bar
+          const bx = barStartX;
+          const by = y;
+
+          // Draw arrow shape: rect + triangle tip
           pdf.setFillColor(cls.color[0], cls.color[1], cls.color[2]);
-          pdf.rect(barStartX, y, barWidth, barHeight, 'F');
+          pdf.rect(bx, by, barWidth, barHeight, 'F');
+          // Arrow tip triangle
+          pdf.triangle(
+            bx + barWidth, by,
+            bx + barWidth + arrowTipW, by + barHeight / 2,
+            bx + barWidth, by + barHeight,
+            'F'
+          );
 
-          // Label in bar
-          pdf.setFontSize(9);
+          // Letter label in white inside bar
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(255, 255, 255);
-          pdf.text(cls.label, barStartX + 3, y + 5.5);
+          pdf.text(cls.label, bx + 5, by + 7.5);
 
-          // Threshold text
-          pdf.setFontSize(7);
-          pdf.setTextColor(80);
+          // Threshold range right of arrow
+          pdf.setFontSize(8);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(100, 100, 100);
+          const thresholdX = bx + barWidth + arrowTipW + 4;
           if (cls.max < 9999) {
-            pdf.text(`≤ ${cls.max}`, barStartX + barWidth + 2, y + 5);
+            pdf.text(`${cls.min} a ${cls.max}`, thresholdX, by + 7);
+          } else {
+            pdf.text(`> ${cls.min}`, thresholdX, by + 7);
           }
 
-          // Active indicator
+          // Active class: bold outline + consumption value
           if (isActive) {
-            pdf.setDrawColor(0, 0, 0);
-            pdf.setLineWidth(1.5);
-            pdf.rect(barStartX - 1, y - 0.5, barWidth + 2, barHeight + 1);
-            // Show value
-            pdf.setFontSize(10);
+            pdf.setDrawColor(30, 30, 30);
+            pdf.setLineWidth(2);
+            pdf.rect(bx - 1, by - 1, barWidth + arrowTipW + 2, barHeight + 2);
+            // Consumption value
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(0, 0, 0);
-            pdf.text(`${Math.round(consoPerM2)} kWh/m²/an`, barStartX + barWidth + 15, y + 5.5);
+            pdf.text(`${Math.round(consoPerM2)} kWh/m${String.fromCharCode(178)}/an`, thresholdX + 30, by + 7.5);
           }
 
-          y += barHeight + 1.5;
+          y += barHeight + barSpacing;
         }
 
-        y += 10;
+        y += 15;
       }
 
       // Footer
       pdf.setFontSize(8);
       pdf.setTextColor(150);
-      pdf.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+      pdf.text(`Genere le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
 
       const fileName = `etiquettes_dpe_${referenceAffaire}.pdf`;
       pdf.save(fileName);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
-      setError(`Erreur lors de la génération de l'étiquette: ${errorMsg}`);
+      setError(`Erreur lors de la generation de l'etiquette: ${errorMsg}`);
     } finally {
       setIsGeneratingLabel(false);
     }
@@ -161,7 +180,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       const addFooter = (pageNum: number) => {
         pdf.setFontSize(8);
         pdf.setTextColor(150);
-        pdf.text(`Rapport Faisabilité Biomasse - ${referenceAffaire} - Page ${pageNum}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+        pdf.text(`Rapport Faisabilite Biomasse - ${referenceAffaire} - Page ${pageNum}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
       };
       const checkPage = (need: number) => {
         if (y + need > pageHeight - 20) {
@@ -191,7 +210,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         pdf.text(value, pageWidth - margin, y, { align: 'right' });
         y += 6;
       };
-      const fmtEur = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+      const fmtEur = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' EUR';
       const fmtNum = (v: number, d = 0) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
 
       // ===== PAGE DE GARDE =====
@@ -199,7 +218,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.rect(0, 0, pageWidth, 80, 'F');
       pdf.setFontSize(28);
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Rapport de Faisabilité', pageWidth / 2, 35, { align: 'center' });
+      pdf.text('Rapport de Faisabilite', pageWidth / 2, 35, { align: 'center' });
       pdf.setFontSize(20);
       pdf.text('Chaufferie Biomasse', pageWidth / 2, 50, { align: 'center' });
       pdf.setFontSize(12);
@@ -211,7 +230,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.text(`Client : ${nomClient}`, margin, y); y += 10;
       pdf.text(`Localisation : ${ville}`, margin, y); y += 10;
       if (affaireData?.departement) {
-        pdf.text(`Département : ${affaireData.departement}`, margin, y); y += 10;
+        pdf.text(`Departement : ${affaireData.departement}`, margin, y); y += 10;
       }
       pdf.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, margin, y); y += 20;
 
@@ -219,20 +238,20 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       if (affaireData) {
         pdf.setFontSize(11);
         pdf.setTextColor(80);
-        pdf.text(`DJU retenu : ${affaireData.djuRetenu || 'N/A'}  |  T° ext. base : ${affaireData.tempExtBase ?? 'N/A'}°C  |  T° int. base : ${affaireData.tempIntBase ?? 'N/A'}°C`, margin, y);
+        pdf.text(`DJU retenu : ${affaireData.djuRetenu || 'N/A'}  |  T ext. base : ${affaireData.tempExtBase ?? 'N/A'}C  |  T int. base : ${affaireData.tempIntBase ?? 'N/A'}C`, margin, y);
         y += 8;
-        pdf.text(`Durée emprunt : ${affaireData.dureeEmprunt || 15} ans  |  Aug. fossile : ${((affaireData.augmentationFossile || 0.04) * 100).toFixed(1)}%/an  |  Aug. biomasse : ${((affaireData.augmentationBiomasse || 0.02) * 100).toFixed(1)}%/an`, margin, y);
+        pdf.text(`Duree emprunt : ${affaireData.dureeEmprunt || 15} ans  |  Aug. fossile : ${((affaireData.augmentationFossile || 0.04) * 100).toFixed(1)}%/an  |  Aug. biomasse : ${((affaireData.augmentationBiomasse || 0.02) * 100).toFixed(1)}%/an`, margin, y);
       }
 
       addFooter(1);
 
       // ===== SECTION 2: BATIMENTS =====
       pdf.addPage(); y = 20;
-      sectionTitle('1', 'Bâtiments analysés');
+      sectionTitle('1', 'Batiments analyses');
 
       const bats = calcData?.batiments || [];
       if (bats.length === 0) {
-        pdf.text('Aucun bâtiment disponible.', margin + 5, y); y += 8;
+        pdf.text('Aucun batiment disponible.', margin + 5, y); y += 8;
       } else {
         // Table header
         checkPage(12);
@@ -241,12 +260,12 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         pdf.setFontSize(9);
         pdf.setTextColor(60);
         const cols = [margin + 2, margin + 15, margin + 50, margin + 80, margin + 105, margin + 130, margin + 155];
-        pdf.text('N°', cols[0], y);
-        pdf.text('Désignation', cols[1], y);
-        pdf.text('Surface (m²)', cols[2], y);
+        pdf.text('No', cols[0], y);
+        pdf.text('Designation', cols[1], y);
+        pdf.text(`Surface (m${String.fromCharCode(178)})`, cols[2], y);
         pdf.text('Conso kWhep', cols[3], y);
-        pdf.text('Coût EI (€/an)', cols[4], y);
-        pdf.text('Coût Réf (€/an)', cols[5], y);
+        pdf.text('Cout EI (EUR/an)', cols[4], y);
+        pdf.text('Cout Ref (EUR/an)', cols[5], y);
         pdf.text('DPE', cols[6], y);
         y += 6;
         pdf.setTextColor(0, 0, 0);
@@ -267,71 +286,90 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
 
       // ===== SECTION 3: ETIQUETTES DPE =====
       y += 5;
-      sectionTitle('2', 'Étiquettes énergétiques DPE');
+      sectionTitle('2', 'Etiquettes energetiques DPE');
       const dpeClasses = [
-        { label: 'A', max: 50, color: [0, 128, 0] },
-        { label: 'B', max: 90, color: [50, 180, 50] },
-        { label: 'C', max: 150, color: [180, 200, 0] },
-        { label: 'D', max: 230, color: [255, 215, 0] },
-        { label: 'E', max: 330, color: [255, 165, 0] },
-        { label: 'F', max: 450, color: [255, 100, 0] },
-        { label: 'G', max: 9999, color: [220, 0, 0] },
+        { label: 'A', min: 0, max: 50, color: [0, 128, 0] },
+        { label: 'B', min: 51, max: 90, color: [50, 180, 50] },
+        { label: 'C', min: 91, max: 150, color: [180, 200, 0] },
+        { label: 'D', min: 151, max: 230, color: [255, 215, 0] },
+        { label: 'E', min: 231, max: 330, color: [255, 165, 0] },
+        { label: 'F', min: 331, max: 450, color: [255, 100, 0] },
+        { label: 'G', min: 451, max: 9999, color: [220, 0, 0] },
       ];
 
       for (const bat of bats) {
-        checkPage(75);
+        checkPage(100);
         pdf.setFontSize(11);
-        pdf.text(`${bat.designation} (${fmtNum(bat.surface_chauffee || 0)} m²)`, margin + 5, y);
-        y += 7;
-        const barH = 6;
-        for (const cls of dpeClasses) {
-          const barW = 35 + dpeClasses.indexOf(cls) * 11;
-          const isActive = cls.label === bat.etiquette_dpe;
-          pdf.setFillColor(cls.color[0], cls.color[1], cls.color[2]);
-          pdf.rect(margin + 5, y, barW, barH, 'F');
-          pdf.setFontSize(8);
-          pdf.setTextColor(255, 255, 255);
-          pdf.text(cls.label, margin + 8, y + 4.5);
-          if (cls.max < 9999) { pdf.setTextColor(80); pdf.setFontSize(7); pdf.text(`≤ ${cls.max}`, margin + 5 + barW + 2, y + 4); }
-          if (isActive) {
-            pdf.setDrawColor(0, 0, 0);
-            pdf.setLineWidth(1.2);
-            pdf.rect(margin + 4, y - 0.5, barW + 2, barH + 1);
-            pdf.setFontSize(9);
-            pdf.setTextColor(0);
-            pdf.text(`${Math.round(bat.conso_kwhep_per_m2 || 0)} kWh/m²/an`, margin + 5 + barW + 15, y + 4.5);
-          }
-          y += barH + 1;
-        }
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`${bat.designation} (${fmtNum(bat.surface_chauffee || 0)} m${String.fromCharCode(178)})`, margin + 5, y);
+        pdf.setFont('helvetica', 'normal');
         y += 8;
+        const barH = 8;
+        const arrowTip = 5;
+        for (let i = 0; i < dpeClasses.length; i++) {
+          const cls = dpeClasses[i];
+          const barW = 35 + i * 11;
+          const isActive = cls.label === bat.etiquette_dpe;
+          const bx = margin + 5;
+          // Arrow bar + tip
+          pdf.setFillColor(cls.color[0], cls.color[1], cls.color[2]);
+          pdf.rect(bx, y, barW, barH, 'F');
+          pdf.triangle(bx + barW, y, bx + barW + arrowTip, y + barH / 2, bx + barW, y + barH, 'F');
+          // Letter
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(255, 255, 255);
+          pdf.text(cls.label, bx + 4, y + 6);
+          // Threshold
+          const thX = bx + barW + arrowTip + 3;
+          pdf.setFontSize(7);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(100, 100, 100);
+          if (cls.max < 9999) {
+            pdf.text(`${cls.min} a ${cls.max}`, thX, y + 5.5);
+          } else {
+            pdf.text(`> ${cls.min}`, thX, y + 5.5);
+          }
+          if (isActive) {
+            pdf.setDrawColor(30, 30, 30);
+            pdf.setLineWidth(1.5);
+            pdf.rect(bx - 1, y - 0.5, barW + arrowTip + 2, barH + 1);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`${Math.round(bat.conso_kwhep_per_m2 || 0)} kWh/m${String.fromCharCode(178)}/an`, thX + 25, y + 6);
+          }
+          y += barH + 1.5;
+        }
+        y += 10;
       }
 
       // ===== SECTION 4: ANALYSE FINANCIERE =====
       pdf.addPage(); y = 20;
-      sectionTitle('3', 'Analyse financière');
+      sectionTitle('3', 'Analyse financiere');
 
       const chiff = calcData?.chiffrage?.[0];
       if (chiff) {
-        addRow('Investissement référence HT', chiff.investissement_ht != null ? fmtEur(chiff.investissement_ht) : 'N/A');
+        addRow('Investissement reference HT', chiff.investissement_ht != null ? fmtEur(chiff.investissement_ht) : 'N/A');
         addRow('Investissement biomasse HT', fmtEur(chiff.investissement_bio_ht || 0));
         addRow('Subventions biomasse', fmtEur(chiff.subventions_bio || 0));
-        addRow('Net à investir (biomasse)', fmtEur((chiff.investissement_bio_ht || 0) - (chiff.subventions_bio || 0)));
-        addRow('Annuité référence', chiff.annuite != null ? fmtEur(chiff.annuite) : 'N/A');
-        addRow('Annuité biomasse', fmtEur(chiff.annuite_biomasse || 0));
+        addRow('Net a investir (biomasse)', fmtEur((chiff.investissement_bio_ht || 0) - (chiff.subventions_bio || 0)));
+        addRow('Annuite reference', chiff.annuite != null ? fmtEur(chiff.annuite) : 'N/A');
+        addRow('Annuite biomasse', fmtEur(chiff.annuite_biomasse || 0));
         y += 5; drawLine();
       }
 
       const parc = calcData?.parcAgregation?.[0];
       if (parc) {
-        addRow('Coût exploitation référence', fmtEur(parc.cout_total || 0) + '/an');
-        addRow('Coût exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
-        addRow('Économie annuelle', fmtEur((parc.cout_total || 0) - (parc.cout_biomasse || 0)) + '/an');
+        addRow('Cout exploitation reference', fmtEur(parc.cout_total || 0) + '/an');
+        addRow('Cout exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
+        addRow('Economie annuelle', fmtEur((parc.cout_total || 0) - (parc.cout_biomasse || 0)) + '/an');
         y += 5;
       }
 
       // ===== SECTION 5: BILAN 20 ANS =====
       y += 5;
-      sectionTitle('4', 'Bilan actualisé sur 20 ans');
+      sectionTitle('4', 'Bilan actualise sur 20 ans');
 
       const bilan = calcData?.bilanActualize || [];
       if (bilan.length > 0) {
@@ -342,11 +380,11 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         pdf.setFontSize(8);
         pdf.setTextColor(60);
         const bCols = [margin + 2, margin + 20, margin + 55, margin + 90, margin + 125];
-        pdf.text('Année', bCols[0], y);
-        pdf.text('Coût initial (€)', bCols[1], y);
-        pdf.text('Coût référence (€)', bCols[2], y);
-        pdf.text('Coût biomasse (€)', bCols[3], y);
-        pdf.text('Économie (€)', bCols[4], y);
+        pdf.text('Annee', bCols[0], y);
+        pdf.text('Cout initial (EUR)', bCols[1], y);
+        pdf.text('Cout reference (EUR)', bCols[2], y);
+        pdf.text('Cout biomasse (EUR)', bCols[3], y);
+        pdf.text('Economie (EUR)', bCols[4], y);
         y += 6;
 
         let totalEconomies = 0;
@@ -369,7 +407,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         y += 5;
         pdf.setFontSize(11);
         pdf.setTextColor(0, 100, 0);
-        pdf.text(`Économies cumulées sur 20 ans : ${fmtEur(totalEconomies)}`, margin + 5, y);
+        pdf.text(`Economies cumulees sur 20 ans : ${fmtEur(totalEconomies)}`, margin + 5, y);
         pdf.setTextColor(0, 0, 0);
       }
 
@@ -377,12 +415,13 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       checkPage(40);
       y += 10;
       sectionTitle('5', 'Impact environnemental');
+      pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
-      pdf.text('Les données détaillées CO₂ et SO₂ sont disponibles dans l\'onglet Résultats de l\'application.', margin + 5, y);
+      pdf.text('Les donnees detaillees CO2 et SO2 sont disponibles dans l\'onglet Resultats de l\'application.', margin + 5, y);
       y += 8;
-      pdf.text('La solution biomasse permet une réduction significative des émissions de gaz à effet de serre', margin + 5, y);
+      pdf.text('La solution biomasse permet une reduction significative des emissions de gaz a effet de serre', margin + 5, y);
       y += 6;
-      pdf.text('par rapport aux solutions fossiles (fuel, gaz naturel).', margin + 5, y);
+      pdf.text('par rapport aux solutions fossiles (fuel, gaz).', margin + 5, y);
 
       addFooter(pdf.getNumberOfPages());
 
@@ -390,7 +429,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.save(fileName);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
-      setError(`Erreur lors de la génération du rapport: ${errorMsg}`);
+      setError(`Erreur lors de la generation du rapport: ${errorMsg}`);
     } finally {
       setIsGeneratingReport(false);
     }
