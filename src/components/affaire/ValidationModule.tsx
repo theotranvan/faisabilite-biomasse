@@ -39,10 +39,10 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
       errors.push('Au moins un bâtiment doit être défini');
     } else {
       data.batiments.forEach((bat: any, idx: number) => {
-        if (!bat.surfaceEtat || bat.surfaceEtat <= 0) {
+        if (!bat.surfaceChauffee || bat.surfaceChauffee <= 0) {
           errors.push(`Bâtiment ${idx + 1}: Surface invalide`);
         }
-        if (!bat.typeEnergiePrincipal) {
+        if (!bat.typeEnergie) {
           errors.push(`Bâtiment ${idx + 1}: Type d'énergie non défini`);
         }
       });
@@ -74,9 +74,15 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
       warnings.push('Chiffrage scénario biomasse non complet');
     } else {
       const totalInvestment =
-        (data.chiffrageBio.coutInstallationChaudieres || 0) +
-        (data.chiffrageBio.coutInstallationReseau || 0) +
-        (data.chiffrageBio.coutInstallateurLocalBois || 0);
+        (data.chiffrageBio.vrd || 0) +
+        (data.chiffrageBio.grosOeuvre || 0) +
+        (data.chiffrageBio.charpenteCouverture || 0) +
+        (data.chiffrageBio.processBois || 0) +
+        (data.chiffrageBio.chaudiereAppoint || 0) +
+        (data.chiffrageBio.hydrauliqueChaufferie || 0) +
+        (data.chiffrageBio.sousStation || 0) +
+        (data.chiffrageBio.installationReseau || 0) +
+        (data.chiffrageBio.autresTravaux || 0);
 
       if (totalInvestment <= 0) {
         errors.push('Investissement total doit être positif');

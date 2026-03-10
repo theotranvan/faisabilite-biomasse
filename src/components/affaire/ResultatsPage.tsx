@@ -19,12 +19,63 @@ import {
   calculEtiquetteEnergetique,
   getEtiquetteCouleur,
 } from '@/lib/calculs';
-import type { Batiment, ChiffrageParcRef } from '@/lib/calculs';
+import type { Batiment } from '@/lib/calculs';
+
+// Convert flat DB batiment to nested Batiment type expected by calculs
+function dbBatimentToCalcBatiment(db: any): Batiment {
+  return {
+    numero: db.numero,
+    designation: db.designation,
+    typeBatiment: db.typeBatiment,
+    surfaceChauffee: db.surfaceChauffee || 0,
+    volumeChauffe: db.volumeChauffe || 0,
+    parc: db.parc || 1,
+    etatInitial: {
+      deperditions_kW: db.deperditions || 0,
+      rendementProduction: db.rendementProduction || 85,
+      rendementDistribution: db.rendementDistribution || 95,
+      rendementEmission: db.rendementEmission || 95,
+      rendementRegulation: db.rendementRegulation || 90,
+      coefIntermittence: db.coefIntermittence || 1,
+      consommationsCalculees: db.consommationsCalculees || 0,
+      consommationsReelles: db.consommationsReelles || 0,
+      typeEnergie: db.typeEnergie || 'Fuel',
+      tarification: db.tarification || 0,
+      abonnement: db.abonnement || 0,
+    },
+    etatReference: (db.refDeperditions != null || db.refRendementProduction != null) ? {
+      deperditions_kW: db.refDeperditions ?? db.deperditions ?? 0,
+      rendementProduction: db.refRendementProduction ?? db.rendementProduction ?? 85,
+      rendementDistribution: db.refRendementDistribution ?? db.rendementDistribution ?? 95,
+      rendementEmission: db.refRendementEmission ?? db.rendementEmission ?? 95,
+      rendementRegulation: db.refRendementRegulation ?? db.rendementRegulation ?? 90,
+      coefIntermittence: db.coefIntermittence || 1,
+      consommationsCalculees: db.consommationsCalculees || 0,
+      consommationsReelles: db.consommationsReelles || 0,
+      typeEnergie: db.refTypeEnergie ?? db.typeEnergie ?? 'Fuel',
+      tarification: db.tarification || 0,
+      abonnement: db.abonnement || 0,
+    } : {
+      // If no ref-specific fields, use initial values as reference
+      deperditions_kW: db.deperditions || 0,
+      rendementProduction: db.rendementProduction || 85,
+      rendementDistribution: db.rendementDistribution || 95,
+      rendementEmission: db.rendementEmission || 95,
+      rendementRegulation: db.rendementRegulation || 90,
+      coefIntermittence: db.coefIntermittence || 1,
+      consommationsCalculees: db.consommationsCalculees || 0,
+      consommationsReelles: db.consommationsReelles || 0,
+      typeEnergie: db.typeEnergie || 'Fuel',
+      tarification: db.tarification || 0,
+      abonnement: db.abonnement || 0,
+    },
+  };
+}
 
 interface ResultatsProps {
   affaireId: string;
-  batiments?: Batiment[];
-  chiffrage?: ChiffrageParcRef;
+  batiments?: any[];
+  chiffrage?: any;
 }
 
 const formatEur = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
@@ -101,14 +152,17 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         const tauxAugFossile = affaire.augmentationFossile || 0.04;
         const tauxAugBiomasse = affaire.augmentationBiomasse || 0.02;
 
+        // Convert flat DB batiments to calc-compatible nested format
+        const calcBatiments = batiments.map(dbBatimentToCalcBatiment);
+
         // Calculate per building
-        const calculsBatiments = batiments.map(bat => ({
+        const calculsBatiments = calcBatiments.map(bat => ({
           ...bat,
           calculs: calculsBatimentComplet(bat, DJU, tempInt, tempExt),
         }));
 
         // Unique parcs
-        const parcs = [...new Set(batiments.map(b => b.parc))].sort((a, b) => a - b);
+        const parcs = [...new Set(calcBatiments.map(b => b.parc))].sort((a, b) => a - b);
 
         // Calculate per parc
         const results: Record<string, ParcResult> = {};
@@ -145,8 +199,8 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
           // Biomass annual costs
           const coutBois = consoEntreeBois * tarifBois;
           const coutAppoint = consoEntreeAppoint * tarifAppoint;
-          const p2Bio = chiffrageBio?.p2 || 0;
-          const coutElecSupp = (chiffrageBio?.consoElecSupplement || 0) * tarifElec;
+          const p2Bio = chiffrageBio?.montantP2 || chiffrageBio?.p2 || 0;
+          const coutElecSupp = (chiffrageBio?.consoElecSupplementaire || chiffrageBio?.consoElecSupplement || 0) * tarifElec;
           const coutBiomasse = coutBois + coutAppoint + p2Bio + coutElecSupp;
 
           // Biomass investment & annuity
@@ -154,30 +208,35 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
           let subventionsBio = 0;
           let annuiteBiomasse = 0;
           if (chiffrageBio) {
+            const reseauChaleurTotal = (chiffrageBio.reseauChaleurQte || chiffrageBio.reseauChaleur || 0) * (chiffrageBio.reseauChaleurPU || 1);
             const sousTotalChaufBio =
               (chiffrageBio.vrd || 0) + (chiffrageBio.grosOeuvre || 0) +
-              (chiffrageBio.charpente || 0) + (chiffrageBio.processBois || 0) +
-              (chiffrageBio.chaudierAppoint || 0) + (chiffrageBio.hydraulique || 0) +
-              (chiffrageBio.reseauChaleur || 0) + (chiffrageBio.sousStation || 0) +
-              (chiffrageBio.installationReseauBat || 0) + (chiffrageBio.autreTravaux || 0);
+              (chiffrageBio.charpenteCouverture || chiffrageBio.charpente || 0) + (chiffrageBio.processBois || 0) +
+              (chiffrageBio.chaudiereAppoint || chiffrageBio.chaudierAppoint || 0) + (chiffrageBio.hydrauliqueChaufferie || chiffrageBio.hydraulique || 0) +
+              reseauChaleurTotal + (chiffrageBio.sousStation || 0) +
+              (chiffrageBio.installationReseau || chiffrageBio.installationReseauBat || 0) + (chiffrageBio.autresTravaux || chiffrageBio.autreTravaux || 0);
             const fraisRateBio =
-              (chiffrageBio.bureauControle || 0) + (chiffrageBio.maitriseOeuvre || 0) +
-              (chiffrageBio.fraisDivers || 0) + (chiffrageBio.aleas || 0);
+              ((chiffrageBio.tauxBureauControle || chiffrageBio.bureauControle || 0) +
+              (chiffrageBio.tauxMaitriseOeuvre || chiffrageBio.maitriseOeuvre || 0) +
+              (chiffrageBio.tauxFraisDivers || chiffrageBio.fraisDivers || 0) +
+              (chiffrageBio.tauxAleas || chiffrageBio.aleas || 0)) / 100;
             investBioHT = sousTotalChaufBio * (1 + fraisRateBio);
             const subRates =
-              (chiffrageBio.cotEnr || 0) + (chiffrageBio.aideDepartementale || 0) +
-              (chiffrageBio.detrDsil || 0) + (chiffrageBio.subventionComplementaire || 0);
-            const subBrut = investBioHT * (subRates / 100);
+              (chiffrageBio.tauxSubventionCotEnr || chiffrageBio.cotEnr || 0) +
+              (chiffrageBio.tauxAideDepartementale || chiffrageBio.aideDepartementale || 0) +
+              (chiffrageBio.tauxDetrDsil || chiffrageBio.detrDsil || 0);
+            const subComplement = chiffrageBio.subventionComplementaire || 0;
+            const subBrut = investBioHT * (subRates / 100) + subComplement;
             subventionsBio = Math.min(subBrut, investBioHT * 0.80);
             const investBioNet = investBioHT - subventionsBio;
-            annuiteBiomasse = (investBioNet + (chiffrageBio.emprunt_biomasse || 0)) / dureeEmprunt;
+            annuiteBiomasse = investBioNet / dureeEmprunt;
           }
 
           // CO2/SO2 — real calculations by fuel type
-          const fuelTypeInitial = batsInParc[0]?.etatInitial?.typeEnergie || 'Fuel';
+          const fuelTypeInitial = batsInParc[0]?.etatInitial.typeEnergie || 'Fuel';
           const fuelTypeRef = batsInParc[0]?.etatReference?.typeEnergie || 'Gaz naturel';
           const fuelTypeBiomasse = parcConfig?.typeBiomasse === 'GRANULES' ? 'Granulé' : 'Plaquette';
-          const consoInitialeKwh = batsInParc.reduce((s, b) => s + (b.etatInitial?.consommationsCalculees || b.etatInitial?.consommationsReelles || 0), 0);
+          const consoInitialeKwh = batsInParc.reduce((s, b) => s + (b.etatInitial.consommationsCalculees || b.etatInitial.consommationsReelles || 0), 0);
           const consoRefKwh = batsInParc.reduce((s, b) => s + (b.calculs?.consoRefCalculees || 0), 0);
 
           const co2Initial = calculCO2Emissions(consoInitialeKwh, getEmissionFactor(fuelTypeInitial, 'co2'));
