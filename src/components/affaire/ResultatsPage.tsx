@@ -7,8 +7,6 @@ import {
   calculsBatimentComplet,
   calculConsoSortieParcChaudieresRef,
   calculPuissanceChauffageParc,
-  calculInvestissementHTRef,
-  calculAnnuiteRef,
   calculBilan20Ans,
   calculCO2Emissions,
   calculSO2Emissions,
@@ -174,11 +172,25 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
           const coutActuel = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelEI || 0), 0);
           const coutRef = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelRef || 0), 0);
 
-          // Investment ref
-          const investHT = chiffrage
-            ? calculInvestissementHTRef(chiffrage.travauxChaufferie, chiffrage.fraisAnnexes)
-            : 0;
-          const annuiteRefParc = calculAnnuiteRef(investHT, chiffrage?.emprunt_ref, dureeEmprunt);
+          // Investment ref — compute from flat DB chiffrage object
+          let investHT = 0;
+          let annuiteRefParc = 0;
+          if (chiffrage) {
+            // Parse lignesChaufferie JSON string → compute sous-total
+            let lignes: any[] = [];
+            try {
+              lignes = typeof chiffrage.lignesChaufferie === 'string'
+                ? JSON.parse(chiffrage.lignesChaufferie)
+                : (chiffrage.lignesChaufferie || []);
+            } catch { lignes = []; }
+            const sousTotalChaufferie = Array.isArray(lignes)
+              ? lignes.reduce((s: number, l: any) => s + ((l.qte || 0) * (l.prixUnitaire || l.pu || 0)), 0)
+              : 0;
+            const feeRate = ((chiffrage.tauxBureauControle || 0) + (chiffrage.tauxMaitriseOeuvre || 0) +
+              (chiffrage.tauxFraisDivers || 0) + (chiffrage.tauxAleas || 0)) / 100;
+            investHT = sousTotalChaufferie * (1 + feeRate);
+            annuiteRefParc = investHT / dureeEmprunt;
+          }
 
           // Parc config
           const parcConfig = affaire.parcs?.find((p: any) => p.numero === parcNum);
