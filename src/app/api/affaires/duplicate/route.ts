@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getDefaultUserId } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const newAffaire = await db.affaire.create({
       data: {
         id: newAffaireId,
-        userId: await getDefaultUserId(),
+        userId: await getSessionUserId(),
         referenceAffaire: `${sourceAffaire.referenceAffaire}-COPY-${new Date().getTime()}`,
         nomClient: `${sourceAffaire.nomClient} (Copie)`,
         adresse: sourceAffaire.adresse,

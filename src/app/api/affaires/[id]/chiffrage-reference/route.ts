@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getDefaultUserId } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({
-      where: { id: params.id, userId: await getDefaultUserId() }
+      where: { id: params.id, userId: await getSessionUserId() }
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

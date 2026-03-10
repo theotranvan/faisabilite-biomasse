@@ -1,12 +1,11 @@
-import { db, getDefaultUserId } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
 // Get all affaires for a user
 export async function GET(_req: NextRequest) {
   try {
-    // Mono-client app - use default user
-    const userId = await getDefaultUserId();
+    const userId = await getSessionUserId();
 
     const affaires = await db.affaire.findMany({
       where: { userId },
@@ -30,8 +29,7 @@ export async function GET(_req: NextRequest) {
 // Create a new affaire
 export async function POST(req: NextRequest) {
   try {
-    // Mono-client app - use default user
-    const userId = await getDefaultUserId();
+    const userId = await getSessionUserId();
 
     const data = await req.json();
 

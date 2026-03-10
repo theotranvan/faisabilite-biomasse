@@ -15,13 +15,22 @@ interface Cout {
 }
 
 const CATEGORIES = [
-  'Gros Œuvre',
-  'Isolation',
-  'Chaufferie',
-  'Électricité / Chaudière',
-  'Réseau de chauffage',
-  'Chauffage / Climatisation',
+  'ISOLATION',
+  'EQUIPEMENTS',
+  'VRD',
+  'GROS_OEUVRE',
+  'CHAUFFERIE_BIOMASSE',
+  'CHAUFFAGE_BATIMENTS',
 ];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  ISOLATION: 'Isolation',
+  EQUIPEMENTS: 'Équipements',
+  VRD: 'VRD',
+  GROS_OEUVRE: 'Gros Œuvre',
+  CHAUFFERIE_BIOMASSE: 'Chaufferie Biomasse',
+  CHAUFFAGE_BATIMENTS: 'Chauffage Bâtiments',
+};
 
 export default function CoutsPage() {
   const [couts, setCouts] = useState<Cout[]>([]);
@@ -45,26 +54,18 @@ export default function CoutsPage() {
 
   const tryLoadCouts = async () => {
     try {
-      const response = await fetch('/api/couts');
+      const response = await fetch('/api/costs');
       if (response.ok) {
         const data = await response.json();
         setCouts(Array.isArray(data) ? data : []);
       } else {
-        // Fallback to localStorage
-        const stored = localStorage.getItem('couts');
-        setCouts(stored ? JSON.parse(stored) : []);
+        setCouts([]);
       }
     } catch {
-      const stored = localStorage.getItem('couts');
-      setCouts(stored ? JSON.parse(stored) : []);
+      setCouts([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const saveCoutsToStorage = (updatedCouts: Cout[]) => {
-    localStorage.setItem('couts', JSON.stringify(updatedCouts));
-    setCouts(updatedCouts);
   };
 
   const handleAddOrUpdate = async (e: React.FormEvent) => {
@@ -76,28 +77,26 @@ export default function CoutsPage() {
       return;
     }
 
-    if (editingId) {
-      // Update
-      const updated = couts.map(c =>
-        c.id === editingId
-          ? {
-              ...c,
-              ...formData,
-              prixUnitaire: parseFloat(formData.prixUnitaire),
-            }
-          : c
-      );
-      saveCoutsToStorage(updated);
-      setEditingId(null);
-    } else {
-      // Create
-      const newCout: Cout = {
-        id: `cost-${Date.now()}`,
-        ...formData,
-        prixUnitaire: parseFloat(formData.prixUnitaire),
-        createdAt: new Date().toISOString(),
-      };
-      saveCoutsToStorage([...couts, newCout]);
+    try {
+      if (editingId) {
+        const res = await fetch('/api/costs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingId, ...formData, prixUnitaire: parseFloat(formData.prixUnitaire) }),
+        });
+        if (!res.ok) throw new Error('Erreur lors de la modification');
+        setEditingId(null);
+      } else {
+        const res = await fetch('/api/costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...formData, prixUnitaire: parseFloat(formData.prixUnitaire) }),
+        });
+        if (!res.ok) throw new Error('Erreur lors de l\'ajout');
+      }
+      await tryLoadCouts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur');
     }
 
     setFormData({ categorie: '', designation: '', unite: '', prixUnitaire: '' });
@@ -115,9 +114,19 @@ export default function CoutsPage() {
     setIsAdding(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce coût ?')) {
-      saveCoutsToStorage(couts.filter(c => c.id !== id));
+      try {
+        const res = await fetch('/api/costs', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        });
+        if (!res.ok) throw new Error('Erreur lors de la suppression');
+        await tryLoadCouts();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur de suppression');
+      }
     }
   };
 
@@ -179,7 +188,7 @@ export default function CoutsPage() {
                   >
                     <option value="">Sélectionner une catégorie</option>
                     {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
                     ))}
                   </select>
                 </div>
@@ -247,7 +256,7 @@ export default function CoutsPage() {
             >
               <option value="">Toutes les catégories</option>
               {CATEGORIES.filter(cat => couts.some(c => c.categorie === cat)).map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
               ))}
             </select>
           </div>
@@ -279,7 +288,7 @@ export default function CoutsPage() {
             {Object.entries(categorizedCouts).map(([categorie, items]) => (
               <Card key={categorie} className="bg-white">
                 <CardHeader className="border-b border-gray-100">
-                  <h2 className="text-lg font-semibold text-gray-900">{categorie}</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{CATEGORY_LABELS[categorie] || categorie}</h2>
                   <p className="text-sm text-gray-600 mt-1">{items.length} coût(s)</p>
                 </CardHeader>
 
