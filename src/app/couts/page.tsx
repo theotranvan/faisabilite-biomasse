@@ -14,7 +14,7 @@ interface Cout {
   createdAt: string;
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   'ISOLATION',
   'EQUIPEMENTS',
   'VRD',
@@ -23,7 +23,7 @@ const CATEGORIES = [
   'CHAUFFAGE_BATIMENTS',
 ];
 
-const CATEGORY_LABELS: Record<string, string> = {
+const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
   ISOLATION: 'Isolation',
   EQUIPEMENTS: 'Équipements',
   VRD: 'VRD',
@@ -39,10 +39,12 @@ export default function CoutsPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterCategorie, setFilterCategorie] = useState('');
+  const [newCategoryMode, setNewCategoryMode] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     categorie: '',
+    customCategorie: '',
     designation: '',
     unite: '',
     prixUnitaire: '',
@@ -72,17 +74,19 @@ export default function CoutsPage() {
     e.preventDefault();
     setError('');
 
-    if (!formData.categorie || !formData.designation || !formData.unite || !formData.prixUnitaire) {
+    const categorie = newCategoryMode ? formData.customCategorie.trim().toUpperCase().replace(/\s+/g, '_') : formData.categorie;
+    if (!categorie || !formData.designation || !formData.unite || !formData.prixUnitaire) {
       setError('Tous les champs sont obligatoires');
       return;
     }
 
     try {
+      const payload = { categorie, designation: formData.designation, unite: formData.unite, prixUnitaire: parseFloat(formData.prixUnitaire) };
       if (editingId) {
         const res = await fetch('/api/costs', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: editingId, ...formData, prixUnitaire: parseFloat(formData.prixUnitaire) }),
+          body: JSON.stringify({ id: editingId, ...payload }),
         });
         if (!res.ok) throw new Error('Erreur lors de la modification');
         setEditingId(null);
@@ -90,7 +94,7 @@ export default function CoutsPage() {
         const res = await fetch('/api/costs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...formData, prixUnitaire: parseFloat(formData.prixUnitaire) }),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error('Erreur lors de l\'ajout');
       }
@@ -99,7 +103,8 @@ export default function CoutsPage() {
       setError(err instanceof Error ? err.message : 'Erreur');
     }
 
-    setFormData({ categorie: '', designation: '', unite: '', prixUnitaire: '' });
+    setFormData({ categorie: '', customCategorie: '', designation: '', unite: '', prixUnitaire: '' });
+    setNewCategoryMode(false);
     setIsAdding(false);
   };
 
@@ -133,12 +138,23 @@ export default function CoutsPage() {
   const handleCancel = () => {
     setIsAdding(false);
     setEditingId(null);
-    setFormData({ categorie: '', designation: '', unite: '', prixUnitaire: '' });
+    setFormData({ categorie: '', customCategorie: '', designation: '', unite: '', prixUnitaire: '' });
+    setNewCategoryMode(false);
     setError('');
   };
 
+  // Build dynamic categories from existing data + defaults
+  const allCategories = [...new Set([...DEFAULT_CATEGORIES, ...couts.map(c => c.categorie)])];
+  const CATEGORY_LABELS: Record<string, string> = { ...DEFAULT_CATEGORY_LABELS };
+  // For custom categories, use a readable label
+  allCategories.forEach(cat => {
+    if (!CATEGORY_LABELS[cat]) {
+      CATEGORY_LABELS[cat] = cat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+  });
+
   // Group and filter couts
-  const categorizedCouts = CATEGORIES.reduce((acc, cat) => {
+  const categorizedCouts = allCategories.reduce((acc, cat) => {
     const items = couts.filter(c => c.categorie === cat);
     if (items.length > 0 && (!filterCategorie || filterCategorie === cat)) {
       acc[cat] = items;
@@ -153,10 +169,7 @@ export default function CoutsPage() {
       <main className="max-w-7xl mx-auto px-4 py-12">
         {/* Header section */}
         <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestion des Coûts</h1>
-            <p className="text-gray-600">Organisez votre base de prix unitaires</p>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Gestion des Coûts</h1>
           {!isAdding && (
             <Button variant="primary" onClick={() => setIsAdding(true)}>
               + Ajouter un coût
@@ -180,17 +193,46 @@ export default function CoutsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Catégorie
                   </label>
-                  <select
-                    value={formData.categorie}
-                    onChange={(e) => setFormData({ ...formData, categorie: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Sélectionner une catégorie</option>
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
-                    ))}
-                  </select>
+                  {newCategoryMode ? (
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Nom de la nouvelle catégorie"
+                        value={formData.customCategorie}
+                        onChange={(e) => setFormData({ ...formData, customCategorie: e.target.value })}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { setNewCategoryMode(false); setFormData({ ...formData, customCategorie: '' }); }}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.categorie}
+                        onChange={(e) => setFormData({ ...formData, categorie: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required={!newCategoryMode}
+                      >
+                        <option value="">Sélectionner</option>
+                        {allCategories.map(cat => (
+                          <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setNewCategoryMode(true)}
+                        className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-300 rounded-lg hover:bg-blue-50"
+                        title="Créer une nouvelle catégorie"
+                      >
+                        + Nouvelle
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -255,7 +297,7 @@ export default function CoutsPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="">Toutes les catégories</option>
-              {CATEGORIES.filter(cat => couts.some(c => c.categorie === cat)).map(cat => (
+              {allCategories.filter(cat => couts.some(c => c.categorie === cat)).map(cat => (
                 <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
               ))}
             </select>
@@ -269,20 +311,14 @@ export default function CoutsPage() {
             <p className="mt-4 text-gray-600">Chargement...</p>
           </div>
         ) : couts.length === 0 ? (
-          <Card className="text-center py-16 bg-white">
-            <div className="space-y-4">
-              <div className="text-6xl">💰</div>
-              <p className="text-lg text-gray-600">Aucun coût défini pour le moment</p>
-              <p className="text-gray-500">Commencez par ajouter vos premiers coûts unitaires</p>
-              <Button variant="primary" onClick={() => setIsAdding(true)} className="mt-6">
-                Ajouter un premier coût
-              </Button>
-            </div>
-          </Card>
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-600 mb-4">Aucun coût défini</p>
+            <Button variant="primary" onClick={() => setIsAdding(true)}>Ajouter un premier coût</Button>
+          </div>
         ) : Object.keys(categorizedCouts).length === 0 ? (
-          <Card className="text-center py-16 bg-white">
-            <p className="text-lg text-gray-600">Aucun coût ne correspond à cette catégorie</p>
-          </Card>
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-600">Aucun coût ne correspond à cette catégorie</p>
+          </div>
         ) : (
           <div className="space-y-8">
             {Object.entries(categorizedCouts).map(([categorie, items]) => (
@@ -336,13 +372,6 @@ export default function CoutsPage() {
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-gray-600 text-sm">
-          <p>© 2025 Faisabilité Biomasse</p>
-        </div>
-      </footer>
     </div>
   );
 }

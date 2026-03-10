@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/shared/Header';
-import { Card, CardHeader } from '@/components/ui/Layout';
 
 interface Affaire {
   id: string;
@@ -53,11 +52,6 @@ export default function AffairesPage() {
       return sortOrder === 'recent' ? dateB - dateA : dateA - dateB;
     });
 
-  // Separate by status
-  const brouillons = filteredAffaires.filter(a => a.statut === 'BROUILLON');
-  const enCours = filteredAffaires.filter(a => a.statut === 'EN_COURS');
-  const terminees = filteredAffaires.filter(a => a.statut === 'TERMINE');
-
   const statusLabels: Record<string, { icon: string; label: string; color: string }> = {
     BROUILLON: { icon: '📝', label: 'Brouillon', color: 'bg-yellow-100 text-yellow-800' },
     EN_COURS: { icon: '🔄', label: 'En cours', color: 'bg-blue-100 text-blue-800' },
@@ -69,10 +63,14 @@ export default function AffairesPage() {
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Header section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Mes Affaires</h1>
-          <p className="text-gray-600">Gérez toutes vos études de faisabilité</p>
+        {/* Header */}
+        <div className="mb-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Affaires</h1>
+          <Link href="/affaires/new">
+            <button className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">
+              + Nouvelle étude
+            </button>
+          </Link>
         </div>
 
         {/* Filters and Search */}
@@ -115,114 +113,52 @@ export default function AffairesPage() {
             <p className="mt-4 text-gray-600">Chargement...</p>
           </div>
         ) : filteredAffaires.length === 0 ? (
-          <Card className="text-center py-16 bg-white">
-            <div className="space-y-4">
-              <div className="text-6xl">📋</div>
-              <p className="text-lg text-gray-600">
-                {searchTerm || filterStatus !== 'tous' ? 'Aucune affaire ne correspond' : 'Aucune affaire créée pour le moment'}
-              </p>
-              <Link href="/affaires/new">
-                <button className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                  Créer une étude
-                </button>
-              </Link>
-            </div>
-          </Card>
+          <div className="text-center py-12 text-gray-500">
+            <p>{searchTerm || filterStatus !== 'tous' ? 'Aucune affaire ne correspond' : 'Aucune affaire pour le moment'}</p>
+            <Link href="/affaires/new">
+              <button className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm">
+                Créer une étude
+              </button>
+            </Link>
+          </div>
         ) : (
-          <div className="space-y-8">
-            {/* Brouillons */}
-            {brouillons.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">📝 Brouillons ({brouillons.length})</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {brouillons.map((affaire) => (
-                    <AffaireCard key={affaire.id} affaire={affaire} statusLabels={statusLabels} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* En cours */}
-            {enCours.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">🔄 En cours ({enCours.length})</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {enCours.map((affaire) => (
-                    <AffaireCard key={affaire.id} affaire={affaire} statusLabels={statusLabels} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Terminées */}
-            {terminees.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">✅ Terminées ({terminees.length})</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {terminees.map((affaire) => (
-                    <AffaireCard key={affaire.id} affaire={affaire} statusLabels={statusLabels} />
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">Client</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">Ville</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">Date</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">Statut</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredAffaires.map((a) => {
+                  const status = statusLabels[a.statut] || statusLabels.BROUILLON;
+                  return (
+                    <tr key={a.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium text-gray-900">{a.nomClient}</td>
+                      <td className="px-4 py-3 text-gray-600">{a.ville}</td>
+                      <td className="px-4 py-3 text-gray-500">{new Date(a.createdAt).toLocaleDateString('fr-FR')}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
+                          {status.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link href={`/affaires/${a.id}`} className="text-blue-600 hover:underline font-medium">
+                          Ouvrir &rarr;
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-gray-600 text-sm">
-          <p>© 2025 Faisabilité Biomasse</p>
-        </div>
-      </footer>
     </div>
-  );
-}
-
-// Component affaire card
-function AffaireCard(props: {
-  affaire: Affaire;
-  statusLabels: Record<string, { icon: string; label: string; color: string }>;
-}) {
-  const { affaire, statusLabels } = props;
-  const status = statusLabels[affaire.statut] || statusLabels.BROUILLON;
-
-  return (
-    <Link href={`/affaires/${affaire.id}`}>
-      <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow bg-white">
-        <CardHeader className="border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {affaire.nomClient}
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {affaire.ville} • {affaire.departement}
-          </p>
-        </CardHeader>
-        <div className="p-4">
-          <p className="text-xs text-gray-500">
-            {new Date(affaire.createdAt).toLocaleDateString('fr-FR')}
-          </p>
-          <div className={`mt-3 inline-block px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-            {status.icon} {status.label}
-          </div>
-          <div className="mt-4 flex items-center gap-2 text-blue-600 font-medium text-sm">
-            <span>Ouvrir</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </div>
-        </div>
-      </Card>
-    </Link>
   );
 }
