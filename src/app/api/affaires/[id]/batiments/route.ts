@@ -1,9 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Normalize batiment data from form to match schema (whitelist valid fields only)
+function normalizeBatiment(b: any) {
+  return {
+    numero: b.numero,
+    designation: b.designation,
+    typeBatiment: b.typeBatiment || 'AUTRES',
+    surfaceChauffee: parseFloat(b.surfaceChauffee) || 0,
+    volumeChauffe: parseFloat(b.volumeChauffe) || 0,
+    parc: b.parc || 1,
+    deperditions: parseFloat(b.deperditions_kW ?? b.deperditions) || 0,
+    rendementProduction: parseFloat(b.rendementProduction) || 0,
+    rendementDistribution: parseFloat(b.rendementDistribution) || 0,
+    rendementEmission: parseFloat(b.rendementEmission) || 0,
+    rendementRegulation: parseFloat(b.rendementRegulation) || 0,
+    coefIntermittence: parseFloat(b.coefIntermittence) || 1,
+    consommationsCalculees: b.consommationsCalculees != null ? parseFloat(b.consommationsCalculees) : null,
+    consommationsReelles: b.consommationsReelles != null ? parseFloat(b.consommationsReelles) : null,
+    typeEnergie: b.typeEnergie || 'FUEL',
+    tarification: parseFloat(b.tarification) || 0,
+    abonnement: parseFloat(b.abonnement) || 0,
+    refDeperditions: b.refDeperditions != null ? parseFloat(b.refDeperditions) : null,
+    refTypeEnergie: b.refTypeEnergie || null,
+    refRendementProduction: b.refRendementProduction != null ? parseFloat(b.refRendementProduction) : null,
+    refRendementDistribution: b.refRendementDistribution != null ? parseFloat(b.refRendementDistribution) : null,
+    refRendementEmission: b.refRendementEmission != null ? parseFloat(b.refRendementEmission) : null,
+    refRendementRegulation: b.refRendementRegulation != null ? parseFloat(b.refRendementRegulation) : null,
+  };
+}
+
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Mono-client app - no auth required
     const batiments = await db.batiment.findMany({
       where: { affaireId: params.id }
     });
@@ -17,26 +45,15 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Mono-client app - no auth required
     const data = await req.json();
 
-    // Normalize batiment data from form to match schema
-    function normalizeBatiment(b: any) {
-      const { id: _id, typeInstallation, deperditions_kW, ...rest } = b;
-      return {
-        ...rest,
-        deperditions: deperditions_kW ?? rest.deperditions ?? 0,
-        typeBatiment: rest.typeBatiment || 'AUTRES',
-        surfaceChauffee: rest.surfaceChauffee || 0,
-        volumeChauffe: rest.volumeChauffe || 0,
-        coefIntermittence: rest.coefIntermittence || 1,
-      };
-    }
+    // Support { batiments: [...] } wrapper format
+    const items = Array.isArray(data) ? data : (data.batiments && Array.isArray(data.batiments)) ? data.batiments : null;
 
     // Si c'est une mise à jour en masse
-    if (Array.isArray(data)) {
+    if (items) {
       const results = [];
-      for (const batiment of data) {
+      for (const batiment of items) {
         if (!batiment.id || batiment.id.startsWith('new-')) {
           // Nouveau bâtiment (no id or temp id)
           const normalized = normalizeBatiment(batiment);
@@ -49,9 +66,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           results.push(created);
         } else {
           // Mise à jour
+          const normalized = normalizeBatiment(batiment);
           const updated = await db.batiment.update({
             where: { id: batiment.id },
-            data: batiment
+            data: normalized
           });
           results.push(updated);
         }
@@ -80,10 +98,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Mono-client app - no auth required
 
     const data = await req.json();
+    const normalized = normalizeBatiment(data);
 
     const batiment = await db.batiment.updateMany({
       where: { affaireId: params.id },
-      data: data
+      data: normalized
     });
 
     return NextResponse.json(batiment);

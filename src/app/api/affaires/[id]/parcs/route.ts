@@ -30,8 +30,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (Array.isArray(data)) {
       const results = [];
       for (const parc of data) {
-        // Strip non-updatable fields
-        const { id: parcId, affaireId: _aid, createdAt: _ca, updatedAt: _ua, ...parcData } = parc;
+        // Strip non-updatable and relation fields
+        const { id: parcId, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = parc;
         if (!parcId || parcId.startsWith('new-') || parcId === '1') {
           // New parc - upsert by affaireId + numero
           const existing = await db.parc.findFirst({
@@ -60,10 +60,27 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json(results);
     }
 
+    // Single parc - strip non-schema fields and upsert
+    const { id: _id, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = data;
+    const numero = parcData.numero || 1;
+
+    const existing = await db.parc.findFirst({
+      where: { affaireId: params.id, numero }
+    });
+
+    if (existing) {
+      const parc = await db.parc.update({
+        where: { id: existing.id },
+        data: parcData
+      });
+      return NextResponse.json(parc);
+    }
+
     const parc = await db.parc.create({
       data: {
         affaireId: params.id,
-        ...data
+        ...parcData,
+        numero
       }
     });
 
@@ -79,10 +96,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Mono-client app - no auth required
 
     const data = await req.json();
+    const { id: _id, affaireId: _aid, createdAt: _ca, updatedAt: _ua, chiffrageRef: _cr, chiffrageBio: _cb, affaire: _aff, ...parcData } = data;
 
     const result = await db.parc.updateMany({
       where: { affaireId: params.id },
-      data: data
+      data: parcData
     });
 
     return NextResponse.json(result);
