@@ -509,6 +509,11 @@ export default function AffaireDetailPage() {
               if (batsParc.length > 0) {
                 // Convert flat DB batiments to calc format for calculConsoSortieParcChaudieresRef
                 const calcBats = batsParc.map((b: any) => ({
+                  numero: b.numero,
+                  designation: b.designation || '',
+                  typeBatiment: b.typeBatiment || '',
+                  surfaceChauffee: b.surfaceChauffee || 0,
+                  volumeChauffe: b.volumeChauffe || 0,
                   parc: b.parc,
                   etatInitial: {
                     deperditions_kW: b.deperditions,
@@ -531,7 +536,7 @@ export default function AffaireDetailPage() {
                   },
                 }));
                 consoBatimentsParParc[parcNum] = calculConsoSortieParcChaudieresRef(
-                  calcBats, parcNum,
+                  calcBats as any, parcNum,
                   (affaire as any).djuRetenu || 1977,
                   (affaire as any).tempIntBase || 19,
                   (affaire as any).tempExtBase || -7
