@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 

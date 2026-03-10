@@ -111,6 +111,7 @@ export default function CoutsPage() {
   const handleEdit = (cout: Cout) => {
     setFormData({
       categorie: cout.categorie,
+      customCategorie: '',
       designation: cout.designation,
       unite: cout.unite,
       prixUnitaire: cout.prixUnitaire.toString(),
