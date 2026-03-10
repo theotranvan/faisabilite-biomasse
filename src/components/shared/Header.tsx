@@ -15,6 +15,7 @@ export function Header() {
     { href: '/', label: 'Accueil', match: (p: string) => p === '/' },
     { href: '/affaires', label: 'Affaires', match: (p: string) => p.startsWith('/affaires') },
     { href: '/couts', label: 'Coûts', match: (p: string) => p === '/couts' },
+    { href: '/admin/meteo', label: 'Météo', match: (p: string) => p.startsWith('/admin/meteo') },
   ];
 
   return (

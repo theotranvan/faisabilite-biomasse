@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, getSessionUserId } from '@/lib/db';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Mono-client app - no auth required
-    const chiffrage = await db.chiffragReference.findFirst({
-      where: {
-        parc: {
-          affaireId: params.id
-        }
-      }
+    const parcNum = req.nextUrl.searchParams.get('parc');
+    
+    if (parcNum) {
+      // Fetch for specific parc
+      const parc = await db.parc.findFirst({
+        where: { affaireId: params.id, numero: parseInt(parcNum) }
+      });
+      if (!parc) return NextResponse.json({});
+      const chiffrage = await db.chiffragReference.findFirst({
+        where: { parcId: parc.id }
+      });
+      return NextResponse.json(chiffrage || {});
+    }
+    
+    // Legacy: return all chiffrages keyed by parc number
+    const parcs = await db.parc.findMany({
+      where: { affaireId: params.id },
+      include: { chiffrageRef: true }
     });
-
-    return NextResponse.json(chiffrage || {});
+    const result: Record<number, any> = {};
+    for (const p of parcs) {
+      if (p.chiffrageRef) result[p.numero] = p.chiffrageRef;
+    }
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error('[GET /api/affaires/[id]/chiffrage-reference]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -74,13 +88,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Find or create first parc for this affaire
+    // Find or create parc for this affaire (use ?parc= query param or default to 1)
+    const parcNum = parseInt(req.nextUrl.searchParams.get('parc') || '1');
     let parc = await db.parc.findFirst({
-      where: { affaireId: params.id }
+      where: { affaireId: params.id, numero: parcNum }
     });
     if (!parc) {
       parc = await db.parc.create({
-        data: { affaireId: params.id, numero: 1 }
+        data: { affaireId: params.id, numero: parcNum }
       });
     }
 

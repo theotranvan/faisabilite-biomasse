@@ -88,8 +88,9 @@ export default function AffaireDetailPage() {
   // Tab data
   const [batiments, setBatiments] = useState<any[]>([]);
   const [parcs, setParcs] = useState<any[]>([]);
-  const [chiffrageRef, setChiffrageRef] = useState<any>(null);
-  const [chiffrageBio, setChiffrageBio] = useState<any>(null);
+  const [chiffrageRef, setChiffrageRef] = useState<Record<number, any>>({});
+  const [chiffrageBio, setChiffrageBio] = useState<Record<number, any>>({});
+  const [selectedChiffrageParc, setSelectedChiffrageParc] = useState<number>(1);
 
   useEffect(() => {
     if (!id) return;
@@ -106,12 +107,27 @@ export default function AffaireDetailPage() {
         setEditData(data);
         
         // Load related data
-        const [bats, parcsData, refData, bioData] = await Promise.all([
+        const [bats, parcsData] = await Promise.all([
           fetchBatiments(id as string),
           fetchParcs(id as string),
-          fetchChiffrageReference(id as string),
-          fetchChiffrageBiomasse(id as string),
         ]);
+        
+        // Load chiffrage per parc
+        const refByParc: Record<number, any> = {};
+        const bioByParc: Record<number, any> = {};
+        for (const p of parcsData) {
+          const [ref, bio] = await Promise.all([
+            fetchChiffrageReference(id as string, p.numero),
+            fetchChiffrageBiomasse(id as string, p.numero),
+          ]);
+          refByParc[p.numero] = ref;
+          bioByParc[p.numero] = bio;
+        }
+        if (parcsData.length === 0) {
+          // Fallback: load without parc param for legacy data
+          refByParc[1] = await fetchChiffrageReference(id as string);
+          bioByParc[1] = await fetchChiffrageBiomasse(id as string);
+        }
         
         // Load isolation data for each building
         const batsWithIsolation = await Promise.all(
@@ -126,8 +142,11 @@ export default function AffaireDetailPage() {
         
         setBatiments(batsWithIsolation);
         setParcs(parcsData);
-        setChiffrageRef(refData);
-        setChiffrageBio(bioData);
+        setChiffrageRef(refByParc);
+        setChiffrageBio(bioByParc);
+        if (parcsData.length > 0) {
+          setSelectedChiffrageParc(parcsData[0].numero);
+        }
       } catch (err) {
         setError('Erreur lors du chargement du projet');
       } finally {
@@ -638,8 +657,17 @@ export default function AffaireDetailPage() {
                                 <h4 className="font-semibold text-gray-900 mb-3">Silo - Réseau {parc.numero}</h4>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                                   <div className="bg-white p-3 rounded border">
-                                    <span className="text-gray-500">Volume silo</span>
-                                    <div className="font-bold text-gray-900">{volSilo > 0 ? `${volSilo} m3` : 'Non défini'}</div>
+                                    <label className="text-gray-500 block mb-1">Volume silo (m³)</label>
+                                    <input
+                                      type="number"
+                                      value={volSilo || ''}
+                                      onChange={(e) => {
+                                        const val = parseFloat(e.target.value) || 0;
+                                        setParcs(prev => prev.map(p => p.id === parc.id ? { ...p, volumeSilo: val } : p));
+                                      }}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm font-bold"
+                                      placeholder="0"
+                                    />
                                   </div>
                                   <div className="bg-white p-3 rounded border">
                                     <span className="text-gray-500">Consommation annuelle</span>
@@ -650,8 +678,21 @@ export default function AffaireDetailPage() {
                                     <div className="font-bold text-yellow-700">{stock10M3.toFixed(1)} m3 ({stock10T.toFixed(2)} t)</div>
                                   </div>
                                   <div className="bg-white p-3 rounded border">
+                                    <label className="text-gray-500 block mb-1">Volume camion (m³)</label>
+                                    <input
+                                      type="number"
+                                      value={volCamion || ''}
+                                      onChange={(e) => {
+                                        const val = parseFloat(e.target.value) || 0;
+                                        setParcs(prev => prev.map(p => p.id === parc.id ? { ...p, volumeCamion: val } : p));
+                                      }}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm font-bold"
+                                      placeholder="90"
+                                    />
+                                  </div>
+                                  <div className="bg-white p-3 rounded border">
                                     <span className="text-gray-500">Livraisons/an</span>
-                                    <div className="font-bold text-green-700">{nbLiv} (camion {volCamion} m3)</div>
+                                    <div className="font-bold text-green-700">{nbLiv}</div>
                                   </div>
                                   {volSilo > 0 && (
                                     <div className="bg-white p-3 rounded border">
@@ -668,6 +709,16 @@ export default function AffaireDetailPage() {
                                     </div>
                                   )}
                                 </div>
+                                <div className="mt-3 flex justify-end">
+                                  <button
+                                    onClick={async () => {
+                                      await saveParcs(affaire.id, parcs);
+                                    }}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                                  >
+                                    Enregistrer
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
@@ -682,20 +733,37 @@ export default function AffaireDetailPage() {
 
           {activeTab === 'chiffrage' && (
             <div className="space-y-6">
+              {parcs.length > 1 && (
+                <div className="flex gap-2 mb-4">
+                  {parcs.map((p: any) => (
+                    <button
+                      key={p.numero}
+                      onClick={() => setSelectedChiffrageParc(p.numero)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedChiffrageParc === p.numero
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Parc {p.numero}
+                    </button>
+                  ))}
+                </div>
+              )}
               <ChiffrageReferenceForm
                 affaireId={affaire.id}
-                data={chiffrageRef}
+                data={chiffrageRef[selectedChiffrageParc] || null}
                 onSave={async (data) => {
-                  await saveChiffrageReference(affaire.id, data);
-                  setChiffrageRef(data);
+                  await saveChiffrageReference(affaire.id, data, selectedChiffrageParc);
+                  setChiffrageRef(prev => ({ ...prev, [selectedChiffrageParc]: data }));
                 }}
               />
               <ChiffrageBiomasseForms
                 affaireId={affaire.id}
-                data={chiffrageBio}
+                data={chiffrageBio[selectedChiffrageParc] || null}
                 onSave={async (data) => {
-                  await saveChiffrageBiomasse(affaire.id, data);
-                  setChiffrageBio(data);
+                  await saveChiffrageBiomasse(affaire.id, data, selectedChiffrageParc);
+                  setChiffrageBio(prev => ({ ...prev, [selectedChiffrageParc]: data }));
                 }}
               />
             </div>
@@ -705,13 +773,13 @@ export default function AffaireDetailPage() {
             <ResultatsPage
               affaireId={affaire.id}
               batiments={batiments}
-              chiffrage={chiffrageRef}
+              chiffrage={chiffrageRef[parcs[0]?.numero || 1] || null}
             />
           )}
 
           {activeTab === 'validation' && (
             <ValidationModule
-              data={{ batiments, parcs, chiffrageRef, chiffrageBio }}
+              data={{ batiments, parcs, chiffrageRef: chiffrageRef[parcs[0]?.numero || 1] || null, chiffrageBio: chiffrageBio[parcs[0]?.numero || 1] || null }}
             />
           )}
 

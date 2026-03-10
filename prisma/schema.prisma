@@ -327,11 +327,21 @@ model MeteoMoyenne {
   departement     String   @unique
   code            String
   djuMoyenne      Float    // moyenne 1996-2022
-  // dju2023, dju2024, etc. could be added as additional columns
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@map("meteo_moyenne")
+}
+
+model MeteoDjuAnnuel {
+  id            String   @id @default(cuid())
+  departement   String
+  annee         Int
+  dju           Float
+  createdAt     DateTime @default(now())
+
+  @@unique([departement, annee])
+  @@map("meteo_dju_annuel")
 }
 
 model MeteoMonotone {

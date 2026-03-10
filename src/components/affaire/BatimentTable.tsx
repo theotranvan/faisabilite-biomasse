@@ -316,7 +316,23 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                       <div>
                         <label className="block text-gray-600 mb-1">Type énergie ref</label>
                         <select value={batiment.refTypeEnergie || ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refTypeEnergie', e.target.value || null)}
+                          onChange={(e) => {
+                            const newType = e.target.value || null;
+                            updateBatiment(batiment.id, 'refTypeEnergie', newType);
+                            // Si "Identique initial" sélectionné, pré-remplir avec les valeurs EI
+                            if (!newType) {
+                              updateBatiment(batiment.id, 'refDeperditions', batiment.deperditions);
+                              updateBatiment(batiment.id, 'refRendementProduction',
+                                batiment.rendementProduction > 1 ? batiment.rendementProduction / 100 : batiment.rendementProduction);
+                              updateBatiment(batiment.id, 'refRendementDistribution',
+                                batiment.rendementDistribution > 1 ? batiment.rendementDistribution / 100 : batiment.rendementDistribution);
+                              updateBatiment(batiment.id, 'refRendementEmission',
+                                batiment.rendementEmission > 1 ? batiment.rendementEmission / 100 : batiment.rendementEmission);
+                              updateBatiment(batiment.id, 'refRendementRegulation',
+                                batiment.rendementRegulation > 1 ? batiment.rendementRegulation / 100 : batiment.rendementRegulation);
+                              updateBatiment(batiment.id, 'refTypeEnergie', batiment.typeEnergie);
+                            }
+                          }}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm">
                           <option value="">Identique initial</option>
                           {TYPES_ENERGIE.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}

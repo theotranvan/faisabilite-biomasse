@@ -186,9 +186,12 @@ export function useAffaires() {
 
   // Chiffrage management
   const fetchChiffrageReference = useCallback(
-    async (affaireId: string) => {
+    async (affaireId: string, parcNum?: number) => {
       try {
-        const response = await fetch(`/api/affaires/${affaireId}/chiffrage-reference`);
+        const url = parcNum != null
+          ? `/api/affaires/${affaireId}/chiffrage-reference?parc=${parcNum}`
+          : `/api/affaires/${affaireId}/chiffrage-reference`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch chiffrage reference');
         return await response.json();
       } catch (err) {
@@ -200,9 +203,12 @@ export function useAffaires() {
   );
 
   const saveChiffrageReference = useCallback(
-    async (affaireId: string, data: any) => {
+    async (affaireId: string, data: any, parcNum?: number) => {
       try {
-        const response = await fetch(`/api/affaires/${affaireId}/chiffrage-reference`, {
+        const url = parcNum != null
+          ? `/api/affaires/${affaireId}/chiffrage-reference?parc=${parcNum}`
+          : `/api/affaires/${affaireId}/chiffrage-reference`;
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -218,9 +224,12 @@ export function useAffaires() {
   );
 
   const fetchChiffrageBiomasse = useCallback(
-    async (affaireId: string) => {
+    async (affaireId: string, parcNum?: number) => {
       try {
-        const response = await fetch(`/api/affaires/${affaireId}/chiffrage-biomasse`);
+        const url = parcNum != null
+          ? `/api/affaires/${affaireId}/chiffrage-biomasse?parc=${parcNum}`
+          : `/api/affaires/${affaireId}/chiffrage-biomasse`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch chiffrage biomasse');
         return await response.json();
       } catch (err) {
@@ -232,9 +241,12 @@ export function useAffaires() {
   );
 
   const saveChiffrageBiomasse = useCallback(
-    async (affaireId: string, data: any) => {
+    async (affaireId: string, data: any, parcNum?: number) => {
       try {
-        const response = await fetch(`/api/affaires/${affaireId}/chiffrage-biomasse`, {
+        const url = parcNum != null
+          ? `/api/affaires/${affaireId}/chiffrage-biomasse?parc=${parcNum}`
+          : `/api/affaires/${affaireId}/chiffrage-biomasse`;
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),

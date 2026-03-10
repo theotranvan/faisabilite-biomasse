@@ -1,8 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Form';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
+
+interface BddCout {
+  id: string;
+  categorie: string;
+  designation: string;
+  unite: string;
+  prixUnitaire: number;
+}
 
 interface LigneChauufferie {
   id: string;
@@ -43,13 +51,33 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [bddCouts, setBddCouts] = useState<BddCout[]>([]);
+
+  useEffect(() => {
+    fetch('/api/costs').then(r => r.json()).then(setBddCouts).catch(() => {});
+  }, []);
 
   const handleLineChange = (idx: number, field: string, value: any) => {
     const newLines = [...(formData.travauxChaufferie || [])];
-    newLines[idx] = {
-      ...newLines[idx],
-      [field]: field === 'designation' || field === 'unite' ? value : parseFloat(value) || 0,
-    };
+    if (field === 'designation') {
+      // Check if value matches a BDD cost entry
+      const bddEntry = bddCouts.find(c => c.designation === value);
+      if (bddEntry) {
+        newLines[idx] = {
+          ...newLines[idx],
+          designation: value,
+          unite: bddEntry.unite,
+          pu: bddEntry.prixUnitaire,
+        };
+      } else {
+        newLines[idx] = { ...newLines[idx], designation: value };
+      }
+    } else {
+      newLines[idx] = {
+        ...newLines[idx],
+        [field]: field === 'unite' ? value : parseFloat(value) || 0,
+      };
+    }
     setFormData(prev => ({ ...prev, travauxChaufferie: newLines }));
   };
 
@@ -144,13 +172,31 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
                   {formData.travauxChaufferie?.map((ligne, idx) => (
                     <tr key={idx} className="border-t border-gray-200">
                       <td className="px-3 py-2">
-                        <input
-                          type="text"
+                        <select
                           value={ligne.designation}
                           onChange={(e) => handleLineChange(idx, 'designation', e.target.value)}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                          placeholder="Ex: Chaudière"
-                        />
+                        >
+                          <option value="">-- Sélectionner --</option>
+                          {Object.entries(
+                            bddCouts.reduce((acc, c) => {
+                              if (!acc[c.categorie]) acc[c.categorie] = [];
+                              acc[c.categorie].push(c);
+                              return acc;
+                            }, {} as Record<string, BddCout[]>)
+                          ).map(([cat, items]) => (
+                            <optgroup key={cat} label={cat.replace(/_/g, ' ')}>
+                              {items.map(item => (
+                                <option key={item.id} value={item.designation}>
+                                  {item.designation}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                          {ligne.designation && !bddCouts.find(c => c.designation === ligne.designation) && (
+                            <option value={ligne.designation}>{ligne.designation} (personnalisé)</option>
+                          )}
+                        </select>
                       </td>
                       <td className="px-3 py-2">
                         <input
