@@ -4,7 +4,7 @@ import {
   calculerIsolationParc,
   integrateIsolationInChiffrageRef,
   LigneIsolation,
-} from '../src/lib/calculs/isolation';
+} from '../lib/calculs/isolation';
 
 describe('Isolation Calculations', () => {
   describe('calculerIsolationBatiment', () => {
