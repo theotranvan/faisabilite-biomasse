@@ -9,7 +9,7 @@ import {
   ISOLATION_PRESETS,
   findIsolationPreset,
   IsolationPreset,
-} from '@/lib/calculs/isolation';
+} from '@/lib/calculs';
 
 interface IsolationBatimentFormProps {
   batimentNumero: number;

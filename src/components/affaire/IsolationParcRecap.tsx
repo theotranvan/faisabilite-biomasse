@@ -7,7 +7,7 @@ import {
   calculerIsolationParc,
   LigneIsolation,
   BatimentIsolationRecap,
-} from '@/lib/calculs/isolation';
+} from '@/lib/calculs';
 
 interface BatimentWithIsolation {
   id: string;

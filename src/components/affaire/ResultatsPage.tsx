@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   calculsBatimentComplet,
   calculConsoSortieParcChaudieresRef,
@@ -110,6 +110,9 @@ interface ParcResult {
     coutAnnuelRef: number;
     consoSortie: number;
     consoKWhepEI: number;
+    consoRefCalculees: number;
+    deperditionsKW: number;
+    deperditionsRefKW: number;
     dpe: string;
     dpeCouleur: string;
   }>;
@@ -271,6 +274,9 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
               coutAnnuelRef: b.calculs?.coutAnnuelRef || 0,
               consoSortie: b.calculs?.consoSortieChaudieresRef || 0,
               consoKWhepEI,
+              consoRefCalculees: b.calculs?.consoRefCalculees || 0,
+              deperditionsKW: b.etatInitial.deperditions_kW,
+              deperditionsRefKW: b.etatReference?.deperditions_kW || b.etatInitial.deperditions_kW,
               dpe,
               dpeCouleur: getEtiquetteCouleur(dpe),
             };
@@ -423,6 +429,20 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
   const surcout = sel.investBioHT - sel.investHT;
   const tempsRetour = gainExploitation > 0 ? surcout / gainExploitation : 0;
   const economies20ans = projections.reduce((s, y) => s + y.economie, 0);
+
+  // Pie chart data
+  const pieDataRef = [
+    { name: 'Combustible', value: sel.coutRef, color: '#ef4444' },
+    { name: 'Annuité emprunt', value: sel.annuiteRef, color: '#3b82f6' },
+  ].filter(d => d.value > 0);
+
+  const pieDataBio = [
+    { name: 'Combustible bois', value: sel.coutBois, color: '#22c55e' },
+    { name: 'Combustible appoint', value: sel.coutAppoint, color: '#f59e0b' },
+    { name: 'Élec supplémentaire', value: sel.coutElecSupp, color: '#a855f7' },
+    { name: 'Entretien (P2)', value: sel.p2Bio, color: '#6366f1' },
+    { name: 'Annuité emprunt', value: sel.annuiteBiomasse, color: '#3b82f6' },
+  ].filter(d => d.value > 0);
 
   return (
     <div className="space-y-6">
@@ -616,6 +636,61 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         </div>
       </Card>
 
+      {/* Répartition coût global — Pie Charts */}
+      {(pieDataRef.length > 0 || pieDataBio.length > 0) && (
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold text-gray-900">Répartition du coût global annuel</h3>
+          </CardHeader>
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h4 className="text-center font-semibold text-gray-700 mb-1">Scénario Référence</h4>
+                <p className="text-center text-sm text-gray-500 mb-4">{formatEur(coutGlobalRef)}</p>
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={pieDataRef}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieDataRef.map((entry, index) => (
+                        <Cell key={index} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: any) => formatEur(value)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div>
+                <h4 className="text-center font-semibold text-gray-700 mb-1">Scénario Biomasse</h4>
+                <p className="text-center text-sm text-gray-500 mb-4">{formatEur(coutGlobalBio)}</p>
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={pieDataBio}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieDataBio.map((entry, index) => (
+                        <Cell key={index} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: any) => formatEur(value)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* CO2/SO2 Table */}
       <Card>
         <CardHeader>
@@ -654,6 +729,75 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
               </tr>
             </tbody>
           </table>
+        </div>
+      </Card>
+
+      {/* ADEME Fonds Chaleur — Volet 1 */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-gray-900">ADEME Fonds Chaleur — Volet 1</h3>
+          <p className="text-sm text-gray-500 mt-1">Synthèse des données par bâtiment pour le dossier ADEME</p>
+        </CardHeader>
+        <div className="p-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-2 px-2">Bâtiment</th>
+                <th className="text-right py-2 px-2">Surface (m²)</th>
+                <th className="text-right py-2 px-2">Déperd. EI (kW)</th>
+                <th className="text-right py-2 px-2">Déperd. Réf (kW)</th>
+                <th className="text-right py-2 px-2">Conso EI (kWhEP)</th>
+                <th className="text-right py-2 px-2">Conso Réf (kWh)</th>
+                <th className="text-right py-2 px-2">Coût EI (€/an)</th>
+                <th className="text-right py-2 px-2">Coût Réf (€/an)</th>
+                <th className="text-right py-2 px-2">Gain (€/an)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sel.batiments.map((bat, idx) => (
+                <tr key={idx} className="border-b border-gray-200">
+                  <td className="py-2 px-2">{bat.designation}</td>
+                  <td className="text-right py-2 px-2">{bat.surfaceChauffee.toLocaleString('fr-FR')}</td>
+                  <td className="text-right py-2 px-2">{bat.deperditionsKW.toFixed(1)}</td>
+                  <td className="text-right py-2 px-2">{bat.deperditionsRefKW.toFixed(1)}</td>
+                  <td className="text-right py-2 px-2">{bat.consoKWhepEI.toLocaleString('fr-FR', { maximumFractionDigits: 0 })}</td>
+                  <td className="text-right py-2 px-2">{bat.consoRefCalculees.toLocaleString('fr-FR', { maximumFractionDigits: 0 })}</td>
+                  <td className="text-right py-2 px-2">{formatEur(bat.coutAnnuelEI)}</td>
+                  <td className="text-right py-2 px-2">{formatEur(bat.coutAnnuelRef)}</td>
+                  <td className="text-right py-2 px-2 text-green-600 font-semibold">{formatEur(bat.coutAnnuelEI - bat.coutAnnuelRef)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-300 font-bold">
+                <td className="py-2 px-2">TOTAL</td>
+                <td className="text-right py-2 px-2">{sel.batiments.reduce((s, b) => s + b.surfaceChauffee, 0).toLocaleString('fr-FR')}</td>
+                <td className="text-right py-2 px-2">{sel.batiments.reduce((s, b) => s + b.deperditionsKW, 0).toFixed(1)}</td>
+                <td className="text-right py-2 px-2">{sel.batiments.reduce((s, b) => s + b.deperditionsRefKW, 0).toFixed(1)}</td>
+                <td className="text-right py-2 px-2">{sel.batiments.reduce((s, b) => s + b.consoKWhepEI, 0).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}</td>
+                <td className="text-right py-2 px-2">{sel.batiments.reduce((s, b) => s + b.consoRefCalculees, 0).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}</td>
+                <td className="text-right py-2 px-2">{formatEur(sel.batiments.reduce((s, b) => s + b.coutAnnuelEI, 0))}</td>
+                <td className="text-right py-2 px-2">{formatEur(sel.batiments.reduce((s, b) => s + b.coutAnnuelRef, 0))}</td>
+                <td className="text-right py-2 px-2 text-green-600">{formatEur(sel.batiments.reduce((s, b) => s + (b.coutAnnuelEI - b.coutAnnuelRef), 0))}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div className="px-6 pb-6">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div className="text-center">
+              <div className="text-sm text-gray-600">Production EnR&R annuelle</div>
+              <div className="text-xl font-bold text-green-600">{(sel.consoEntreeBois / 1000).toFixed(0)} MWh</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-600">CO₂ évitées / an</div>
+              <div className="text-xl font-bold text-green-600">{gainCO2annuel.toFixed(1)} t</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-600">CO₂ évitées sur 20 ans</div>
+              <div className="text-xl font-bold text-green-600">{gainCO2_20ans.toFixed(0)} t</div>
+            </div>
+          </div>
         </div>
       </Card>
 

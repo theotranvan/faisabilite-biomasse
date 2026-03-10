@@ -55,6 +55,22 @@ export {
   calculChiffrageComplet,
 } from '../../../lib/calculs/chiffrage';
 
+export {
+  calculerIsolationBatiment,
+  calculerIsolationParc,
+  integrateIsolationInChiffrageRef,
+  ISOLATION_PRESETS,
+  findIsolationPreset,
+} from '../../../lib/calculs/isolation';
+
+export type {
+  IsolationPreset,
+  LigneIsolation,
+  ResultatIsolationBatiment,
+  BatimentIsolationRecap,
+  ResultatIsolationParc,
+} from '../../../lib/calculs/isolation';
+
 export type {
   EtatEnergie,
   Batiment,

@@ -4,6 +4,12 @@
  * Elle n'entre PAS dans le calcul du total investissement
  */
 
+export interface IsolationPreset {
+  designation: string;
+  unite: string;
+  prixUnitaire: number;
+}
+
 export interface LigneIsolation {
   id?: string;
   designation: string;
@@ -19,17 +25,19 @@ export interface ResultatIsolationBatiment {
   resteARealiser: number;    // totalIsolation - dejaRealise
 }
 
+export interface BatimentIsolationRecap {
+  numero: number;
+  designation: string;
+  totalIsolation: number;
+  dejaRealise: number;
+  resteARealiser: number;
+}
+
 export interface ResultatIsolationParc {
   sousTotalIsolation: number;
   totalDejaRealise: number;
   resteARealiser: number;
-  batiments: {
-    numero: number;
-    designation: string;
-    totalIsolation: number;
-    dejaRealise: number;
-    resteARealiser: number;
-  }[];
+  batiments: BatimentIsolationRecap[];
 }
 
 /**
@@ -145,7 +153,7 @@ export function integrateIsolationInChiffrageRef(
  * Données de base pour l'autocomplete isolation
  * Provient de la BDD coûts catégorie ISOLATION
  */
-export const ISOLATION_PRESETS = [
+export const ISOLATION_PRESETS: IsolationPreset[] = [
   { designation: 'Isolation de plancher', unite: 'm2', prixUnitaire: 80 },
   { designation: 'Isolation de rampant', unite: 'm2', prixUnitaire: 120 },
   { designation: 'Isolation des combles perdus', unite: 'm2', prixUnitaire: 80 },
