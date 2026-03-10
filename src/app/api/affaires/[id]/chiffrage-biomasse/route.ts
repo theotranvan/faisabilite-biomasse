@@ -30,11 +30,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Find first parc for this affaire
-    const parc = await db.parc.findFirst({
+    // Find or create first parc for this affaire
+    let parc = await db.parc.findFirst({
       where: { affaireId: params.id }
     });
-    if (!parc) return NextResponse.json({ error: 'No parc found' }, { status: 404 });
+    if (!parc) {
+      parc = await db.parc.create({
+        data: { affaireId: params.id, numero: 1 }
+      });
+    }
 
     // Chercher s'il existe déjà
     const existing = await db.chiffrageBiomasse.findFirst({

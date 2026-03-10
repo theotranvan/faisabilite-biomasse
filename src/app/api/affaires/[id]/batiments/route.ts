@@ -20,21 +20,34 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // Mono-client app - no auth required
     const data = await req.json();
 
+    // Normalize batiment data from form to match schema
+    function normalizeBatiment(b: any) {
+      const { id: _id, typeInstallation, deperditions_kW, ...rest } = b;
+      return {
+        ...rest,
+        deperditions: deperditions_kW ?? rest.deperditions ?? 0,
+        typeBatiment: rest.typeBatiment || 'AUTRES',
+        surfaceChauffee: rest.surfaceChauffee || 0,
+        volumeChauffe: rest.volumeChauffe || 0,
+        coefIntermittence: rest.coefIntermittence || 1,
+      };
+    }
+
     // Si c'est une mise à jour en masse
     if (Array.isArray(data)) {
       const results = [];
       for (const batiment of data) {
-        if (batiment.id && batiment.id.startsWith('new-')) {
-          // Nouveau bâtiment
+        if (!batiment.id || batiment.id.startsWith('new-')) {
+          // Nouveau bâtiment (no id or temp id)
+          const normalized = normalizeBatiment(batiment);
           const created = await db.batiment.create({
             data: {
               affaireId: params.id,
-              ...batiment,
-              id: undefined
+              ...normalized,
             }
           });
           results.push(created);
-        } else if (batiment.id) {
+        } else {
           // Mise à jour
           const updated = await db.batiment.update({
             where: { id: batiment.id },
@@ -47,10 +60,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     // Créer un seul bâtiment
+    const normalized = normalizeBatiment(data);
     const batiment = await db.batiment.create({
       data: {
         affaireId: params.id,
-        ...data
+        ...normalized
       }
     });
 

@@ -22,7 +22,20 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Mono-client app - no auth required
-    const data = await req.json();
+    const rawData = await req.json();
+
+    // Normalize data: wizard sends simplified fields, map to schema
+    const { parc: _parc, sousTotalChaufferie, emprunt, dureeEmprunt, ...schemaFields } = rawData;
+    const data: any = { ...schemaFields };
+    // If wizard simplified fields are present, map to schema
+    if (!data.lignesChaufferie && sousTotalChaufferie !== undefined) {
+      data.lignesChaufferie = JSON.stringify([
+        { designation: 'Chaufferie', unite: 'forfait', qte: 1, prixUnitaire: sousTotalChaufferie }
+      ]);
+    }
+    if (!data.lignesIsolation) {
+      data.lignesIsolation = data.lignesIsolation || '[]';
+    }
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({
@@ -30,11 +43,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Find first parc for this affaire
-    const parc = await db.parc.findFirst({
+    // Find or create first parc for this affaire
+    let parc = await db.parc.findFirst({
       where: { affaireId: params.id }
     });
-    if (!parc) return NextResponse.json({ error: 'No parc found' }, { status: 404 });
+    if (!parc) {
+      parc = await db.parc.create({
+        data: { affaireId: params.id, numero: 1 }
+      });
+    }
 
     // Chercher s'il existe déjà
     const existing = await db.chiffragReference.findFirst({
