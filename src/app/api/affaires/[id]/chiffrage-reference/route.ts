@@ -24,18 +24,49 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // Mono-client app - no auth required
     const rawData = await req.json();
 
-    // Normalize data: wizard sends simplified fields, map to schema
-    const { parc: _parc, sousTotalChaufferie, emprunt, dureeEmprunt, ...schemaFields } = rawData;
-    const data: any = { ...schemaFields };
-    // If wizard simplified fields are present, map to schema
-    if (!data.lignesChaufferie && sousTotalChaufferie !== undefined) {
+    // Strip non-schema fields sent by frontend
+    const {
+      parc: _parc, sousTotalChaufferie, emprunt, dureeEmprunt,
+      id: _id, parcId: _parcId, createdAt: _ca, updatedAt: _ua,
+      affaireId: _aid,
+      ...rest
+    } = rawData;
+
+    // Map form field names to schema field names
+    const data: any = {};
+    // lignesChaufferie
+    if (rest.travauxChaufferie) {
+      data.lignesChaufferie = typeof rest.travauxChaufferie === 'string'
+        ? rest.travauxChaufferie
+        : JSON.stringify(rest.travauxChaufferie);
+    } else if (rest.lignesChaufferie) {
+      data.lignesChaufferie = typeof rest.lignesChaufferie === 'string'
+        ? rest.lignesChaufferie
+        : JSON.stringify(rest.lignesChaufferie);
+    } else if (sousTotalChaufferie !== undefined) {
       data.lignesChaufferie = JSON.stringify([
         { designation: 'Chaufferie', unite: 'forfait', qte: 1, prixUnitaire: sousTotalChaufferie }
       ]);
+    } else {
+      data.lignesChaufferie = '[]';
     }
-    if (!data.lignesIsolation) {
-      data.lignesIsolation = data.lignesIsolation || '[]';
+    // lignesIsolation
+    if (rest.lignesIsolation) {
+      data.lignesIsolation = typeof rest.lignesIsolation === 'string'
+        ? rest.lignesIsolation
+        : JSON.stringify(rest.lignesIsolation);
+    } else {
+      data.lignesIsolation = '[]';
     }
+    // Fee rates
+    if (rest.bureauControle !== undefined) data.tauxBureauControle = rest.bureauControle;
+    if (rest.tauxBureauControle !== undefined) data.tauxBureauControle = rest.tauxBureauControle;
+    if (rest.maitriseOeuvre !== undefined) data.tauxMaitriseOeuvre = rest.maitriseOeuvre;
+    if (rest.tauxMaitriseOeuvre !== undefined) data.tauxMaitriseOeuvre = rest.tauxMaitriseOeuvre;
+    if (rest.fraisDivers !== undefined) data.tauxFraisDivers = rest.fraisDivers;
+    if (rest.tauxFraisDivers !== undefined) data.tauxFraisDivers = rest.tauxFraisDivers;
+    if (rest.aleas !== undefined) data.tauxAleas = rest.aleas;
+    if (rest.tauxAleas !== undefined) data.tauxAleas = rest.tauxAleas;
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({

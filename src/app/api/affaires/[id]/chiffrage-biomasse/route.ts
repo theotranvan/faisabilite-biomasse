@@ -22,7 +22,40 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Mono-client app - no auth required
-    const data = await req.json();
+    const rawData = await req.json();
+
+    // Strip non-schema fields and map form names to schema names
+    const {
+      id: _id, parcId: _parcId, createdAt: _ca, updatedAt: _ua,
+      affaireId: _aid,
+      // Form field names that differ from schema
+      charpente, chaudierAppoint, hydraulique, reseauChaleur,
+      installationReseauBat, autreTravaux, p2, consoElecSupplement,
+      cotEnr, aideDepartementale, detrDsil,
+      bureauControle, maitriseOeuvre, fraisDivers, aleas,
+      emprunt_biomasse,
+      ...schemaFields
+    } = rawData;
+
+    const data: any = { ...schemaFields };
+    // Map misnamed fields
+    if (charpente !== undefined) data.charpenteCouverture = charpente;
+    if (chaudierAppoint !== undefined) data.chaudiereAppoint = chaudierAppoint;
+    if (hydraulique !== undefined) data.hydrauliqueChaufferie = hydraulique;
+    if (reseauChaleur !== undefined) data.reseauChaleurQte = reseauChaleur;
+    if (installationReseauBat !== undefined) data.installationReseau = installationReseauBat;
+    if (autreTravaux !== undefined) data.autresTravaux = autreTravaux;
+    if (p2 !== undefined) data.montantP2 = p2;
+    if (consoElecSupplement !== undefined) data.consoElecSupplementaire = consoElecSupplement;
+    // Subventions
+    if (cotEnr !== undefined) data.tauxSubventionCotEnr = cotEnr;
+    if (aideDepartementale !== undefined) data.tauxAideDepartementale = aideDepartementale;
+    if (detrDsil !== undefined) data.tauxDetrDsil = detrDsil;
+    // Fees
+    if (bureauControle !== undefined) data.tauxBureauControle = bureauControle;
+    if (maitriseOeuvre !== undefined) data.tauxMaitriseOeuvre = maitriseOeuvre;
+    if (fraisDivers !== undefined) data.tauxFraisDivers = fraisDivers;
+    if (aleas !== undefined) data.tauxAleas = aleas;
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({

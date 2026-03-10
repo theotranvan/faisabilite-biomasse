@@ -30,19 +30,29 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (Array.isArray(data)) {
       const results = [];
       for (const parc of data) {
-        if (!parc.id || parc.id.startsWith('new-')) {
-          const created = await db.parc.create({
-            data: {
-              affaireId: params.id,
-              ...parc,
-              id: undefined
-            }
+        // Strip non-updatable fields
+        const { id: parcId, affaireId: _aid, createdAt: _ca, updatedAt: _ua, ...parcData } = parc;
+        if (!parcId || parcId.startsWith('new-') || parcId === '1') {
+          // New parc - upsert by affaireId + numero
+          const existing = await db.parc.findFirst({
+            where: { affaireId: params.id, numero: parcData.numero || 1 }
           });
-          results.push(created);
+          if (existing) {
+            const updated = await db.parc.update({
+              where: { id: existing.id },
+              data: parcData
+            });
+            results.push(updated);
+          } else {
+            const created = await db.parc.create({
+              data: { affaireId: params.id, ...parcData, numero: parcData.numero || 1 }
+            });
+            results.push(created);
+          }
         } else {
           const updated = await db.parc.update({
-            where: { id: parc.id },
-            data: parc
+            where: { id: parcId },
+            data: parcData
           });
           results.push(updated);
         }
