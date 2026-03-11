@@ -10,6 +10,7 @@ import {
   calculCoutAnnuel,
   calculsBatimentComplet,
   calculsBatimentReference,
+  calculConsoRefCalculees,
 } from '../lib/calculs/batiment';
 
 import {
@@ -151,10 +152,10 @@ function testBatiment2Reference() {
     etatReference: {
       deperditions_kW: 20,
       typeEnergie: 'Gaz naturel',
-      rendementProduction: 0.85,  // Decimal format
-      rendementDistribution: 0.90,
-      rendementEmission: 0.90,
-      rendementRegulation: 0.90,
+      rendementProduction: 85,
+      rendementDistribution: 90,
+      rendementEmission: 90,
+      rendementRegulation: 90,
       tarification: 0.1502,
       abonnement: 0,
       consommationsCalculees: 0,
@@ -306,10 +307,10 @@ function testBatimentComplet() {
     },
     etatReference: {
       deperditions_kW: 20,
-      rendementProduction: 0.85,
-      rendementDistribution: 0.90,
-      rendementEmission: 0.90,
-      rendementRegulation: 0.90,
+      rendementProduction: 85,
+      rendementDistribution: 90,
+      rendementEmission: 90,
+      rendementRegulation: 90,
       typeEnergie: 'Gaz naturel',
       tarification: 0.1502,
       abonnement: 0,
@@ -410,8 +411,8 @@ function testAgregationParcs() {
         consommationsCalculees: 31464, consommationsReelles: 32000,
         typeEnergie: 'Fuel', tarification: 0.13, abonnement: 0 },
       etatReference: { deperditions_kW: 10, typeEnergie: 'Gaz naturel',
-        rendementProduction: 0.80, rendementDistribution: 0.90,
-        rendementEmission: 0.90, rendementRegulation: 0.90,
+        rendementProduction: 80, rendementDistribution: 90,
+        rendementEmission: 90, rendementRegulation: 90,
         tarification: 0.978, abonnement: 0, consommationsCalculees: 0 },
     },
     {
@@ -422,8 +423,8 @@ function testAgregationParcs() {
         consommationsCalculees: 58868, consommationsReelles: 60000,
         typeEnergie: 'Électricité', tarification: 0.226, abonnement: 0 },
       etatReference: { deperditions_kW: 20, typeEnergie: 'Gaz naturel',
-        rendementProduction: 0.85, rendementDistribution: 0.90,
-        rendementEmission: 0.90, rendementRegulation: 0.90,
+        rendementProduction: 85, rendementDistribution: 90,
+        rendementEmission: 90, rendementRegulation: 90,
         tarification: 0.978, abonnement: 0, consommationsCalculees: 0 },
     },
   ];
@@ -446,6 +447,101 @@ function testAgregationParcs() {
 }
 
 /**
+ * TEST 10: UI-path rendements — Verify that rendements in % format (as stored from UI) produce correct results
+ */
+function testUIPathRendements() {
+  console.log('\n### TEST 10: Chemin UI → calcul (rendements en %)');
+
+  // Simulate what the UI sends: rendements in % (85, 95, 98, 97)
+  const etatUI = {
+    deperditions_kW: 50,
+    rendementProduction: 85,
+    rendementDistribution: 95,
+    rendementEmission: 98,
+    rendementRegulation: 97,
+    coefIntermittence: 1,
+    consommationsCalculees: 100000,
+    typeEnergie: 'Gaz naturel',
+    tarification: 0.08,
+    abonnement: 150,
+  };
+
+  const rendement = calculRendementMoyen(etatUI);
+  const expectedRendement = (85/100) * (95/100) * (98/100) * (97/100);
+  assert(expect(rendement, expectedRendement, 0.001),
+    `Rendement UI path = ${(expectedRendement * 100).toFixed(2)}% (got ${(rendement * 100).toFixed(2)}%)`);
+  assert(rendement > 0.5 && rendement < 1.0,
+    `Rendement is in realistic range [50%-100%] (got ${(rendement * 100).toFixed(2)}%)`);
+
+  console.log('  ✓ UI-path rendements validated (BUG-001 fix verified)');
+}
+
+/**
+ * TEST 11: Reference state uses its own tarification (not EI tarification)
+ */
+function testRefTarification() {
+  console.log('\n### TEST 11: Tarification ref ≠ tarification EI');
+
+  const batiment: Batiment = {
+    numero: 1,
+    designation: 'Test tarification ref',
+    typeBatiment: 'Logements',
+    surfaceChauffee: 100,
+    volumeChauffe: 300,
+    parc: 1,
+    etatInitial: {
+      deperditions_kW: 10,
+      rendementProduction: 80,
+      rendementDistribution: 90,
+      rendementEmission: 90,
+      rendementRegulation: 90,
+      coefIntermittence: 1,
+      consommationsCalculees: 31464,
+      typeEnergie: 'Fuel',
+      tarification: 0.13,  // EI tarif
+      abonnement: 0,
+    },
+    etatReference: {
+      deperditions_kW: 10,
+      typeEnergie: 'Gaz naturel',
+      rendementProduction: 80,
+      rendementDistribution: 90,
+      rendementEmission: 90,
+      rendementRegulation: 90,
+      tarification: 0.978,  // Ref tarif (different from EI!)
+      abonnement: 200,
+      consommationsCalculees: 0,
+    },
+  };
+
+  const calculs = calculsBatimentComplet(batiment, 1977, 19, -7);
+
+  // Verify ref cost uses ref tarification (0.978), not EI (0.13)
+  assert((calculs.coutAnnuelRef || 0) > 0, `Coût annuel ref > 0 (got ${(calculs.coutAnnuelRef || 0).toFixed(2)}€)`);
+  
+  // The ref cost should be much larger than if using EI tarif (0.13)
+  // ConsoRefPCS * 0.978 vs ConsoRefPCS * 0.13 → ratio ~7.5x
+  const consoRefPCS = calculs.consoRefPCS || 0;
+  const expectedRefCost = 200 + (consoRefPCS * 0.978);
+  assert(expect(calculs.coutAnnuelRef || 0, expectedRefCost, 0.01),
+    `Coût ref utilise tarif ref 0.978 (got ${(calculs.coutAnnuelRef || 0).toFixed(2)}€, expected ${expectedRefCost.toFixed(2)}€)`);
+
+  console.log('  ✓ Ref tarification correctly used (BUG-002 fix verified)');
+}
+
+/**
+ * TEST 12: Edge case — rendement = 0 should not cause division by zero
+ */
+function testRendementZero() {
+  console.log('\n### TEST 12: Edge case rendement = 0');
+
+  const result = calculConsoRefCalculees(10, 1977, 19, -7, 0, 1);
+  assert(result === 0, `Rendement 0 → conso = 0 (no division by zero) (got ${result})`);
+
+  console.log('  ✓ Rendement 0 handled safely');
+}
+
+/**
  * Run all tests
  */
 export function runAllTests() {
@@ -464,6 +560,9 @@ export function runAllTests() {
     testBatimentComplet();
     testBilan20Ans();
     testAgregationParcs();
+    testUIPathRendements();
+    testRefTarification();
+    testRendementZero();
 
     console.log('\n═══════════════════════════════════════════════════════════');
     console.log('✓ TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS!');
@@ -477,7 +576,7 @@ export function runAllTests() {
 }
 
 // Export for Jest if used
-export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans, testAgregationParcs };
+export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans, testAgregationParcs, testUIPathRendements, testRefTarification, testRendementZero };
 
 // Auto-run when executed directly
 runAllTests();

@@ -44,8 +44,8 @@ function transformBatiment(row: any): Batiment {
       coefIntermittence: row.coefIntermittence ?? 1,
       consommationsCalculees: 0,
       typeEnergie: mapEnergyType(row.refTypeEnergie || row.typeEnergie),
-      tarification: row.tarification ?? 0,
-      abonnement: row.abonnement ?? 0,
+      tarification: row.refTarification ?? row.tarification ?? 0,
+      abonnement: row.refAbonnement ?? row.abonnement ?? 0,
     };
   }
 

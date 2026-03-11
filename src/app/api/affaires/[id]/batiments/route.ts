@@ -27,6 +27,8 @@ function normalizeBatiment(b: any) {
     refRendementDistribution: b.refRendementDistribution != null ? parseFloat(b.refRendementDistribution) : null,
     refRendementEmission: b.refRendementEmission != null ? parseFloat(b.refRendementEmission) : null,
     refRendementRegulation: b.refRendementRegulation != null ? parseFloat(b.refRendementRegulation) : null,
+    refTarification: b.refTarification != null ? parseFloat(b.refTarification) : null,
+    refAbonnement: b.refAbonnement != null ? parseFloat(b.refAbonnement) : null,
   };
 }
 
@@ -52,6 +54,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Si c'est une mise à jour en masse
     if (items) {
+      // Validation
+      for (const b of items) {
+        const errors: string[] = [];
+        if (!b.designation || b.designation.trim() === '') errors.push('Désignation manquante');
+        if (b.surfaceChauffee != null && parseFloat(b.surfaceChauffee) < 0) errors.push('Surface chauffée ne peut pas être négative');
+        if (b.deperditions != null && parseFloat(b.deperditions) < 0) errors.push('Déperditions ne peuvent pas être négatives');
+        if (b.rendementProduction != null && (parseFloat(b.rendementProduction) < 0 || parseFloat(b.rendementProduction) > 100)) errors.push('Rendement production doit être entre 0 et 100');
+        if (b.rendementDistribution != null && (parseFloat(b.rendementDistribution) < 0 || parseFloat(b.rendementDistribution) > 100)) errors.push('Rendement distribution doit être entre 0 et 100');
+        if (b.rendementEmission != null && (parseFloat(b.rendementEmission) < 0 || parseFloat(b.rendementEmission) > 100)) errors.push('Rendement émission doit être entre 0 et 100');
+        if (b.rendementRegulation != null && (parseFloat(b.rendementRegulation) < 0 || parseFloat(b.rendementRegulation) > 100)) errors.push('Rendement régulation doit être entre 0 et 100');
+        if (errors.length > 0) {
+          return NextResponse.json({ error: `Bâtiment "${b.designation || b.numero || '?'}" : ${errors.join(', ')}` }, { status: 400 });
+        }
+      }
       const results = [];
       for (const batiment of items) {
         if (!batiment.id || batiment.id.startsWith('new-')) {

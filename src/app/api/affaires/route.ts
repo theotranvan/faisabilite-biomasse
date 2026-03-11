@@ -35,8 +35,12 @@ export async function POST(req: NextRequest) {
 
     // Validate required fields
     if (!data.nomClient || !data.ville || !data.departement) {
+      const missing = [];
+      if (!data.nomClient) missing.push('Nom du client');
+      if (!data.ville) missing.push('Ville');
+      if (!data.departement) missing.push('Département');
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: `Champs obligatoires manquants : ${missing.join(', ')}` },
         { status: 400 }
       );
     }

@@ -122,6 +122,8 @@ model Batiment {
   refRendementDistribution Float?
   refRendementEmission  Float?
   refRendementRegulation Float?
+  refTarification       Float?
+  refAbonnement         Float?
   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

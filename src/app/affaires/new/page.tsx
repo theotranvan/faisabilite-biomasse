@@ -268,7 +268,8 @@ export default function NewAffairePage() {
           });
 
           if (!response.ok) {
-            setError('Erreur lors de la création');
+            const errData = await response.json().catch(() => ({}));
+            setError(errData.error || 'Erreur lors de la création');
             return;
           }
 

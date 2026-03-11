@@ -93,6 +93,7 @@ export function useAffaires() {
 
   const deleteAffaire = useCallback(
     async (id: string) => {
+      if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette affaire ? Tous les bâtiments, parcs et chiffrages associés seront supprimés. Cette action est irréversible.')) return;
       setIsLoading(true);
       setError(null);
 
@@ -141,7 +142,10 @@ export function useAffaires() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(batiments),
         });
-        if (!response.ok) throw new Error('Failed to save batiments');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || 'Erreur lors de la sauvegarde des bâtiments');
+        }
         return await response.json();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
