@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
@@ -10,23 +12,31 @@ export const db =
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
 
-let _cachedUserId: string | null = null;
+let _cachedDefaultUserId: string | null = null;
 
 export async function getDefaultUserId(): Promise<string> {
-  if (_cachedUserId) return _cachedUserId;
+  if (_cachedDefaultUserId) return _cachedDefaultUserId;
   const user = await db.user.findFirst({
     where: { email: 'user@unique.local' },
     select: { id: true },
   });
   if (!user) throw new Error('Default user not found — run npx prisma db seed');
-  _cachedUserId = user.id;
-  return _cachedUserId;
+  _cachedDefaultUserId = user.id;
+  return _cachedDefaultUserId;
 }
 
 /**
- * Always returns the shared default user ID.
- * All users share the same projects (single shared account).
+ * Returns the authenticated user's ID from the session.
+ * Falls back to the default user if no session is found (e.g. during seed/scripts).
  */
 export async function getSessionUserId(): Promise<string> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user && (session.user as any).id) {
+      return (session.user as any).id;
+    }
+  } catch {
+    // getServerSession may fail outside of request context (e.g. scripts)
+  }
   return getDefaultUserId();
 }

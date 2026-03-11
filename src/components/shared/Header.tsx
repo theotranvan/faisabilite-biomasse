@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import clsx from 'clsx';
 
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
 
   // Ne pas afficher le bouton retour sur la page d'accueil ou dashboard
   const showBackButton = !['/dashboard', '/', '/accueil'].includes(pathname);
@@ -59,6 +61,17 @@ export function Header() {
           >
             + Nouvelle étude
           </Link>
+          {session?.user && (
+            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
+              <span className="text-sm text-gray-500">{session.user.name || session.user.email}</span>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+              >
+                Déconnexion
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

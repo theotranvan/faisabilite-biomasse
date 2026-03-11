@@ -258,20 +258,36 @@ async function main() {
   // Create Default User for mono-client app
   // First delete if exists
   await prisma.user.deleteMany({
-    where: { email: 'user@unique.local' }
+    where: { email: { in: ['user@unique.local', 'admin@biomasse.local'] } }
   });
+
+  // Generate proper bcrypt hash at runtime
+  const { hash } = await import('bcryptjs');
+  const hashedPassword = await hash('biomasse2026', 10);
 
   await prisma.user.create({
     data: {
       email: 'user@unique.local',
-      password: 'hashed_no_password',
+      password: hashedPassword,
       nom: 'Utilisateur',
       prenom: 'Unique',
       entreprise: 'Application',
       role: 'USER',
     },
   });
-  console.log('✓ Default unique user created');
+
+  await prisma.user.create({
+    data: {
+      email: 'admin@biomasse.local',
+      password: hashedPassword,
+      nom: 'Administrateur',
+      prenom: 'Système',
+      entreprise: 'Application',
+      role: 'ADMIN',
+    },
+  });
+  console.log('✓ Default users created (user@unique.local / admin@biomasse.local — mot de passe: biomasse2026)');
+
 
   console.log('✓ Database seeding completed!');
 }

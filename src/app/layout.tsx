@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Faisabilité Biomasse',
@@ -14,9 +15,11 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className="antialiased bg-gray-50">
-        <div className="min-h-screen flex flex-col">
-          {children}
-        </div>
+        <Providers>
+          <div className="min-h-screen flex flex-col">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
