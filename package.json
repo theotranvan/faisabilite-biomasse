@@ -10,7 +10,9 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed.ts"
+    "prisma:seed": "node prisma/seed.ts",
+    "test": "tsx scripts/test-parcours-complet.ts",
+    "test:parcours": "npm run prisma:seed && npm run test"
   },
   "prisma": {
     "seed": "node prisma/seed.ts"
