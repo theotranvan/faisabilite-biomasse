@@ -3,18 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { ville: string } }
+  { params }: { params: Promise<{ ville: string }> }
 ) {
   try {
+    const { ville } = await params;
     const data = await db.meteoMonotone.findMany({
-      where: { ville: params.ville },
+      where: { ville },
       orderBy: { heure: 'asc' },
       select: { temperatureExt: true },
     });
 
     if (data.length === 0) {
       return NextResponse.json(
-        { error: `No data found for ville: ${params.ville}` },
+        { error: `No data found for ville: ${ville}` },
         { status: 404 }
       );
     }

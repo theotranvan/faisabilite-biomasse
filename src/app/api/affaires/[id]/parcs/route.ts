@@ -21,11 +21,12 @@ function normalizeParc(data: any) {
   };
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
     const parcs = await db.parc.findMany({
-      where: { affaireId: params.id }
+      where: { affaireId: id }
     });
 
     return NextResponse.json(parcs);
@@ -35,14 +36,15 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
     const data = await req.json();
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({
-      where: { id: params.id }
+      where: { id }
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         if (!parcId || parcId.startsWith('new-') || parcId === '1') {
           // New parc - upsert by affaireId + numero
           const existing = await db.parc.findFirst({
-            where: { affaireId: params.id, numero: parcData.numero }
+            where: { affaireId: id, numero: parcData.numero }
           });
           if (existing) {
             const updated = await db.parc.update({
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             results.push(updated);
           } else {
             const created = await db.parc.create({
-              data: { affaireId: params.id, ...parcData }
+              data: { affaireId: id, ...parcData }
             });
             results.push(created);
           }
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const numero = parcData.numero;
 
     const existing = await db.parc.findFirst({
-      where: { affaireId: params.id, numero }
+      where: { affaireId: id, numero }
     });
 
     if (existing) {
@@ -98,7 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const parc = await db.parc.create({
       data: {
-        affaireId: params.id,
+        affaireId: id,
         ...parcData,
         numero
       }
@@ -111,15 +113,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
 
     const data = await req.json();
     const parcData = normalizeParc(data);
 
     const result = await db.parc.updateMany({
-      where: { affaireId: params.id },
+      where: { affaireId: id },
       data: parcData
     });
 
@@ -130,7 +133,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, _params: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, _context: { params: Promise<{ id: string }> }) {
   try {
     // Mono-client app - no auth required
 

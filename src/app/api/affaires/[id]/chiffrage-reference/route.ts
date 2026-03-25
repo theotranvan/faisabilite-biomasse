@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, getSessionUserId } from '@/lib/db';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const parcNum = req.nextUrl.searchParams.get('parc');
     
     if (parcNum) {
       // Fetch for specific parc
       const parc = await db.parc.findFirst({
-        where: { affaireId: params.id, numero: parseInt(parcNum) }
+        where: { affaireId: id, numero: parseInt(parcNum) }
       });
       if (!parc) return NextResponse.json({});
       const chiffrage = await db.chiffragReference.findFirst({
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     
     // Legacy: return all chiffrages keyed by parc number
     const parcs = await db.parc.findMany({
-      where: { affaireId: params.id },
+      where: { affaireId: id },
       include: { chiffrageRef: true }
     });
     const result: Record<number, any> = {};
@@ -33,8 +34,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
     const rawData = await req.json();
 
@@ -84,18 +86,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Vérifier que l'affaire existe
     const affaire = await db.affaire.findFirst({
-      where: { id: params.id, userId: await getSessionUserId() }
+      where: { id, userId: await getSessionUserId() }
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     // Find or create parc for this affaire (use ?parc= query param or default to 1)
     const parcNum = parseInt(req.nextUrl.searchParams.get('parc') || '1');
     let parc = await db.parc.findFirst({
-      where: { affaireId: params.id, numero: parcNum }
+      where: { affaireId: id, numero: parcNum }
     });
     if (!parc) {
       parc = await db.parc.create({
-        data: { affaireId: params.id, numero: parcNum }
+        data: { affaireId: id, numero: parcNum }
       });
     }
 

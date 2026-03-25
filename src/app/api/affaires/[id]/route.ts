@@ -1,16 +1,13 @@
 import { db, isAdmin } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-interface Params {
-  id: string;
-}
-
 // Get a single affaire
-export async function GET(_req: NextRequest, { params }: { params: Params }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
     const affaire = await db.affaire.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         batiments: true,
         parcs: true,
@@ -35,11 +32,12 @@ export async function GET(_req: NextRequest, { params }: { params: Params }) {
 }
 
 // Update an affaire
-export async function PUT(req: NextRequest, { params }: { params: Params }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
     const existingAffaire = await db.affaire.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAffaire) {
@@ -52,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
     const data = await req.json();
 
     const affaire = await db.affaire.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         nomClient: data.nomClient,
         adresse: data.adresse,
@@ -91,15 +89,16 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
 }
 
 // Delete an affaire (admin only)
-export async function DELETE(_req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     if (!(await isAdmin())) {
       return NextResponse.json({ error: 'Seul un administrateur peut supprimer une affaire' }, { status: 403 });
     }
 
     // Verify the affaire exists
     const existingAffaire = await db.affaire.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAffaire) {
@@ -110,7 +109,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Params }) 
     }
 
     await db.affaire.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

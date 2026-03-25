@@ -3,11 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { departement: string } }
+  { params }: { params: Promise<{ departement: string }> }
 ) {
   try {
+    const { departement } = await params;
     const meteo = await db.meteoMoyenne.findUnique({
-      where: { departement: params.departement },
+      where: { departement },
     });
 
     if (!meteo) {
@@ -18,7 +19,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      departement: meteo.departement,
+      departement,
       dju: meteo.djuMoyenne,
     });
   } catch (error) {

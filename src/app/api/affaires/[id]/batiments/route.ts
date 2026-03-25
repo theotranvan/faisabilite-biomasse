@@ -32,10 +32,11 @@ function normalizeBatiment(b: any) {
   };
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const batiments = await db.batiment.findMany({
-      where: { affaireId: params.id }
+      where: { affaireId: id }
     });
 
     return NextResponse.json(batiments);
@@ -45,8 +46,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const data = await req.json();
 
     // Support { batiments: [...] } wrapper format
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           const normalized = normalizeBatiment(batiment);
           const created = await db.batiment.create({
             data: {
-              affaireId: params.id,
+              affaireId: id,
               ...normalized,
             }
           });
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const normalized = normalizeBatiment(data);
     const batiment = await db.batiment.create({
       data: {
-        affaireId: params.id,
+        affaireId: id,
         ...normalized
       }
     });
@@ -109,15 +111,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Mono-client app - no auth required
 
     const data = await req.json();
     const normalized = normalizeBatiment(data);
 
     const batiment = await db.batiment.updateMany({
-      where: { affaireId: params.id },
+      where: { affaireId: id },
       data: normalized
     });
 
@@ -128,11 +131,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, _params: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, _context: { params: Promise<{ id: string }> }) {
   try {
     // Mono-client app - no auth required
 
-    const { batimentId } = await req.json();  // Use _params if needed
+    const { batimentId } = await req.json();
 
     await db.batiment.delete({
       where: { id: batimentId }

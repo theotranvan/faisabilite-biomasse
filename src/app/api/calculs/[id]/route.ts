@@ -72,9 +72,10 @@ function mapEnergyType(dbType: string | null | undefined): string {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const affaireId = params.id;
+  const { id } = await params;
+  const affaireId = id;
 
   try {
     // Load affaire with all relations

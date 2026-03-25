@@ -3,11 +3,12 @@ import { db } from '@/lib/db';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string; batimentId: string } }
+  { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
+    const { batimentId } = await params;
     const travauxIsolation = await db.travauxIsolation.findUnique({
-      where: { batimentId: params.batimentId },
+      where: { batimentId },
       include: { lignes: true },
     });
 
@@ -19,17 +20,18 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string; batimentId: string } }
+  { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
+    const { id, batimentId } = await params;
     const data = await req.json();
     const lignes = data.lignes || [];
 
     // Vérifier que le bâtiment existe et appartient à l'affaire
     const batiment = await db.batiment.findFirst({
       where: {
-        id: params.batimentId,
-        affaireId: params.id,
+        id: batimentId,
+        affaireId: id,
       },
     });
 
@@ -39,13 +41,13 @@ export async function POST(
 
     // Récupérer ou créer TravauxIsolation
     let travauxIsolation = await db.travauxIsolation.findUnique({
-      where: { batimentId: params.batimentId },
+      where: { batimentId },
     });
 
     if (!travauxIsolation) {
       travauxIsolation = await db.travauxIsolation.create({
         data: {
-          batimentId: params.batimentId,
+          batimentId,
         },
       });
     }
@@ -74,7 +76,7 @@ export async function POST(
     // Retourner les données mises à jour
     return NextResponse.json({
       id: travauxIsolation.id,
-      batimentId: params.batimentId,
+      batimentId,
       lignes: createdLignes,
     });
   } catch (error: any) {
