@@ -16,10 +16,7 @@
 import { PrismaClient } from '@prisma/client';
 import {
   calculsBatimentComplet,
-  calculPuissanceChauffageParc,
   calculConsoSortieParcChaudieresRef,
-  calculInvestissementHTRef,
-  calculBilan20Ans,
 } from '@/lib/calculs';
 
 const db = new PrismaClient();
@@ -45,12 +42,44 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════════════\n');
 
   try {
-    // ========== ÉTAPE 1: CRÉER L'AFFAIRE ==========
-    console.log('\n🔧 Étape 1: Création de l\'affaire');
+    // ========== ÉTAPE 0: RÉCUPÉRER OU CRÉER L'UTILISATEUR ==========
+    console.log('👤 Étape 0: Récupération utilisateur');
     console.log('─────────────────────────────────────────────────────────────');
+
+    let user = await db.user.findUnique({
+      where: { email: 'user@unique.local' },
+    });
+
+    if (!user) {
+      console.log('  Utilisateur non trouvé, création...');
+      const { hash } = await import('bcryptjs');
+      const hashedPassword = await hash('test2026', 10);
+      user = await db.user.create({
+        data: {
+          email: 'test-parcours@biomasse.local',
+          password: hashedPassword,
+          nom: 'Test',
+          prenom: 'Parcours',
+          entreprise: 'Validation',
+          role: 'USER',
+        },
+      });
+    }
+
+    console.log(`  ✓ Utilisateur: ${user.email}\n`);
+
+    // ========== ÉTAPE 1: CRÉER L'AFFAIRE ==========
+    console.log('🔧 Étape 1: Création de l\'affaire');
+    console.log('─────────────────────────────────────────────────────────────');
+
+    // Générer une référence unique basée sur le timestamp
+    const timestamp = Date.now();
+    const referenceAffaire = `TEST-${timestamp}`;
 
     const affaire = await db.affaire.create({
       data: {
+        userId: user.id,
+        referenceAffaire: referenceAffaire,
         nomClient: 'Test Excel Complet',
         adresse: '123 Rue de Test',
         ville: 'Lyon',
@@ -70,7 +99,8 @@ async function main() {
     });
 
     test('Affaire créée', affaire.id !== undefined);
-    console.log(`  ID affaire: ${affaire.id}\n`);
+    console.log(`  ID affaire: ${affaire.id}`);
+    console.log(`  Référence: ${affaire.referenceAffaire}\n`);
 
     // ========== ÉTAPE 2: CRÉER LES 3 BÂTIMENTS ==========
     console.log('🏢 Étape 2: Création des 3 bâtiments (données Excel)');
@@ -230,8 +260,8 @@ async function main() {
         rendementEmission: bat1.rendementEmission,
         rendementRegulation: bat1.rendementRegulation,
         coefIntermittence: bat1.coefIntermittence,
-        consommationsCalculees: bat1.consommationsCalculees,
-        consommationsReelles: bat1.consommationsReelles,
+        consommationsCalculees: bat1.consommationsCalculees ?? 0,
+        consommationsReelles: bat1.consommationsReelles ?? undefined,
         typeEnergie: bat1.typeEnergie === 'FUEL' ? 'Fuel' : bat1.typeEnergie === 'ELECTRICITE' ? 'Electricité' : 'Fuel',
         tarification: bat1.tarification,
         abonnement: bat1.abonnement,
@@ -261,8 +291,8 @@ async function main() {
       rendementEmission: bat2.rendementEmission,
       rendementRegulation: bat2.rendementRegulation,
       coefIntermittence: bat2.coefIntermittence,
-      consommationsCalculees: bat2.consommationsCalculees,
-      consommationsReelles: bat2.consommationsReelles,
+      consommationsCalculees: bat2.consommationsCalculees ?? 0,
+      consommationsReelles: bat2.consommationsReelles ?? undefined,
       typeEnergie: 'Electricité',
       tarification: bat2.tarification,
       abonnement: bat2.abonnement,
@@ -304,8 +334,8 @@ async function main() {
         rendementEmission: b.rendementEmission,
         rendementRegulation: b.rendementRegulation,
         coefIntermittence: b.coefIntermittence,
-        consommationsCalculees: b.consommationsCalculees,
-        consommationsReelles: b.consommationsReelles,
+        consommationsCalculees: b.consommationsCalculees ?? 0,
+        consommationsReelles: b.consommationsReelles ?? undefined,
         typeEnergie: b.typeEnergie,
         tarification: b.tarification,
         abonnement: b.abonnement,
@@ -338,16 +368,15 @@ async function main() {
     const chiffrageBio = await db.chiffrageBiomasse.create({
       data: {
         parcId: parc1.id,
-        // 5 chaudières × 5000€
-        lignesChaufferie: JSON.stringify([{ designation: 'Chaudière biomasse', qte: 5, prixUnitaire: 5000 }]),
-        montantChaufferie: 25000,
+        processBois: 25000,       // 5 chaudières × 5000€
+        hydrauliqueChaufferie: 3000,
         tauxSubventionCotEnr: 0,
       },
     });
 
     test('Chiffrage Parc 1 créé', chiffrageBio.id !== undefined);
-    test('Montant chiffrage = 25000€', chiffrageBio.montantChaufferie === 25000, 25000, chiffrageBio.montantChaufferie);
-    console.log(`  5 chaudières × 5000€ = 25000€\n`);
+    test('Montant processBois = 25000€', chiffrageBio.processBois === 25000, 25000, chiffrageBio.processBois);
+    console.log(`  processBois: 25000€, hydrauliqueChaufferie: 3000€\n`);
 
     // ========== ÉTAPE 7: VÉRIFIER AFFAIRE COMPLÈTE ==========
     console.log('✅ Étape 7: Vérification affaire complète');
