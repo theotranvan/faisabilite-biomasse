@@ -22,7 +22,7 @@ export async function getDefaultUserId(): Promise<string> {
   });
   if (!user) throw new Error('Default user not found — run npx prisma db seed');
   _cachedDefaultUserId = user.id;
-  return _cachedDefaultUserId;
+  return _cachedDefaultUserId!;
 }
 
 /**

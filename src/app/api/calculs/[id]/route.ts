@@ -131,7 +131,9 @@ export async function GET(
     });
 
     // Unique parcs
-    const parcNums = [...new Set(batimentsCalc.map((b: any) => b.parc))].sort((a: any, b: any) => a - b);
+    const parcSet = new Set<number>();
+    batimentsCalc.forEach((b: any) => parcSet.add(b.parc));
+    const parcNums = Array.from(parcSet).sort((a: any, b: any) => a - b);
 
     // Calculate per parc
     const parcAgregation: any[] = [];
