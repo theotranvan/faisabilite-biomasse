@@ -542,6 +542,158 @@ function testRendementZero() {
 }
 
 /**
+ * TEST 13: calculsBatimentComplet with decimal reference efficiencies (Excel format)
+ */
+function testBatimentCompletRefDecimal() {
+  console.log('\n### TEST 13: calculsBatimentComplet — rendements ref en décimal (format Excel)');
+
+  const bat: Batiment = {
+    numero: 2, designation: 'Test', typeBatiment: 'Bureaux',
+    surfaceChauffee: 200, volumeChauffe: 500, parc: 2,
+    etatInitial: {
+      deperditions_kW: 20, rendementProduction: 85, rendementDistribution: 90,
+      rendementEmission: 90, rendementRegulation: 90, coefIntermittence: 1,
+      consommationsCalculees: 58868, consommationsReelles: 60000,
+      typeEnergie: 'Electricité', tarification: 0.226, abonnement: 0,
+    },
+    etatReference: {
+      deperditions_kW: 20, typeEnergie: 'Gaz naturel',
+      rendementProduction: 0.85, rendementDistribution: 0.90,
+      rendementEmission: 0.90, rendementRegulation: 0.90,
+      tarification: 0.1502, abonnement: 0, consommationsCalculees: 0,
+    },
+  };
+
+  const result = calculsBatimentComplet(bat, 1977, 19, -7);
+
+  // consoRefCalculees must be ~58901.74 NOT ~5.89e12
+  assert(result.consoRefCalculees !== undefined && result.consoRefCalculees > 0,
+    'consoRefCalculees > 0');
+  assert(result.consoRefCalculees! < 1000000,
+    `consoRefCalculees < 1M (got ${result.consoRefCalculees?.toFixed(2)} — si > 1M, la détection >1 est cassée)`);
+  assert(expect(result.consoRefCalculees!, 58901.74, 0.01),
+    `consoRefCalculees = 58901.74 (got ${result.consoRefCalculees?.toFixed(2)})`);
+  assert(expect(result.consoRefPCS!, 64791.91, 0.01),
+    `consoRefPCS = 64791.91 (got ${result.consoRefPCS?.toFixed(2)})`);
+  assert(expect(result.consoSortieChaudieresRef!, 50066.48, 0.01),
+    `consoSortieChaudieresRef = 50066.48 (got ${result.consoSortieChaudieresRef?.toFixed(2)})`);
+  assert(expect(result.coutAnnuelRef!, 9731.71, 1),
+    `coutAnnuelRef ≈ 9731.71 (got ${result.coutAnnuelRef?.toFixed(2)})`);
+}
+
+/**
+ * TEST 14: calculsBatimentComplet with percentage reference efficiencies (% format)
+ */
+function testBatimentCompletRefPercent() {
+  console.log('\n### TEST 14: calculsBatimentComplet — rendements ref en % (format UI)');
+
+  const bat: Batiment = {
+    numero: 1, designation: 'Test', typeBatiment: 'Logements',
+    surfaceChauffee: 100, volumeChauffe: 300, parc: 1,
+    etatInitial: {
+      deperditions_kW: 10, rendementProduction: 80, rendementDistribution: 90,
+      rendementEmission: 90, rendementRegulation: 90, coefIntermittence: 1,
+      consommationsCalculees: 31464, consommationsReelles: 32000,
+      typeEnergie: 'Fuel', tarification: 0.13, abonnement: 0,
+    },
+    etatReference: {
+      deperditions_kW: 10, typeEnergie: 'Gaz naturel',
+      rendementProduction: 80, rendementDistribution: 90,
+      rendementEmission: 90, rendementRegulation: 90,
+      tarification: 0.978, abonnement: 0, consommationsCalculees: 0,
+    },
+  };
+
+  const result = calculsBatimentComplet(bat, 1977, 19, -7);
+
+  assert(result.consoRefCalculees! < 1000000,
+    `consoRefCalculees reasonable (got ${result.consoRefCalculees?.toFixed(2)})`);
+  assert(expect(result.consoRefCalculees!, 31291.55, 1),
+    `consoRefCalculees ≈ 31291.55 (got ${result.consoRefCalculees?.toFixed(2)})`);
+  assert(expect(result.coutAnnuelRef!, 33735.52, 100),
+    `coutAnnuelRef reasonable (got ${result.coutAnnuelRef?.toFixed(2)})`);
+}
+
+/**
+ * TEST 15: Consistency between batiment.ts and parc.ts calculations
+ */
+function testCoherenceBatimentVsParc() {
+  console.log('\n### TEST 15: Cohérence batiment.ts vs parc.ts (même résultat)');
+
+  const bat: Batiment = {
+    numero: 2, designation: 'Test', typeBatiment: 'Bureaux',
+    surfaceChauffee: 200, volumeChauffe: 500, parc: 1,
+    etatInitial: {
+      deperditions_kW: 20, rendementProduction: 85, rendementDistribution: 90,
+      rendementEmission: 90, rendementRegulation: 90, coefIntermittence: 1,
+      consommationsCalculees: 58868, typeEnergie: 'Electricité', tarification: 0.226, abonnement: 0,
+    },
+    etatReference: {
+      deperditions_kW: 20, typeEnergie: 'Gaz naturel',
+      rendementProduction: 0.85, rendementDistribution: 0.90,
+      rendementEmission: 0.90, rendementRegulation: 0.90,
+      tarification: 0.1502, abonnement: 0, consommationsCalculees: 0,
+    },
+  };
+
+  // Via batiment.ts
+  const batResult = calculsBatimentComplet(bat, 1977, 19, -7);
+
+  // Via parc.ts
+  const parcResult = calculConsoSortieParcChaudieresRef([bat], 1, 1977, 19, -7);
+
+  assert(expect(batResult.consoSortieChaudieresRef!, parcResult, 1),
+    `batiment.ts (${batResult.consoSortieChaudieresRef?.toFixed(2)}) ≈ parc.ts (${parcResult.toFixed(2)})`);
+}
+
+/**
+ * TEST 16: Complete Excel test case with 3 buildings and 2 networks
+ */
+function testCasTestExcelComplet() {
+  console.log('\n### TEST 16: Cas test Excel complet — 3 bâtiments, 2 parcs');
+
+  const allBats: Batiment[] = [
+    { numero:1, designation:'Bâtiment 1', typeBatiment:'Logements', surfaceChauffee:100, volumeChauffe:300, parc:1,
+      etatInitial: { deperditions_kW:10, rendementProduction:80, rendementDistribution:90, rendementEmission:90, rendementRegulation:90, coefIntermittence:1, consommationsCalculees:31464, consommationsReelles:32000, typeEnergie:'Fuel', tarification:0.13, abonnement:0 },
+      etatReference: { deperditions_kW:10, typeEnergie:'Gaz naturel', rendementProduction:0.80, rendementDistribution:0.90, rendementEmission:0.90, rendementRegulation:0.90, tarification:0.978, abonnement:0, consommationsCalculees:0 }},
+    { numero:2, designation:'Bâtiment 2', typeBatiment:'Bureaux', surfaceChauffee:200, volumeChauffe:500, parc:2,
+      etatInitial: { deperditions_kW:20, rendementProduction:85, rendementDistribution:90, rendementEmission:90, rendementRegulation:90, coefIntermittence:1, consommationsCalculees:58868, consommationsReelles:60000, typeEnergie:'Electricité', tarification:0.226, abonnement:0 },
+      etatReference: { deperditions_kW:20, typeEnergie:'Gaz naturel', rendementProduction:0.85, rendementDistribution:0.90, rendementEmission:0.90, rendementRegulation:0.90, tarification:0.1502, abonnement:0, consommationsCalculees:0 }},
+    { numero:3, designation:'essai ajout bât', typeBatiment:'Logements', surfaceChauffee:100, volumeChauffe:300, parc:1,
+      etatInitial: { deperditions_kW:20, rendementProduction:80, rendementDistribution:85, rendementEmission:85, rendementRegulation:90, coefIntermittence:1, consommationsCalculees:70189, consommationsReelles:71000, typeEnergie:'Fuel', tarification:0.13, abonnement:0 },
+      etatReference: null as any },
+  ];
+
+  // Calculate each building
+  for (const bat of allBats) {
+    const c = calculsBatimentComplet(bat, 1977, 19, -7);
+    if (c.consoRefCalculees) {
+      assert(c.consoRefCalculees < 1000000,
+        `${bat.designation} consoRef raisonnable (${c.consoRefCalculees.toFixed(0)})`);
+    }
+  }
+
+  // Verify exact Excel values
+  const c1 = calculsBatimentComplet(allBats[0], 1977, 19, -7);
+  assert(expect(c1.coutAnnuelEI, 4090.32, 0.01), 'Bât1 coût EI = 4090.32€');
+  assert(expect(c1.consoRefCalculees!, 31291.55, 1), 'Bât1 consoRef = 31291.55');
+
+  const c2 = calculsBatimentComplet(allBats[1], 1977, 19, -7);
+  assert(expect(c2.coutAnnuelEI, 13304.17, 0.01), 'Bât2 coût EI = 13304.17€');
+  assert(expect(c2.consoRefCalculees!, 58901.74, 1), 'Bât2 consoRef = 58901.74');
+  assert(expect(c2.consoSortieChaudieresRef!, 50066.48, 1), 'Bât2 sortieChaud = 50066.48');
+
+  const c3 = calculsBatimentComplet(allBats[2], 1977, 19, -7);
+  assert(expect(c3.coutAnnuelEI, 9124.57, 0.01), 'Bât3 coût EI = 9124.57€');
+
+  // Network aggregation
+  assert(calculPuissanceChauffageParc(allBats, 1) === 10, 'Parc1 puissance = 10kW');
+  assert(expect(calculConsoSortieParcChaudieresRef(allBats, 1, 1977, 19, -7), 25033.24, 1), 'Parc1 conso = 25033.24');
+  assert(calculPuissanceChauffageParc(allBats, 2) === 20, 'Parc2 puissance = 20kW');
+  assert(expect(calculConsoSortieParcChaudieresRef(allBats, 2, 1977, 19, -7), 50066.48, 1), 'Parc2 conso = 50066.48');
+}
+
+/**
  * Run all tests
  */
 export function runAllTests() {
@@ -563,9 +715,13 @@ export function runAllTests() {
     testUIPathRendements();
     testRefTarification();
     testRendementZero();
+    testBatimentCompletRefDecimal();     // TEST 13
+    testBatimentCompletRefPercent();      // TEST 14
+    testCoherenceBatimentVsParc();        // TEST 15
+    testCasTestExcelComplet();            // TEST 16
 
     console.log('\n═══════════════════════════════════════════════════════════');
-    console.log('✓ TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS!');
+    console.log('✓ TOUS LES 16 TESTS SONT PASSÉS AVEC SUCCÈS!');
     console.log('═══════════════════════════════════════════════════════════\n');
   } catch (error) {
     console.error('\n═══════════════════════════════════════════════════════════');
@@ -576,7 +732,7 @@ export function runAllTests() {
 }
 
 // Export for Jest if used
-export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans, testAgregationParcs, testUIPathRendements, testRefTarification, testRendementZero };
+export { testBatiment3Initial, testBatiment2Initial, testBatiment2Reference, testBatiment1Initial, testChiffrageParcRef, testMonotone, testBatimentComplet, testBilan20Ans, testAgregationParcs, testUIPathRendements, testRefTarification, testRendementZero, testBatimentCompletRefDecimal, testBatimentCompletRefPercent, testCoherenceBatimentVsParc, testCasTestExcelComplet };
 
 // Auto-run when executed directly
 runAllTests();
