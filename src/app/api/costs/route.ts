@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, isAdmin } from '@/lib/db';
 
 export async function GET(_req: NextRequest) {
   try {
-    // Mono-client app - no auth required
     const allCosts = await db.bddCout.findMany();
     return NextResponse.json(allCosts);
   } catch (error: any) {
@@ -14,7 +13,9 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Mono-client app - no auth required
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });
+    }
     const data = await req.json();
 
     // Check if cost already exists to avoid duplicates
@@ -47,7 +48,9 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    // Mono-client app - no auth required
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });
+    }
     const { id, ...data } = await req.json();
 
     const updateData: any = { ...data };
@@ -69,7 +72,9 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    // Mono-client app - no auth required
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });
+    }
     const { id } = await req.json();
 
     await db.bddCout.delete({

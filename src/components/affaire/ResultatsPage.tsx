@@ -41,7 +41,7 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
       tarification: db.tarification || 0,
       abonnement: db.abonnement || 0,
     },
-    etatReference: (db.refDeperditions != null || db.refRendementProduction != null) ? {
+    etatReference: {
       deperditions_kW: db.refDeperditions ?? db.deperditions ?? 0,
       rendementProduction: db.refRendementProduction ?? db.rendementProduction ?? 85,
       rendementDistribution: db.refRendementDistribution ?? db.rendementDistribution ?? 95,
@@ -51,19 +51,6 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
       consommationsCalculees: db.consommationsCalculees || 0,
       consommationsReelles: db.consommationsReelles || 0,
       typeEnergie: db.refTypeEnergie ?? db.typeEnergie ?? 'Fuel',
-      tarification: db.tarification || 0,
-      abonnement: db.abonnement || 0,
-    } : {
-      // If no ref-specific fields, use initial values as reference
-      deperditions_kW: db.deperditions || 0,
-      rendementProduction: db.rendementProduction || 85,
-      rendementDistribution: db.rendementDistribution || 95,
-      rendementEmission: db.rendementEmission || 95,
-      rendementRegulation: db.rendementRegulation || 90,
-      coefIntermittence: db.coefIntermittence || 1,
-      consommationsCalculees: db.consommationsCalculees || 0,
-      consommationsReelles: db.consommationsReelles || 0,
-      typeEnergie: db.typeEnergie || 'Fuel',
       tarification: db.tarification || 0,
       abonnement: db.abonnement || 0,
     },

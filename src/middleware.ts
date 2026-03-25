@@ -7,7 +7,7 @@ export default withAuth(
     const token = req.nextauth.token;
 
     // Admin routes require ADMIN role
-    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin') || pathname === '/couts') {
       if (token?.role !== 'ADMIN') {
         if (pathname.startsWith('/api/')) {
           return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });

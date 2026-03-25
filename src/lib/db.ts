@@ -40,3 +40,26 @@ export async function getSessionUserId(): Promise<string> {
   }
   return getDefaultUserId();
 }
+
+/**
+ * Returns the authenticated user's role from the session.
+ */
+export async function getSessionRole(): Promise<string> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user && (session.user as any).role) {
+      return (session.user as any).role;
+    }
+  } catch {
+    // getServerSession may fail outside of request context
+  }
+  return 'USER';
+}
+
+/**
+ * Checks if the current session user is an admin.
+ */
+export async function isAdmin(): Promise<boolean> {
+  const role = await getSessionRole();
+  return role === 'ADMIN';
+}

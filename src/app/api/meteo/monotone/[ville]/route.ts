@@ -19,7 +19,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(data.map(d => d.temperatureExt));
+    return NextResponse.json(data.map((d: any) => d.temperatureExt));
   } catch (error) {
     console.error('[meteo/monotone/GET]', error);
     return NextResponse.json(

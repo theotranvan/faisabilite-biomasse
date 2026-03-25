@@ -9,6 +9,8 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+  const isAdminUser = userRole === 'ADMIN';
 
   // Ne pas afficher le bouton retour sur la page d'accueil ou dashboard
   const showBackButton = !['/dashboard', '/', '/accueil'].includes(pathname);
@@ -16,8 +18,10 @@ export function Header() {
   const navLinks = [
     { href: '/', label: 'Accueil', match: (p: string) => p === '/' },
     { href: '/affaires', label: 'Affaires', match: (p: string) => p.startsWith('/affaires') },
-    { href: '/couts', label: 'Coûts', match: (p: string) => p === '/couts' },
-    { href: '/admin/meteo', label: 'Météo', match: (p: string) => p.startsWith('/admin/meteo') },
+    ...(isAdminUser ? [
+      { href: '/couts', label: 'Coûts', match: (p: string) => p === '/couts' },
+      { href: '/admin/meteo', label: 'Météo', match: (p: string) => p.startsWith('/admin/meteo') },
+    ] : []),
   ];
 
   return (
@@ -63,6 +67,11 @@ export function Header() {
           </Link>
           {session?.user && (
             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
+              {isAdminUser && (
+                <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">
+                  Admin
+                </span>
+              )}
               <span className="text-sm text-gray-500">{session.user.name || session.user.email}</span>
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}

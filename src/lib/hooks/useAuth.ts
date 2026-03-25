@@ -9,6 +9,8 @@ export function useAuth() {
   const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
   const user = session?.user;
+  const role = (session?.user as any)?.role as string | undefined;
+  const isAdmin = role === 'ADMIN';
 
   const login = async (email: string, password: string) => {
     const result = await signIn('credentials', {
@@ -33,6 +35,8 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated,
+    role,
+    isAdmin,
     login,
     logout,
     session,

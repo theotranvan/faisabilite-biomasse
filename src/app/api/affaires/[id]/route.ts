@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { db, isAdmin } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface Params {
@@ -90,10 +90,13 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
   }
 }
 
-// Delete an affaire
+// Delete an affaire (admin only)
 export async function DELETE(_req: NextRequest, { params }: { params: Params }) {
   try {
-    // Mono-client app - no auth required
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Seul un administrateur peut supprimer une affaire' }, { status: 403 });
+    }
+
     // Verify the affaire exists
     const existingAffaire = await db.affaire.findUnique({
       where: { id: params.id },

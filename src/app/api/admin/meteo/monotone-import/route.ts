@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     }
 
     const text = await file.text();
-    const lines = text.split('\n').filter(l => l.trim());
+    const lines = text.split('\n').filter((l: any) => l.trim());
     const startIdx = isNaN(parseFloat(lines[0])) ? 1 : 0;
 
-    const records = lines.slice(startIdx).map((line, i) => ({
+    const records = lines.slice(startIdx).map((line: any, i: any) => ({
       ville,
       heure: i,
       temperatureExt: parseFloat(line.trim()) || 0,

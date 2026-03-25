@@ -92,6 +92,12 @@ export default function AffaireDetailPage() {
   const [chiffrageBio, setChiffrageBio] = useState<Record<number, any>>({});
   const [selectedChiffrageParc, setSelectedChiffrageParc] = useState<number>(1);
 
+  // Compute active parcs from both configured parcs AND batiment assignments
+  const activeParcsNums = Array.from(new Set([
+    ...parcs.map((p: any) => p.numero as number),
+    ...batiments.map((b: any) => b.parc as number).filter(Boolean),
+  ])).sort((a, b) => a - b);
+
   useEffect(() => {
     if (!id) return;
 
@@ -476,6 +482,18 @@ export default function AffaireDetailPage() {
               onSave={async (bats) => {
                 const savedBats = await saveBatiments(affaire.id, bats);
                 setBatiments(savedBats);
+                // Auto-create parc records for any new parc numbers used by batiments
+                const usedParcNums = Array.from(new Set(savedBats.map((b: any) => b.parc as number).filter(Boolean)));
+                const existingParcNums = parcs.map((p: any) => p.numero);
+                const missingParcNums = usedParcNums.filter(n => !existingParcNums.includes(n));
+                if (missingParcNums.length > 0) {
+                  const newParcs = [
+                    ...parcs,
+                    ...missingParcNums.map(n => ({ numero: n })),
+                  ];
+                  const saved = await saveParcs(affaire.id, newParcs);
+                  setParcs(saved);
+                }
               }}
             />
           )}
@@ -494,9 +512,15 @@ export default function AffaireDetailPage() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ lignes }),
                       });
-                      // Refresh data
-                      const updated = await fetchBatiments(affaire.id);
-                      setBatiments(updated);
+                      // Refresh data with isolation included
+                      const bats = await fetchBatiments(affaire.id);
+                      const batsWithIsolation = await Promise.all(
+                        bats.map(async (bat: any) => {
+                          const isolationData = await fetchIsolation(affaire.id, bat.id);
+                          return { ...bat, travauxIsolation: isolationData };
+                        })
+                      );
+                      setBatiments(batsWithIsolation);
                       setSelectedBatimentForIsolation(null);
                     }}
                     onClose={() => setSelectedBatimentForIsolation(null)}
@@ -507,8 +531,7 @@ export default function AffaireDetailPage() {
                   <Alert type="info" className="mb-6">
                     💡 Les travaux d'isolation sont saisis <strong>par bâtiment</strong> et apparaissent à titre informatif dans les synthèses. Ils n'entrent <strong>pas</strong> dans le calcul de l'investissement HT.
                   </Alert>
-                  {Array.from({ length: 4 }, (_, i) => i + 1)
-                    .filter(parcNum => parcs.some(p => p.numero === parcNum))
+                  {activeParcsNums
                     .map((parcNum) => (
                       <IsolationParcRecap
                         key={`parc-${parcNum}`}
@@ -524,8 +547,8 @@ export default function AffaireDetailPage() {
 
           {activeTab === 'parc' && (() => {
             const consoBatimentsParParc: Record<number, number> = {};
-            [1, 2, 3, 4].forEach(parcNum => {
-              const batsParc = batiments.filter((b: any) => b.parc === parcNum && (b.refDeperditions != null || b.refRendementProduction != null));
+            activeParcsNums.forEach(parcNum => {
+              const batsParc = batiments.filter((b: any) => b.parc === parcNum && b.deperditions != null);
               if (batsParc.length > 0) {
                 const calcBats = batsParc.map((b: any) => ({
                   numero: b.numero,
@@ -535,23 +558,23 @@ export default function AffaireDetailPage() {
                   volumeChauffe: b.volumeChauffe || 0,
                   parc: b.parc,
                   etatInitial: {
-                    deperditions_kW: b.deperditions,
-                    rendementProduction: b.rendementProduction,
-                    rendementDistribution: b.rendementDistribution,
-                    rendementEmission: b.rendementEmission,
-                    rendementRegulation: b.rendementRegulation,
-                    coefIntermittence: b.coefIntermittence,
-                    typeEnergie: b.typeEnergie,
-                    tarification: b.tarification,
-                    abonnement: b.abonnement,
+                    deperditions_kW: b.deperditions || 0,
+                    rendementProduction: b.rendementProduction || 85,
+                    rendementDistribution: b.rendementDistribution || 95,
+                    rendementEmission: b.rendementEmission || 95,
+                    rendementRegulation: b.rendementRegulation || 90,
+                    coefIntermittence: b.coefIntermittence || 1,
+                    typeEnergie: b.typeEnergie || 'Fuel',
+                    tarification: b.tarification || 0,
+                    abonnement: b.abonnement || 0,
                   },
                   etatReference: {
-                    deperditions_kW: b.refDeperditions ?? b.deperditions,
-                    rendementProduction: b.refRendementProduction ?? b.rendementProduction,
-                    rendementDistribution: b.refRendementDistribution ?? b.rendementDistribution,
-                    rendementEmission: b.refRendementEmission ?? b.rendementEmission,
-                    rendementRegulation: b.refRendementRegulation ?? b.rendementRegulation,
-                    typeEnergie: b.refTypeEnergie ?? b.typeEnergie,
+                    deperditions_kW: b.refDeperditions ?? b.deperditions ?? 0,
+                    rendementProduction: b.refRendementProduction ?? b.rendementProduction ?? 85,
+                    rendementDistribution: b.refRendementDistribution ?? b.rendementDistribution ?? 95,
+                    rendementEmission: b.refRendementEmission ?? b.rendementEmission ?? 95,
+                    rendementRegulation: b.refRendementRegulation ?? b.rendementRegulation ?? 90,
+                    typeEnergie: b.refTypeEnergie ?? b.typeEnergie ?? 'Fuel',
                   },
                 }));
                 consoBatimentsParParc[parcNum] = calculConsoSortieParcChaudieresRef(
@@ -733,23 +756,32 @@ export default function AffaireDetailPage() {
 
           {activeTab === 'chiffrage' && (
             <div className="space-y-6">
-              {parcs.length > 1 && (
-                <div className="flex gap-2 mb-4">
-                  {parcs.map((p: any) => (
+              {/* Sélecteur de parc — toujours visible, basé sur les parcs actifs */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center gap-4">
+                <span className="text-sm font-semibold text-gray-700">Parc :</span>
+                <div className="flex gap-2">
+                  {activeParcsNums.length > 0 ? activeParcsNums.map((num) => (
                     <button
-                      key={p.numero}
-                      onClick={() => setSelectedChiffrageParc(p.numero)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedChiffrageParc === p.numero
-                          ? 'bg-green-600 text-white'
+                      key={num}
+                      onClick={() => setSelectedChiffrageParc(num)}
+                      className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                        selectedChiffrageParc === num
+                          ? 'bg-green-600 text-white shadow-sm'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      Parc {p.numero}
+                      Parc {num}
                     </button>
-                  ))}
+                  )) : (
+                    <button className="px-5 py-2 rounded-lg text-sm font-semibold bg-green-600 text-white shadow-sm">
+                      Parc 1
+                    </button>
+                  )}
                 </div>
-              )}
+                <span className="text-xs text-gray-500 ml-auto">
+                  Chiffrage pour le parc {selectedChiffrageParc}
+                </span>
+              </div>
               <ChiffrageReferenceForm
                 affaireId={affaire.id}
                 data={chiffrageRef[selectedChiffrageParc] || null}
@@ -790,6 +822,7 @@ export default function AffaireDetailPage() {
                 referenceAffaire={affaire.referenceAffaire}
                 nomClient={affaire.nomClient}
                 ville={affaire.ville}
+                activeParcsNums={activeParcsNums}
               />
               <Card>
                 <CardHeader>

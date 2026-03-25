@@ -8,7 +8,7 @@ export async function GET() {
       select: { ville: true },
       orderBy: { ville: 'asc' },
     });
-    const villes = result.map(r => r.ville);
+    const villes = result.map((r: any) => r.ville);
     return NextResponse.json(villes);
   } catch (error: any) {
     console.error('[GET /api/admin/meteo/villes]', error);

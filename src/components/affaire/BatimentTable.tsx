@@ -208,14 +208,14 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                       </td>
                       <td className="px-3 py-2">
                         <select
-                          value={(batiment as any).parc || 1}
-                          onChange={(e) => updateBatiment(batiment.id, 'parc', e.target.value)}
+                          value={String(batiment.parc || 1)}
+                          onChange={(e) => updateBatiment(batiment.id, 'parc', parseInt(e.target.value))}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         >
-                          <option value={1}>1</option>
-                          <option value={2}>2</option>
-                          <option value={3}>3</option>
-                          <option value={4}>4</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
                         </select>
                       </td>
                       <td className="px-3 py-2">
@@ -341,17 +341,23 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                         <select value={batiment.refTypeEnergie || ''}
                           onChange={(e) => {
                             const newType = e.target.value || null;
-                            updateBatiment(batiment.id, 'refTypeEnergie', newType);
-                            // Si "Identique initial" sélectionné, pré-remplir avec les valeurs EI
                             if (!newType) {
-                              updateBatiment(batiment.id, 'refDeperditions', batiment.deperditions);
-                              updateBatiment(batiment.id, 'refRendementProduction', batiment.rendementProduction);
-                              updateBatiment(batiment.id, 'refRendementDistribution', batiment.rendementDistribution);
-                              updateBatiment(batiment.id, 'refRendementEmission', batiment.rendementEmission);
-                              updateBatiment(batiment.id, 'refRendementRegulation', batiment.rendementRegulation);
-                              updateBatiment(batiment.id, 'refTypeEnergie', batiment.typeEnergie);
-                              updateBatiment(batiment.id, 'refTarification', batiment.tarification);
-                              updateBatiment(batiment.id, 'refAbonnement', batiment.abonnement);
+                              // "Identique initial" sélectionné: copier toutes les valeurs EI en un seul update
+                              setBatiments(prev => prev.map(b =>
+                                b.id === batiment.id ? {
+                                  ...b,
+                                  refTypeEnergie: b.typeEnergie,
+                                  refDeperditions: b.deperditions,
+                                  refRendementProduction: b.rendementProduction,
+                                  refRendementDistribution: b.rendementDistribution,
+                                  refRendementEmission: b.rendementEmission,
+                                  refRendementRegulation: b.rendementRegulation,
+                                  refTarification: b.tarification,
+                                  refAbonnement: b.abonnement,
+                                } : b
+                              ));
+                            } else {
+                              updateBatiment(batiment.id, 'refTypeEnergie', newType);
                             }
                           }}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm">

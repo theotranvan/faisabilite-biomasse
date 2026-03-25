@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const text = await file.text();
-    const lines = text.split('\n').slice(1).filter(l => l.trim()); // skip header
+    const lines = text.split('\n').slice(1).filter((l: any) => l.trim()); // skip header
 
     let count = 0;
     for (const line of lines) {

@@ -2,16 +2,14 @@ import { db, getSessionUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
-// Get all affaires for a user
+// Get all affaires (shared across all users of the bureau)
 export async function GET(_req: NextRequest) {
   try {
-    const userId = await getSessionUserId();
-
     const affaires = await db.affaire.findMany({
-      where: { userId },
       include: {
         batiments: true,
         parcs: true,
+        user: { select: { nom: true, prenom: true } },
       },
       orderBy: { createdAt: 'desc' },
     });

@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     });
 
     for (const newParc of newParcs) {
-      const sourceParc = sourceParcs.find(p => p.numero === newParc.numero);
+      const sourceParc = sourceParcs.find((p: any) => p.numero === newParc.numero);
       if (!sourceParc) continue;
 
       // Copy chiffrage reference

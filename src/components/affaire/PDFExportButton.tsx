@@ -10,16 +10,20 @@ interface PDFExportProps {
   referenceAffaire: string;
   nomClient: string;
   ville: string;
+  activeParcsNums: number[];
 }
 
-export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville }: PDFExportProps) {
+export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville, activeParcsNums }: PDFExportProps) {
   const [isGeneratingLabel, setIsGeneratingLabel] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [generatingParcLabel, setGeneratingParcLabel] = useState<number | null>(null);
+  const [generatingParcReport, setGeneratingParcReport] = useState<number | null>(null);
   const [error, setError] = useState('');
 
-  const generateLabel = async () => {
+  const generateLabel = async (parcFilter?: number) => {
     setError('');
-    setIsGeneratingLabel(true);
+    if (parcFilter != null) setGeneratingParcLabel(parcFilter);
+    else setIsGeneratingLabel(true);
 
     try {
       // Fetch calculation results to get DPE data
@@ -45,7 +49,10 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       y += 10;
       pdf.setFontSize(11);
       pdf.setTextColor(80);
-      pdf.text(`${referenceAffaire} - ${nomClient} - ${ville}`, pageWidth / 2, y, { align: 'center' });
+      const subtitle = parcFilter != null
+        ? `${referenceAffaire} - ${nomClient} - ${ville} - Parc ${parcFilter}`
+        : `${referenceAffaire} - ${nomClient} - ${ville}`;
+      pdf.text(subtitle, pageWidth / 2, y, { align: 'center' });
       y += 15;
 
       // DPE scale definition (official French thresholds)
@@ -59,7 +66,10 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         { label: 'G', min: 451, max: 9999, color: [220, 0, 0] },
       ];
 
-      const batiments = calcData?.batiments || [];
+      const allBatiments = calcData?.batiments || [];
+      const batiments = parcFilter != null
+        ? allBatiments.filter((b: any) => b.parc === parcFilter)
+        : allBatiments;
       if (batiments.length === 0) {
         pdf.setFontSize(12);
         pdf.setTextColor(150, 0, 0);
@@ -143,19 +153,23 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.setTextColor(150);
       pdf.text(`Genere le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
 
-      const fileName = `etiquettes_dpe_${referenceAffaire}.pdf`;
+      const fileName = parcFilter != null
+        ? `etiquettes_dpe_${referenceAffaire}_parc${parcFilter}.pdf`
+        : `etiquettes_dpe_${referenceAffaire}.pdf`;
       pdf.save(fileName);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
       setError(`Erreur lors de la generation de l'etiquette: ${errorMsg}`);
     } finally {
       setIsGeneratingLabel(false);
+      setGeneratingParcLabel(null);
     }
   };
 
-  const generateFullReport = async () => {
+  const generateFullReport = async (parcFilter?: number) => {
     setError('');
-    setIsGeneratingReport(true);
+    if (parcFilter != null) setGeneratingParcReport(parcFilter);
+    else setIsGeneratingReport(true);
 
     try {
       // Fetch full affaire data + calculation results
@@ -222,7 +236,10 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.setFontSize(20);
       pdf.text('Chaufferie Biomasse', pageWidth / 2, 50, { align: 'center' });
       pdf.setFontSize(12);
-      pdf.text(referenceAffaire, pageWidth / 2, 68, { align: 'center' });
+      const coverRef = parcFilter != null
+        ? `${referenceAffaire} - Parc ${parcFilter}`
+        : referenceAffaire;
+      pdf.text(coverRef, pageWidth / 2, 68, { align: 'center' });
 
       y = 100;
       pdf.setTextColor(0, 0, 0);
@@ -247,9 +264,12 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
 
       // ===== SECTION 2: BATIMENTS =====
       pdf.addPage(); y = 20;
-      sectionTitle('1', 'Batiments analyses');
+      sectionTitle('1', parcFilter != null ? `Batiments analyses - Parc ${parcFilter}` : 'Batiments analyses');
 
-      const bats = calcData?.batiments || [];
+      const allBats = calcData?.batiments || [];
+      const bats = parcFilter != null
+        ? allBats.filter((b: any) => b.parc === parcFilter)
+        : allBats;
       if (bats.length === 0) {
         pdf.text('Aucun batiment disponible.', margin + 5, y); y += 8;
       } else {
@@ -348,7 +368,11 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
       pdf.addPage(); y = 20;
       sectionTitle('3', 'Analyse financiere');
 
-      const chiff = calcData?.chiffrage?.[0];
+      const chiffrageArr = calcData?.chiffrage || [];
+      const parcAgrArr = calcData?.parcAgregation || [];
+      const chiff = parcFilter != null
+        ? chiffrageArr.find((c: any) => c.parc === parcFilter)
+        : chiffrageArr.length === 1 ? chiffrageArr[0] : null;
       if (chiff) {
         addRow('Investissement reference HT', chiff.investissement_ht != null ? fmtEur(chiff.investissement_ht) : 'N/A');
         addRow('Investissement biomasse HT', fmtEur(chiff.investissement_bio_ht || 0));
@@ -357,21 +381,52 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         addRow('Annuite reference', chiff.annuite != null ? fmtEur(chiff.annuite) : 'N/A');
         addRow('Annuite biomasse', fmtEur(chiff.annuite_biomasse || 0));
         y += 5; drawLine();
+      } else if (parcFilter == null && chiffrageArr.length > 1) {
+        // Multiple parcs, no filter: show summary for each
+        for (const c of chiffrageArr) {
+          pdf.setFontSize(11);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Parc ${c.parc}`, margin + 5, y); y += 7;
+          pdf.setFont('helvetica', 'normal');
+          addRow('Investissement reference HT', c.investissement_ht != null ? fmtEur(c.investissement_ht) : 'N/A');
+          addRow('Investissement biomasse HT', fmtEur(c.investissement_bio_ht || 0));
+          addRow('Subventions biomasse', fmtEur(c.subventions_bio || 0));
+          addRow('Net a investir (biomasse)', fmtEur((c.investissement_bio_ht || 0) - (c.subventions_bio || 0)));
+          addRow('Annuite reference', c.annuite != null ? fmtEur(c.annuite) : 'N/A');
+          addRow('Annuite biomasse', fmtEur(c.annuite_biomasse || 0));
+          y += 3; drawLine();
+        }
       }
 
-      const parc = calcData?.parcAgregation?.[0];
+      const parc = parcFilter != null
+        ? parcAgrArr.find((p: any) => p.parc === parcFilter)
+        : parcAgrArr.length === 1 ? parcAgrArr[0] : null;
       if (parc) {
         addRow('Cout exploitation reference', fmtEur(parc.cout_total || 0) + '/an');
         addRow('Cout exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
         addRow('Economie annuelle', fmtEur((parc.cout_total || 0) - (parc.cout_biomasse || 0)) + '/an');
         y += 5;
+      } else if (parcFilter == null && parcAgrArr.length > 1) {
+        for (const p of parcAgrArr) {
+          checkPage(30);
+          pdf.setFontSize(11);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Parc ${p.parc}`, margin + 5, y); y += 7;
+          pdf.setFont('helvetica', 'normal');
+          addRow('Cout exploitation reference', fmtEur(p.cout_total || 0) + '/an');
+          addRow('Cout exploitation biomasse', fmtEur(p.cout_biomasse || 0) + '/an');
+          addRow('Economie annuelle', fmtEur((p.cout_total || 0) - (p.cout_biomasse || 0)) + '/an');
+          y += 3;
+        }
       }
 
       // ===== SECTION 5: BILAN 20 ANS =====
       y += 5;
       sectionTitle('4', 'Bilan actualise sur 20 ans');
 
-      const bilan = calcData?.bilanActualize || [];
+      const bilan = parcFilter != null
+        ? (calcData?.bilanParParc?.[parcFilter] || [])
+        : (calcData?.bilanActualize || []);
       if (bilan.length > 0) {
         // Table header
         checkPage(12);
@@ -425,13 +480,16 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
 
       addFooter(pdf.getNumberOfPages());
 
-      const fileName = `rapport_${referenceAffaire}.pdf`;
+      const fileName = parcFilter != null
+        ? `rapport_${referenceAffaire}_parc${parcFilter}.pdf`
+        : `rapport_${referenceAffaire}.pdf`;
       pdf.save(fileName);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
       setError(`Erreur lors de la generation du rapport: ${errorMsg}`);
     } finally {
       setIsGeneratingReport(false);
+      setGeneratingParcReport(null);
     }
   };
 
@@ -441,33 +499,70 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville 
         <h3 className="text-lg font-semibold text-gray-900">Exports PDF</h3>
       </CardHeader>
       {error && <Alert type="error" className="m-6 mb-0">{error}</Alert>}
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-6">
+        {/* --- Etiquettes DPE --- */}
         <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Étiquettes DPE</h4>
           <Button 
             variant="primary" 
-            onClick={generateLabel} 
+            onClick={() => generateLabel()} 
             loading={isGeneratingLabel} 
             className="w-full"
-            title="Télécharger une étiquette simple avec les informations principales"
+            title="Télécharger les étiquettes DPE de tous les bâtiments"
           >
-            📌 Exporter l'étiquette
+            📌 Exporter toutes les étiquettes
           </Button>
+          {activeParcsNums.length > 1 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {activeParcsNums.map((num) => (
+                <Button
+                  key={`label-parc-${num}`}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => generateLabel(num)}
+                  loading={generatingParcLabel === num}
+                  title={`Étiquettes DPE du Parc ${num} uniquement`}
+                >
+                  📌 Parc {num}
+                </Button>
+              ))}
+            </div>
+          )}
           <p className="text-sm text-gray-600 mt-2">
-            Exporte une étiquette simple avec les informations principales de l'étude.
+            Exporte les étiquettes énergétiques DPE des bâtiments.
           </p>
         </div>
+
+        {/* --- Rapport complet --- */}
         <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Rapport complet</h4>
           <Button 
             variant="secondary" 
-            onClick={generateFullReport} 
+            onClick={() => generateFullReport()} 
             loading={isGeneratingReport} 
             className="w-full"
-            title="Télécharger un rapport détaillé avec tous les résultats"
+            title="Télécharger le rapport complet avec tous les résultats"
           >
             📄 Exporter le rapport complet
           </Button>
+          {activeParcsNums.length > 1 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {activeParcsNums.map((num) => (
+                <Button
+                  key={`report-parc-${num}`}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => generateFullReport(num)}
+                  loading={generatingParcReport === num}
+                  title={`Rapport du Parc ${num} uniquement`}
+                >
+                  📄 Parc {num}
+                </Button>
+              ))}
+            </div>
+          )}
           <p className="text-sm text-gray-600 mt-2">
-            Télécharge un rapport détaillé en format PDF avec tous les résultats et analyses.
+            Télécharge un rapport détaillé en format PDF. Exportez par parc pour un rapport ciblé.
           </p>
         </div>
       </div>

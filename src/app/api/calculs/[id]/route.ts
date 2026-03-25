@@ -33,21 +33,18 @@ function transformBatiment(row: any): Batiment {
     abonnement: row.abonnement ?? 0,
   };
 
-  let etatReference: EtatEnergie | null = null;
-  if (row.refDeperditions != null || row.refRendementProduction != null) {
-    etatReference = {
-      deperditions_kW: row.refDeperditions ?? row.deperditions ?? 0,
-      rendementProduction: row.refRendementProduction ?? row.rendementProduction ?? 80,
-      rendementDistribution: row.refRendementDistribution ?? row.rendementDistribution ?? 85,
-      rendementEmission: row.refRendementEmission ?? row.rendementEmission ?? 90,
-      rendementRegulation: row.refRendementRegulation ?? row.rendementRegulation ?? 95,
-      coefIntermittence: row.coefIntermittence ?? 1,
-      consommationsCalculees: 0,
-      typeEnergie: mapEnergyType(row.refTypeEnergie || row.typeEnergie),
-      tarification: row.refTarification ?? row.tarification ?? 0,
-      abonnement: row.refAbonnement ?? row.abonnement ?? 0,
-    };
-  }
+  const etatReference: EtatEnergie = {
+    deperditions_kW: row.refDeperditions ?? row.deperditions ?? 0,
+    rendementProduction: row.refRendementProduction ?? row.rendementProduction ?? 80,
+    rendementDistribution: row.refRendementDistribution ?? row.rendementDistribution ?? 85,
+    rendementEmission: row.refRendementEmission ?? row.rendementEmission ?? 90,
+    rendementRegulation: row.refRendementRegulation ?? row.rendementRegulation ?? 95,
+    coefIntermittence: row.coefIntermittence ?? 1,
+    consommationsCalculees: 0,
+    typeEnergie: mapEnergyType(row.refTypeEnergie || row.typeEnergie),
+    tarification: row.refTarification ?? row.tarification ?? 0,
+    abonnement: row.refAbonnement ?? row.abonnement ?? 0,
+  };
 
   return {
     numero: row.numero,
@@ -109,7 +106,7 @@ export async function GET(
     const batimentsCalc = affaire.batiments.map(transformBatiment);
 
     // Calculate per building
-    const batimentsResults = batimentsCalc.map(bat => {
+    const batimentsResults = batimentsCalc.map((bat: any) => {
       const calculs = calculsBatimentComplet(bat, DJU, tempInt, tempExt);
       const surface = bat.surfaceChauffee || 1;
       const consoKwhepPerM2 = calculs.consoKWhepEI / surface;
@@ -134,7 +131,7 @@ export async function GET(
     });
 
     // Unique parcs
-    const parcNums = [...new Set(batimentsCalc.map(b => b.parc))].sort((a, b) => a - b);
+    const parcNums = [...new Set(batimentsCalc.map((b: any) => b.parc))].sort((a: any, b: any) => a - b);
 
     // Calculate per parc
     const parcAgregation: any[] = [];
@@ -152,14 +149,14 @@ export async function GET(
 
       // Costs
       const coutActuel = batimentsResults
-        .filter(b => b.parc === parcNum)
-        .reduce((s, b) => s + b.cout_annuel, 0);
+        .filter((b: any) => b.parc === parcNum)
+        .reduce((s: any, b: any) => s + b.cout_annuel, 0);
       const coutRef = batimentsResults
-        .filter(b => b.parc === parcNum)
-        .reduce((s, b) => s + b.cout_annuel_ref, 0);
+        .filter((b: any) => b.parc === parcNum)
+        .reduce((s: any, b: any) => s + b.cout_annuel_ref, 0);
 
       // Chiffrage reference
-      const parcConfig = affaire.parcs.find(p => p.numero === parcNum);
+      const parcConfig = affaire.parcs.find((p: any) => p.numero === parcNum);
       const chiffrageRef = parcConfig?.chiffrageRef;
       const chiffrageBio = parcConfig?.chiffrageBio;
 
@@ -240,8 +237,11 @@ export async function GET(
         parc: parcNum,
         puissance_kW: puissance,
         conso_kWh: conso,
+        cout_actuel: coutActuel,
         cout_total: coutRef,
         cout_biomasse: coutBiomasse,
+        annuite_ref: annuiteRefParc,
+        annuite_biomasse: annuiteBiomasse,
       });
 
       chiffrageResults.push({
@@ -258,7 +258,7 @@ export async function GET(
       });
     }
 
-    // Bilan 20 ans with real values
+    // Bilan 20 ans with real values (global)
     const bilanActualize = calculBilan20Ans(
       totalCoutActuel,
       totalCoutRef + totalAnnuiteRef,
@@ -269,6 +269,28 @@ export async function GET(
       totalAnnuiteBiomasse,
       dureeEmprunt
     );
+
+    // Bilan 20 ans per parc
+    const bilanParParc: Record<number, any[]> = {};
+    for (const pa of parcAgregation) {
+      const bilanParc = calculBilan20Ans(
+        pa.cout_actuel,
+        pa.cout_total + pa.annuite_ref,
+        pa.cout_biomasse + pa.annuite_biomasse,
+        tauxAugFossile,
+        tauxAugBiomasse,
+        pa.annuite_ref,
+        pa.annuite_biomasse,
+        dureeEmprunt
+      );
+      bilanParParc[pa.parc] = bilanParc.map((year: any) => ({
+        annee: year.year,
+        cout_initial: year.coutActuel,
+        cout_reference: year.coutRef,
+        cout_biomasse: year.coutBiomasse,
+        economies_bio_vs_ref: year.economie,
+      }));
+    }
 
     const economiesAn1 = bilanActualize.length > 0 ? bilanActualize[0].economie : 0;
 
@@ -282,7 +304,8 @@ export async function GET(
       batiments: batimentsResults,
       parcAgregation,
       chiffrage: chiffrageResults,
-      bilanActualize: bilanActualize.map(year => ({
+      bilanParParc,
+      bilanActualize: bilanActualize.map((year: any) => ({
         annee: year.year,
         cout_initial: year.coutActuel,
         cout_reference: year.coutRef,
