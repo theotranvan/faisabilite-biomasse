@@ -152,12 +152,12 @@ export function calculsBatimentReference(
 
   const etatRef = batiment.etatReference;
   
-  // ATTENTION: dans l'Excel, les rendements ref sont en pourcentage (85, 90).
-  // On divise par 100 comme pour l'état initial.
-  const rp = etatRef.rendementProduction / 100;
-  const rd = etatRef.rendementDistribution / 100;
-  const re = etatRef.rendementEmission / 100;
-  const rr = etatRef.rendementRegulation / 100;
+  // ATTENTION: les rendements ref peuvent être en % (85, 90) ou en décimal (0.85, 0.90).
+  // On utilise la détection > 1 pour normaliser (pareil que parc.ts).
+  const rp = etatRef.rendementProduction > 1 ? etatRef.rendementProduction / 100 : etatRef.rendementProduction;
+  const rd = etatRef.rendementDistribution > 1 ? etatRef.rendementDistribution / 100 : etatRef.rendementDistribution;
+  const re = etatRef.rendementEmission > 1 ? etatRef.rendementEmission / 100 : etatRef.rendementEmission;
+  const rr = etatRef.rendementRegulation > 1 ? etatRef.rendementRegulation / 100 : etatRef.rendementRegulation;
   
   const rendementMoyenRef = rp * rd * re * rr;
 

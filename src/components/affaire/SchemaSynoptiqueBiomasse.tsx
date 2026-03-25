@@ -9,10 +9,10 @@ const BIOMASSE_CHARS: Record<string, { pci: number; masseVol: number; tauxCendre
 
 interface SchemaSynoptiqueProps {
   puissanceChaudiereBois: number;
-  rendementChaudiereBois: number; // 0-1
+  rendementChaudiereBois: number; // 0-100 (%)
   puissanceChaudiere2: number;
-  rendementChaudiere2: number; // 0-1
-  pourcentageCouvertureBois: number; // 0-1
+  rendementChaudiere2: number; // 0-100 (%)
+  pourcentageCouvertureBois: number; // 0-100 (%)
   typeBiomasse: string;
   combustibleAppoint: string;
   longueurReseau: number;
@@ -40,13 +40,15 @@ export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
   } = props;
 
   const chars = BIOMASSE_CHARS[typeBiomasse] || BIOMASSE_CHARS.PLAQUETTE;
-  const couverturePct = pourcentageCouvertureBois * 100;
+  const couverturePct = pourcentageCouvertureBois > 1 ? pourcentageCouvertureBois : pourcentageCouvertureBois * 100;
 
   // Calculs
   const consoSortieBois = consoBatimentsParc * (couverturePct / 100);
-  const consoEntreeBois = rendementChaudiereBois > 0 ? consoSortieBois / rendementChaudiereBois : 0;
+  const rendBoisNorm = rendementChaudiereBois > 1 ? rendementChaudiereBois / 100 : rendementChaudiereBois;
+  const consoEntreeBois = rendBoisNorm > 0 ? consoSortieBois / rendBoisNorm : 0;
   const consoSortieAppoint = consoBatimentsParc * (1 - couverturePct / 100);
-  const consoEntreeAppoint = rendementChaudiere2 > 0 ? consoSortieAppoint / rendementChaudiere2 : 0;
+  const rendApptNorm = rendementChaudiere2 > 1 ? rendementChaudiere2 / 100 : rendementChaudiere2;
+  const consoEntreeAppoint = rendApptNorm > 0 ? consoSortieAppoint / rendApptNorm : 0;
 
   const consoAnnuelleTonnes = consoEntreeBois / (chars.pci * 1000);
   const consoAnnuelleM3 = chars.masseVol > 0 ? (consoAnnuelleTonnes * 1000) / chars.masseVol : 0;

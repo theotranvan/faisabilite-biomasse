@@ -663,9 +663,10 @@ export default function AffaireDetailPage() {
                             };
                             const c = chars[parc.typeBiomasse || 'PLAQUETTE'] || chars.PLAQUETTE;
                             const consoBat = consoBatimentsParParc[parc.numero] || 0;
-                            const couv = (parc.pourcentageCouvertureBois || 0) * 100;
+                            const couv = (parc.pourcentageCouvertureBois || 0);
                             const consoSortie = consoBat * (couv / 100);
-                            const consoEntree = (parc.rendementChaudiereBois || 0) > 0 ? consoSortie / (parc.rendementChaudiereBois || 1) : 0;
+                            const rendBoisNorm = (parc.rendementChaudiereBois || 0) > 1 ? (parc.rendementChaudiereBois || 1) / 100 : (parc.rendementChaudiereBois || 1);
+                            const consoEntree = rendBoisNorm > 0 ? consoSortie / rendBoisNorm : 0;
                             const consoT = consoEntree / (c.pci * 1000);
                             const consoM3 = c.masseVol > 0 ? (consoT * 1000) / c.masseVol : 0;
                             const stock10T = (consoEntree / 365 * 10) / (c.pci * 1000);

@@ -125,13 +125,13 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                 <label className="block text-sm font-medium text-gray-700 mb-1">Rendement chaudière (%)</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
-                  max="1"
+                  max="100"
                   value={parc.rendementChaudiereBois || ''}
                   onChange={(e) => updateParc(parc.numero, 'rendementChaudiereBois', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="0.85"
+                  placeholder="85"
                 />
               </div>
 
@@ -139,13 +139,13 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                 <label className="block text-sm font-medium text-gray-700 mb-1">% Couverture biomasse</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
-                  max="1"
+                  max="100"
                   value={parc.pourcentageCouvertureBois || ''}
                   onChange={(e) => updateParc(parc.numero, 'pourcentageCouvertureBois', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="0.80"
+                  placeholder="80"
                 />
               </div>
 
@@ -278,9 +278,9 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
 
               if (!consoBatiments || !couverture || !rendBois) return null;
 
-              const consoSortieBois = calculConsommationsSortieChaudiereBois(consoBatiments, couverture * 100);
-              const consoEntreeBois = rendBois > 0 ? calculConsommationsEntreeChaudiereBois(consoSortieBois, rendBois * 100) : 0;
-              const consoAppoint = rendAppoint > 0 ? calculConsommationsAppoint(consoBatiments, couverture * 100, rendAppoint * 100) : 0;
+              const consoSortieBois = calculConsommationsSortieChaudiereBois(consoBatiments, couverture);
+              const consoEntreeBois = rendBois > 0 ? calculConsommationsEntreeChaudiereBois(consoSortieBois, rendBois) : 0;
+              const consoAppoint = rendAppoint > 0 ? calculConsommationsAppoint(consoBatiments, couverture, rendAppoint) : 0;
               const heuresPP = puissanceBois > 0 ? calculHeuresPP(consoSortieBois, puissanceBois) : 0;
 
               const stockage = characteristics
