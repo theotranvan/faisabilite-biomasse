@@ -162,7 +162,7 @@ export default function AffaireDetailPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const numericFields = ['latitude', 'longitude', 'tarifFuelExploitation', 'tarifGazExploitation', 'tarifBoisExploitation', 'tarifElecExploitation'];
+    const numericFields = ['latitude', 'longitude', 'tarifFuelExploitation', 'tarifGazExploitation', 'tarifBoisExploitation', 'tarifElecExploitation', 'djuRetenu', 'tempExtBase', 'tempIntBase', 'augmentationFossile', 'augmentationBiomasse', 'dureeEmprunt'];
     setEditData({
       ...editData,
       [name]: numericFields.includes(name) ? parseFloat(value) || null : value,

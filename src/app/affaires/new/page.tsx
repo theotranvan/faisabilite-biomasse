@@ -138,13 +138,17 @@ export default function NewAffairePage() {
     dureeEmprunt: 15,
   });
 
-  // Load DJU for default département on mount
+  // Load DJU + tempExtBase for default département on mount
   useEffect(() => {
     fetch('/api/meteo/18')
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.dju) {
-          setAffaire(prev => ({ ...prev, djuRetenu: Math.round(data.dju) }));
+        if (data) {
+          setAffaire(prev => ({
+            ...prev,
+            ...(data.dju ? { djuRetenu: Math.round(data.dju) } : {}),
+            ...(data.tempExtBase != null ? { tempExtBase: data.tempExtBase } : {}),
+          }));
         }
       })
       .catch(() => {});
@@ -183,7 +187,7 @@ export default function NewAffairePage() {
     const updated = {
       ...affaire,
       [name]:
-        name.includes('Base') || name.includes('DJU') || name.includes('ugmentation') || name.includes('uree')
+        name.includes('Base') || name.includes('dju') || name.includes('ugmentation') || name.includes('uree')
           ? parseFloat(value) || 0
           : value,
     };
