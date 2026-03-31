@@ -12,12 +12,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [debugInfo, setDebugInfo] = useState('');
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setDebugInfo('');
     setIsLoading(true);
 
     try {
@@ -27,17 +24,13 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      setDebugInfo(JSON.stringify(result, null, 2));
-
       if (result?.error) {
-        setError(`Erreur: ${result.error}`);
+        setError('Email ou mot de passe incorrect');
       } else if (result?.ok) {
-        // Force a hard navigation to ensure cookies are sent
         window.location.href = '/dashboard';
       }
-    } catch (err: any) {
-      setError(`Exception: ${err.message}`);
-      setDebugInfo(err.stack || err.message);
+    } catch (err) {
+      setError('Une erreur est survenue');
     } finally {
       setIsLoading(false);
     }
@@ -86,12 +79,6 @@ export default function LoginPage() {
             S'inscrire
           </Link>
         </p>
-
-        {debugInfo && (
-          <pre className="mt-4 p-3 bg-gray-100 text-xs text-gray-800 rounded overflow-auto max-h-40">
-            {debugInfo}
-          </pre>
-        )}
       </div>
     </div>
   );
