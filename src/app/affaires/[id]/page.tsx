@@ -167,6 +167,22 @@ export default function AffaireDetailPage() {
       ...editData,
       [name]: numericFields.includes(name) ? parseFloat(value) || null : value,
     });
+
+    // Auto-fetch DJU and tempExtBase when département changes
+    if (name === 'departement') {
+      fetch(`/api/meteo/${value}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) {
+            setEditData(prev => ({
+              ...prev,
+              ...(data.dju ? { djuRetenu: Math.round(data.dju) } : {}),
+              ...(data.tempExtBase != null ? { tempExtBase: data.tempExtBase } : {}),
+            }));
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   const handleSave = async () => {
