@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -56,7 +56,7 @@ model Affaire {
   departement             String
   latitude                Float?
   longitude               Float?
-  notes                   String?
+  notes                   String?  @db.Text
   
   tempExtBase             Float    @default(-7)
   tempIntBase             Float    @default(19)
@@ -95,7 +95,7 @@ model HistoriqueAffaire {
   affaire   Affaire  @relation(fields: [affaireId], references: [id], onDelete: Cascade)
   
   action    String   // "modification", "creation", etc.
-  details   String?  // JSON string of changes
+  details   String?  @db.Text // JSON string of changes
   createdAt DateTime @default(now())
 
   @@map("historique_affaires")
@@ -228,8 +228,8 @@ model ChiffragReference {
   parc                  Parc     @relation(fields: [parcId], references: [id], onDelete: Cascade)
   
   // JSON arrays of cost lines
-  lignesIsolation       String   // JSON: {designation, unite, qte, prixUnitaire, dejaRealise}[]
-  lignesChaufferie      String   // JSON: {designation, unite, qte, prixUnitaire}[]
+  lignesIsolation       String   @db.Text // JSON: {designation, unite, qte, prixUnitaire, dejaRealise}[]
+  lignesChaufferie      String   @db.Text // JSON: {designation, unite, qte, prixUnitaire}[]
   
   // Annexes fees (%)
   tauxBureauControle    Float    @default(0)

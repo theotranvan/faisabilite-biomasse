@@ -262,8 +262,9 @@ async function main() {
   });
 
   // Generate proper bcrypt hash at runtime
-  const { hash } = await import('bcryptjs');
-  const hashedPassword = await hash('biomasse2026', 10);
+  const bcrypt = await import('bcryptjs');
+  const hashFn = bcrypt.hash || bcrypt.default?.hash;
+  const hashedPassword = await hashFn('biomasse2026', 10);
 
   await prisma.user.create({
     data: {
