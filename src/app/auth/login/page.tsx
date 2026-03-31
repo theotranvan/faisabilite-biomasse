@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { Button, Input } from '@/components/ui/Form';
 import { Alert } from '@/components/ui/Layout';
@@ -73,12 +72,6 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Pas encore inscrit?{' '}
-          <Link href="/auth/register" className="text-blue-600 hover:underline font-semibold">
-            S'inscrire
-          </Link>
-        </p>
       </div>
     </div>
   );
