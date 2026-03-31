@@ -7,8 +7,14 @@ export async function GET(
 ) {
   try {
     const { departement } = await params;
-    const meteo = await db.meteoMoyenne.findUnique({
-      where: { departement },
+    // Try by code first (e.g. "69"), then by name (e.g. "Rhône")
+    const meteo = await db.meteoMoyenne.findFirst({
+      where: {
+        OR: [
+          { code: departement },
+          { departement },
+        ],
+      },
     });
 
     if (!meteo) {
