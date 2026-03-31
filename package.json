@@ -13,6 +13,7 @@
     "prisma:seed": "node prisma/seed.ts",
     "test": "tsx tests/calculs.test.ts && tsx tests/regression.test.ts",
     "test:calculs": "tsx tests/calculs.test.ts",
+    "test:regression": "tsx tests/regression.test.ts",
     "test:parcours": "npm run prisma:seed && tsx scripts/test-parcours-complet.ts"
   },
   "prisma": {
