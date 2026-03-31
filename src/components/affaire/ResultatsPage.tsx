@@ -51,8 +51,8 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
       consommationsCalculees: db.consommationsCalculees || 0,
       consommationsReelles: db.consommationsReelles || 0,
       typeEnergie: db.refTypeEnergie ?? db.typeEnergie ?? 'Fuel',
-      tarification: db.tarification || 0,
-      abonnement: db.abonnement || 0,
+      tarification: (db.refTarification ?? db.tarification) || 0,
+      abonnement: (db.refAbonnement ?? db.abonnement) || 0,
     },
   };
 }
@@ -60,7 +60,8 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
 interface ResultatsProps {
   affaireId: string;
   batiments?: any[];
-  chiffrage?: any;
+  chiffrageRefByParc?: Record<number, any>;
+  chiffrageBioByParc?: Record<number, any>;
 }
 
 const formatEur = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
@@ -105,7 +106,7 @@ interface ParcResult {
   }>;
 }
 
-export function ResultatsPage({ affaireId, batiments = [], chiffrage }: ResultatsProps) {
+export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = {}, chiffrageBioByParc = {} }: ResultatsProps) {
   const [allResults, setAllResults] = useState<Record<string, ParcResult>>({});
   const [selectedParc, setSelectedParc] = useState<string>('consolide');
   const [projections, setProjections] = useState<any[]>([]);
@@ -128,9 +129,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         if (!response.ok) throw new Error('Impossible de charger l\'affaire');
         const affaire = await response.json();
 
-        // Fetch chiffrage biomasse
-        const resBio = await fetch(`/api/affaires/${affaireId}/chiffrage-biomasse`);
-        const chiffrageBio = resBio.ok ? await resBio.json() : null;
+        // Use chiffrages passed as props (per-parc)
 
         // Parameters
         const DJU = affaire.djuRetenu || 1977;
@@ -156,6 +155,9 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
         const results: Record<string, ParcResult> = {};
 
         for (const parcNum of parcs) {
+          const chiffrageBio = chiffrageBioByParc[parcNum] || null;
+          const chiffrageRef = chiffrageRefByParc[parcNum] || null;
+
           const batsInParc = calculsBatiments.filter(b => b.parc === parcNum);
           const puissance = calculPuissanceChauffageParc(batsInParc, parcNum);
           const conso = calculConsoSortieParcChaudieresRef(batsInParc, parcNum, DJU, tempInt, tempExt);
@@ -165,19 +167,19 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
           // Investment ref — compute from flat DB chiffrage object
           let investHT = 0;
           let annuiteRefParc = 0;
-          if (chiffrage) {
+          if (chiffrageRef) {
             // Parse lignesChaufferie JSON string → compute sous-total
             let lignes: any[] = [];
             try {
-              lignes = typeof chiffrage.lignesChaufferie === 'string'
-                ? JSON.parse(chiffrage.lignesChaufferie)
-                : (chiffrage.lignesChaufferie || []);
+              lignes = typeof chiffrageRef.lignesChaufferie === 'string'
+                ? JSON.parse(chiffrageRef.lignesChaufferie)
+                : (chiffrageRef.lignesChaufferie || []);
             } catch { lignes = []; }
             const sousTotalChaufferie = Array.isArray(lignes)
               ? lignes.reduce((s: number, l: any) => s + ((l.qte || 0) * (l.prixUnitaire || l.pu || 0)), 0)
               : 0;
-            const feeRate = (chiffrage.tauxBureauControle || 0) + (chiffrage.tauxMaitriseOeuvre || 0) +
-              (chiffrage.tauxFraisDivers || 0) + (chiffrage.tauxAleas || 0);
+            const feeRate = (chiffrageRef.tauxBureauControle || 0) + (chiffrageRef.tauxMaitriseOeuvre || 0) +
+              (chiffrageRef.tauxFraisDivers || 0) + (chiffrageRef.tauxAleas || 0);
             investHT = sousTotalChaufferie * (1 + feeRate);
             annuiteRefParc = investHT / dureeEmprunt;
           }
@@ -391,7 +393,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrage }: Resultat
     };
 
     calculateResults();
-  }, [affaireId, batiments, chiffrage]);
+  }, [affaireId, batiments, chiffrageRefByParc, chiffrageBioByParc]);
 
   if (isLoading) return <Alert type="info">Calcul des résultats en cours...</Alert>;
   if (error) return <Alert type="error">{error}</Alert>;

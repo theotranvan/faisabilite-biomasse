@@ -2,16 +2,31 @@ import { db, getSessionUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
-// Get all affaires (shared across all users of the bureau)
+// Get all affaires visible to the current user (own + team affaires)
 export async function GET(_req: NextRequest) {
   try {
+    const userId = await getSessionUserId();
+
+    // Find user's teams
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      include: { equipes: { select: { id: true } } },
+    });
+    const equipeIds = user?.equipes.map(e => e.id) || [];
+
     const affaires = await db.affaire.findMany({
+      where: {
+        OR: [
+          { userId },
+          { equipeId: { in: equipeIds } },
+        ],
+      },
       include: {
         batiments: true,
         parcs: true,
         user: { select: { nom: true, prenom: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json(affaires);
@@ -53,9 +68,17 @@ export async function POST(req: NextRequest) {
     // Generate reference
     const referenceAffaire = generateAffaireReference();
 
+    // Assign to user's first team if they belong to one
+    const userWithTeams = await db.user.findUnique({
+      where: { id: userId },
+      include: { equipes: { select: { id: true } } },
+    });
+    const equipeId = data.equipeId || userWithTeams?.equipes[0]?.id || null;
+
     const affaire = await db.affaire.create({
       data: {
         userId,
+        equipeId,
         referenceAffaire,
         nomClient: data.nomClient,
         adresse: data.adresse,

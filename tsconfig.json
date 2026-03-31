@@ -48,6 +48,11 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "prisma",
+    "tests",
+    "scripts",
+    "*.test.ts",
+    "*.spec.ts"
   ]
 }

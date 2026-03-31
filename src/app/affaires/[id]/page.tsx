@@ -17,8 +17,7 @@ import { ResultatsPage } from '@/components/affaire/ResultatsPage';
 import { ValidationModule } from '@/components/affaire/ValidationModule';
 import { PDFExportButton } from '@/components/affaire/PDFExportButton';
 import { AffaireActions } from '@/components/affaire/AffaireActions';
-import { ProjectSharing } from '@/components/affaire/ProjectSharing';
-import { VersionHistory } from '@/components/affaire/VersionHistory';
+
 import { calculConsoSortieParcChaudieresRef } from '@/lib/calculs';
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +52,6 @@ const TABS: TabConfig[] = [
   { id: 'resultats', label: 'Résultats', icon: '📊' },
   { id: 'validation', label: 'Validation', icon: '✓' },
   { id: 'export', label: 'Export', icon: '📄' },
-  { id: 'sharing', label: 'Partage', icon: '👥' },
-  { id: 'history', label: 'Historique', icon: '⏰' },
 ];
 
 const DEPARTEMENTS = [
@@ -806,7 +803,8 @@ export default function AffaireDetailPage() {
             <ResultatsPage
               affaireId={affaire.id}
               batiments={batiments}
-              chiffrage={chiffrageRef[parcs[0]?.numero || 1] || null}
+              chiffrageRefByParc={chiffrageRef}
+              chiffrageBioByParc={chiffrageBio}
             />
           )}
 
@@ -840,13 +838,7 @@ export default function AffaireDetailPage() {
             </div>
           )}
 
-          {activeTab === 'sharing' && (
-            <ProjectSharing affaireId={affaire.id} />
-          )}
 
-          {activeTab === 'history' && (
-            <VersionHistory affaireId={affaire.id} />
-          )}
         </div>
       </main>
     </div>

@@ -24,6 +24,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   affaires Affaire[]
+  equipes  Equipe[] @relation("EquipeMembres")
   @@map("users")
 }
 
@@ -31,10 +32,22 @@ model User {
 
 // ============ AFFAIRES ============
 
+model Equipe {
+  id        String    @id @default(cuid())
+  nom       String
+  membres   User[]    @relation("EquipeMembres")
+  affaires  Affaire[]
+  createdAt DateTime  @default(now())
+
+  @@map("equipes")
+}
+
 model Affaire {
   id                      String   @id @default(cuid())
   userId                  String
   user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  equipeId                String?
+  equipe                  Equipe?  @relation(fields: [equipeId], references: [id])
   
   referenceAffaire        String   @unique
   nomClient               String
