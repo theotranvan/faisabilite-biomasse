@@ -342,6 +342,7 @@ model MeteoMoyenne {
   departement     String   @unique
   code            String
   djuMoyenne      Float    // moyenne 1996-2022
+  tempExtBase     Float?   // température extérieure de base (°C)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

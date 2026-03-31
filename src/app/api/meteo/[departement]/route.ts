@@ -27,6 +27,7 @@ export async function GET(
     return NextResponse.json({
       departement,
       dju: meteo.djuMoyenne,
+      tempExtBase: meteo.tempExtBase,
     });
   } catch (error) {
     console.error('[meteo/[departement]]', error);

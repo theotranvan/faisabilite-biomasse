@@ -189,13 +189,17 @@ export default function NewAffairePage() {
     };
     setAffaire(updated);
 
-    // Auto-fetch DJU when département changes
+    // Auto-fetch DJU and tempExtBase when département changes
     if (name === 'departement') {
       fetch(`/api/meteo/${value}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
-          if (data?.dju) {
-            setAffaire(prev => ({ ...prev, djuRetenu: Math.round(data.dju) }));
+          if (data) {
+            setAffaire(prev => ({
+              ...prev,
+              ...(data.dju ? { djuRetenu: Math.round(data.dju) } : {}),
+              ...(data.tempExtBase != null ? { tempExtBase: data.tempExtBase } : {}),
+            }));
           }
         })
         .catch(() => {});
