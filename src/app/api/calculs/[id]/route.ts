@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 import {
   calculsBatimentComplet,
   calculPuissanceChauffageParc,
@@ -75,6 +75,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  await getSessionUserId();
   const affaireId = id;
 
   try {
@@ -168,7 +169,12 @@ export async function GET(
       let annuiteRefParc = 0;
 
       if (chiffrageRef) {
-        const rawLignes = JSON.parse(chiffrageRef.lignesChaufferie || '[]');
+        let rawLignes: any[] = [];
+        try {
+          rawLignes = JSON.parse(chiffrageRef.lignesChaufferie || '[]');
+        } catch {
+          rawLignes = [];
+        }
         // Normalize field names: prixUnitaire → pu, quantite → qte
         const lignesChaufferie = rawLignes.map((l: any) => ({
           qte: l.qte || l.quantite || 0,

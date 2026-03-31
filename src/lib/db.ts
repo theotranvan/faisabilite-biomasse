@@ -27,7 +27,7 @@ export async function getDefaultUserId(): Promise<string> {
 
 /**
  * Returns the authenticated user's ID from the session.
- * Falls back to the default user if no session is found (e.g. during seed/scripts).
+ * In production, throws if no session. In dev, falls back to default user.
  */
 export async function getSessionUserId(): Promise<string> {
   try {
@@ -37,6 +37,9 @@ export async function getSessionUserId(): Promise<string> {
     }
   } catch {
     // getServerSession may fail outside of request context (e.g. scripts)
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Non authentifié');
   }
   return getDefaultUserId();
 }

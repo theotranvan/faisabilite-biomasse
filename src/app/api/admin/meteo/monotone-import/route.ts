@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, isAdmin } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Accès réservé aux administrateurs' }, { status: 403 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const ville = (formData.get('ville') as string)?.trim();
@@ -21,10 +25,11 @@ export async function POST(req: NextRequest) {
       temperatureExt: parseFloat(line.trim()) || 0,
     }));
 
-    // Delete existing data for this city
-    await db.meteoMonotone.deleteMany({ where: { ville } });
-    // Insert new data
-    await db.meteoMonotone.createMany({ data: records });
+    // Delete existing data for this city and insert new data atomically
+    await db.$transaction([
+      db.meteoMonotone.deleteMany({ where: { ville } }),
+      db.meteoMonotone.createMany({ data: records }),
+    ]);
 
     return NextResponse.json({ success: true, ville, heures: records.length });
   } catch (error: any) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 
 // Normalize parc data to match schema (whitelist valid fields only)
 function normalizeParc(data: any) {
@@ -24,7 +24,7 @@ function normalizeParc(data: any) {
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    // Mono-client app - no auth required
+    await getSessionUserId();
     const parcs = await db.parc.findMany({
       where: { affaireId: id }
     });
@@ -39,7 +39,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    // Mono-client app - no auth required
+    await getSessionUserId();
     const data = await req.json();
 
     // Vérifier que l'affaire existe
@@ -115,14 +115,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
-    // Mono-client app - no auth required
+    await params;
+    await getSessionUserId();
 
     const data = await req.json();
+    if (!data.id) {
+      return NextResponse.json({ error: 'ID du parc requis' }, { status: 400 });
+    }
     const parcData = normalizeParc(data);
 
-    const result = await db.parc.updateMany({
-      where: { affaireId: id },
+    const result = await db.parc.update({
+      where: { id: data.id },
       data: parcData
     });
 
@@ -135,7 +138,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, _context: { params: Promise<{ id: string }> }) {
   try {
-    // Mono-client app - no auth required
+    await getSessionUserId();
 
     const { parcId } = await req.json();
 

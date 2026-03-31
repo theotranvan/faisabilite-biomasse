@@ -1,11 +1,11 @@
-import { db, isAdmin } from '@/lib/db';
+import { db, isAdmin, getSessionUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Get a single affaire
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    // Mono-client app - no auth required
+    await getSessionUserId();
     const affaire = await db.affaire.findUnique({
       where: { id },
       include: {
@@ -35,7 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    // Mono-client app - no auth required
+    await getSessionUserId();
     const existingAffaire = await db.affaire.findUnique({
       where: { id },
     });

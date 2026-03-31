@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
+    await getSessionUserId();
     const { batimentId } = await params;
     const travauxIsolation = await db.travauxIsolation.findUnique({
       where: { batimentId },
@@ -23,6 +24,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
+    await getSessionUserId();
     const { id, batimentId } = await params;
     const data = await req.json();
     const lignes = data.lignes || [];

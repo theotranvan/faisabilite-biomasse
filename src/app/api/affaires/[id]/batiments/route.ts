@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, getSessionUserId } from '@/lib/db';
 
 // Normalize batiment data from form to match schema (whitelist valid fields only)
 function normalizeBatiment(b: any) {
@@ -35,6 +35,7 @@ function normalizeBatiment(b: any) {
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await getSessionUserId();
     const batiments = await db.batiment.findMany({
       where: { affaireId: id }
     });
@@ -49,6 +50,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await getSessionUserId();
     const data = await req.json();
 
     // Support { batiments: [...] } wrapper format
@@ -113,14 +115,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
-    // Mono-client app - no auth required
+    await params;
+    await getSessionUserId();
 
     const data = await req.json();
+    if (!data.id) {
+      return NextResponse.json({ error: 'ID du bâtiment requis' }, { status: 400 });
+    }
     const normalized = normalizeBatiment(data);
 
-    const batiment = await db.batiment.updateMany({
-      where: { affaireId: id },
+    const batiment = await db.batiment.update({
+      where: { id: data.id },
       data: normalized
     });
 
@@ -133,7 +138,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, _context: { params: Promise<{ id: string }> }) {
   try {
-    // Mono-client app - no auth required
+    await getSessionUserId();
 
     const { batimentId } = await req.json();
 
