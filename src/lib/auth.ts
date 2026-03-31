@@ -16,26 +16,31 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-        });
+        try {
+          const user = await db.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        if (!user) {
+          if (!user) {
+            return null;
+          }
+
+          const isValid = await compare(credentials.password, user.password);
+
+          if (!isValid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: `${user.prenom} ${user.nom}`,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('[NextAuth] authorize error:', error);
           return null;
         }
-
-        const isValid = await compare(credentials.password, user.password);
-
-        if (!isValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: `${user.prenom} ${user.nom}`,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -63,4 +68,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
 };
