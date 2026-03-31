@@ -164,13 +164,13 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                 <label className="block text-sm font-medium text-gray-700 mb-1">Rendement chaudière appoint (%)</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
-                  max="1"
+                  max="100"
                   value={parc.rendementChaudiere2 || ''}
                   onChange={(e) => updateParc(parc.numero, 'rendementChaudiere2', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="0.85"
+                  placeholder="85"
                 />
               </div>
             </div>
