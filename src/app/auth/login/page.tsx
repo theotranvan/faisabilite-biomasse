@@ -2,21 +2,22 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Button, Input } from '@/components/ui/Form';
 import { Alert } from '@/components/ui/Layout';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [debugInfo, setDebugInfo] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setDebugInfo('');
     setIsLoading(true);
 
     try {
@@ -26,13 +27,17 @@ export default function LoginPage() {
         redirect: false,
       });
 
+      setDebugInfo(JSON.stringify(result, null, 2));
+
       if (result?.error) {
-        setError('Email ou mot de passe incorrect');
+        setError(`Erreur: ${result.error}`);
       } else if (result?.ok) {
-        router.push('/dashboard');
+        // Force a hard navigation to ensure cookies are sent
+        window.location.href = '/dashboard';
       }
-    } catch (err) {
-      setError('Une erreur est survenue');
+    } catch (err: any) {
+      setError(`Exception: ${err.message}`);
+      setDebugInfo(err.stack || err.message);
     } finally {
       setIsLoading(false);
     }
@@ -81,6 +86,12 @@ export default function LoginPage() {
             S'inscrire
           </Link>
         </p>
+
+        {debugInfo && (
+          <pre className="mt-4 p-3 bg-gray-100 text-xs text-gray-800 rounded overflow-auto max-h-40">
+            {debugInfo}
+          </pre>
+        )}
       </div>
     </div>
   );
