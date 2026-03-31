@@ -3,7 +3,6 @@ import { db, getSessionUserId } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
-    // Mono-client app - no auth required
     const { affaireId } = await req.json();
 
     // Fetch source affaire

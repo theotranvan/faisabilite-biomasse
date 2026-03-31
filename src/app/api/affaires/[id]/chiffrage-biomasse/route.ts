@@ -36,7 +36,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    // Mono-client app - no auth required
     const rawData = await req.json();
 
     // Strip non-schema fields and map form names to schema names
