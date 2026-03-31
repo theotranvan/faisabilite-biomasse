@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/shared/Header';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
@@ -138,6 +138,18 @@ export default function NewAffairePage() {
     dureeEmprunt: 15,
   });
 
+  // Load DJU for default département on mount
+  useEffect(() => {
+    fetch('/api/meteo/18')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.dju) {
+          setAffaire(prev => ({ ...prev, djuRetenu: Math.round(data.dju) }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const [batiments, setBatiments] = useState<Batiment[]>([
     {
       numero: 1,
@@ -168,13 +180,26 @@ export default function NewAffairePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setAffaire({
+    const updated = {
       ...affaire,
       [name]:
         name.includes('Base') || name.includes('DJU') || name.includes('ugmentation') || name.includes('uree')
           ? parseFloat(value) || 0
           : value,
-    });
+    };
+    setAffaire(updated);
+
+    // Auto-fetch DJU when département changes
+    if (name === 'departement') {
+      fetch(`/api/meteo/${value}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.dju) {
+            setAffaire(prev => ({ ...prev, djuRetenu: Math.round(data.dju) }));
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   const handleBatimentChange = (idx: number, field: string, value: any) => {
