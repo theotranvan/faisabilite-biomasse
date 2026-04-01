@@ -13,13 +13,13 @@ export function Header() {
   const isAdminUser = userRole === 'ADMIN';
 
   // Ne pas afficher le bouton retour sur la page d'accueil ou dashboard
-  const showBackButton = !['/dashboard', '/', '/accueil'].includes(pathname);
+  const showBackButton = !['/dashboard', '/', '/accueil', '/affaires'].includes(pathname);
 
   const navLinks = [
-    { href: '/', label: 'Accueil', match: (p: string) => p === '/' },
-    { href: '/affaires', label: 'Affaires', match: (p: string) => p.startsWith('/affaires') },
+    { href: '/affaires', label: 'Accueil', match: (p: string) => p === '/' || p === '/affaires' },
+    { href: '/affaires/new', label: 'Nouvelle étude', match: (p: string) => p === '/affaires/new' },
     ...(isAdminUser ? [
-      { href: '/couts', label: 'Coûts', match: (p: string) => p === '/couts' },
+      { href: '/couts', label: 'BDD Coûts', match: (p: string) => p === '/couts' },
       { href: '/admin/meteo', label: 'Météo', match: (p: string) => p.startsWith('/admin/meteo') },
     ] : []),
   ];
@@ -28,7 +28,7 @@ export function Header() {
     <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         <div className="flex items-center gap-10">
-          <Link href="/" className="font-bold text-gray-900 text-lg tracking-tight hover:text-blue-600 transition">
+          <Link href="/affaires" className="font-bold text-gray-900 text-lg tracking-tight hover:text-blue-600 transition">
             Faisabilité Biomasse
           </Link>
 
@@ -59,12 +59,6 @@ export function Header() {
               ← Retour
             </button>
           )}
-          <Link
-            href="/affaires/new"
-            className="px-4 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
-          >
-            + Nouvelle étude
-          </Link>
           {session?.user && (
             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
               {isAdminUser && (
@@ -74,7 +68,7 @@ export function Header() {
               )}
               <span className="text-sm text-gray-500">{session.user.name || session.user.email}</span>
               <button
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => signOut({ callbackUrl: '/auth/login' })}
                 className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
               >
                 Déconnexion

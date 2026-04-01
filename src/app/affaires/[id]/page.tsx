@@ -45,12 +45,12 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { id: 'info', label: 'Informations', icon: '📋' },
+  { id: 'info', label: 'Données générales', icon: '📋' },
   { id: 'batiments', label: 'Bâtiments', icon: '🏢' },
   { id: 'isolation', label: 'Isolation', icon: '🧊' },
-  { id: 'parc', label: 'Réseau', icon: '🔥' },
-  { id: 'chiffrage', label: 'Coûts', icon: '💰' },
-  { id: 'resultats', label: 'Résultats', icon: '📊' },
+  { id: 'parc', label: 'Configuration biomasse', icon: '🔥' },
+  { id: 'chiffrage', label: 'Chiffrage', icon: '💰' },
+  { id: 'resultats', label: 'Synthèse & Résultats', icon: '📊' },
   { id: 'validation', label: 'Validation', icon: '✓' },
   { id: 'export', label: 'Export', icon: '📄' },
 ];
@@ -598,8 +598,8 @@ export default function AffaireDetailPage() {
                 {/* Sous-onglets */}
                 <div className="flex gap-1 border-b border-gray-200">
                   {([
-                    { id: 'chaufferie' as const, label: 'Chaufferie' },
-                    { id: 'silo' as const, label: 'Silo' },
+                    { id: 'chaufferie' as const, label: 'Chaufferie & Réseau' },
+                    { id: 'silo' as const, label: 'Silo & Stockage' },
                   ]).map(tab => (
                     <button
                       key={tab.id}
