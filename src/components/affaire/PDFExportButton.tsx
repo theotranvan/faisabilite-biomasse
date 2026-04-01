@@ -303,10 +303,14 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       };
 
       const fmtEur = (v: number) => {
-        const formatted = Math.round(v).toLocaleString('fr-FR');
+        const formatted = Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         return formatted + ' EUR';
       };
-      const fmtNum = (v: number, d = 0) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
+      const fmtNum = (v: number, d = 0) => {
+        const parts = v.toFixed(d).split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return d > 0 ? parts[0] + ',' + (parts[1] || '') : parts[0];
+      };
 
       // ═════════════════════════════════════════
       // PAGE DE GARDE
