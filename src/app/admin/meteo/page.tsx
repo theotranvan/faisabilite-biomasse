@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader } from '@/components/ui/Layout';
 import { Button } from '@/components/ui/Form';
+import Header from '@/components/shared/Header';
 
 export default function AdminMeteoPage() {
   const [villes, setVilles] = useState<string[]>([]);
@@ -70,8 +71,9 @@ export default function AdminMeteoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
         <h1 className="text-2xl font-bold text-gray-900">Administration Météo</h1>
 
         {/* DJU Import */}
