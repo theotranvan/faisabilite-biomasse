@@ -15,12 +15,12 @@ L'app sera sur `http://localhost:3000`
 ### 2. Accounts de test
 
 **Admin:**
-- Email: admin@example.com
-- Password: admin123
+- Email: admin@biomasse.local
+- Password: biomasse2026
 
 **User:**
-- Email: user@example.com
-- Password: user123
+- Email: user@unique.local
+- Password: biomasse2026
  
 Ou créez votre propre compte via `/auth/register`
 

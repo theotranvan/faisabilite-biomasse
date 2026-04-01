@@ -197,7 +197,21 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                 État initial
               </button>
               <button
-                onClick={() => setActiveTab('etat_ref')}
+                onClick={() => {
+                  // Copier les valeurs initiales vers les champs ref s'ils sont null
+                  setBatiments(prev => prev.map(b => ({
+                    ...b,
+                    refDeperditions: b.refDeperditions ?? b.deperditions,
+                    refTypeEnergie: b.refTypeEnergie ?? b.typeEnergie,
+                    refRendementProduction: b.refRendementProduction ?? b.rendementProduction,
+                    refRendementDistribution: b.refRendementDistribution ?? b.rendementDistribution,
+                    refRendementEmission: b.refRendementEmission ?? b.rendementEmission,
+                    refRendementRegulation: b.refRendementRegulation ?? b.rendementRegulation,
+                    refTarification: b.refTarification ?? b.tarification,
+                    refAbonnement: b.refAbonnement ?? b.abonnement,
+                  })));
+                  setActiveTab('etat_ref');
+                }}
                 className={`px-4 py-2 font-semibold transition ${activeTab === 'etat_ref' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'}`}
               >
                 État de référence
@@ -375,18 +389,38 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                 <p className="text-sm text-gray-600 mb-4">Modifier les valeurs de référence pour chaque bâtiment (après travaux d'isolation)</p>
                 {batiments.map((batiment) => (
                   <div key={batiment.id} className="mb-4 p-4 bg-white rounded border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-3">{batiment.designation}</h4>
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-semibold text-gray-900">{batiment.designation}</h4>
+                      <button
+                        type="button"
+                        onClick={() => setBatiments(prev => prev.map(b =>
+                          b.id === batiment.id ? {
+                            ...b,
+                            refDeperditions: b.deperditions,
+                            refTypeEnergie: b.typeEnergie,
+                            refRendementProduction: b.rendementProduction,
+                            refRendementDistribution: b.rendementDistribution,
+                            refRendementEmission: b.rendementEmission,
+                            refRendementRegulation: b.rendementRegulation,
+                            refTarification: b.tarification,
+                            refAbonnement: b.abonnement,
+                          } : b
+                        ))}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      >
+                        ↻ Réinitialiser à l&apos;état initial
+                      </button>
+                    </div>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <label className="block text-gray-600 mb-1">Déperditions ref (kW)</label>
-                        <input type="number" value={batiment.refDeperditions ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refDeperditions', e.target.value || null)}
-                          placeholder={String(batiment.deperditions)}
+                        <input type="number" value={batiment.refDeperditions ?? batiment.deperditions}
+                          onChange={(e) => updateBatiment(batiment.id, 'refDeperditions', e.target.value || batiment.deperditions)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Type énergie ref</label>
-                        <select value={batiment.refTypeEnergie || ''}
+                        <select value={batiment.refTypeEnergie || batiment.typeEnergie}
                           onChange={(e) => {
                             const newType = e.target.value || null;
                             if (!newType) {
@@ -409,50 +443,44 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                             }
                           }}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                          <option value="">Identique initial</option>
+                          <option value="" disabled>-- Choisir --</option>
                           {TYPES_ENERGIE.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt production ref (%)</label>
-                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementProduction ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refRendementProduction', e.target.value || null)}
-                          placeholder={String(batiment.rendementProduction)}
+                        <input type="number" step="1" min="0" max="110" value={batiment.refRendementProduction ?? batiment.rendementProduction}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementProduction', e.target.value || batiment.rendementProduction)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt distribution ref (%)</label>
-                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementDistribution ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refRendementDistribution', e.target.value || null)}
-                          placeholder={String(batiment.rendementDistribution)}
+                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementDistribution ?? batiment.rendementDistribution}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementDistribution', e.target.value || batiment.rendementDistribution)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt émission ref (%)</label>
-                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementEmission ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refRendementEmission', e.target.value || null)}
-                          placeholder={String(batiment.rendementEmission)}
+                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementEmission ?? batiment.rendementEmission}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementEmission', e.target.value || batiment.rendementEmission)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt régulation ref (%)</label>
-                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementRegulation ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refRendementRegulation', e.target.value || null)}
-                          placeholder={String(batiment.rendementRegulation)}
+                        <input type="number" step="1" min="0" max="100" value={batiment.refRendementRegulation ?? batiment.rendementRegulation}
+                          onChange={(e) => updateBatiment(batiment.id, 'refRendementRegulation', e.target.value || batiment.rendementRegulation)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Tarification ref (€/kWh)</label>
-                        <input type="number" step="0.001" value={batiment.refTarification ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refTarification', e.target.value || null)}
-                          placeholder={String(batiment.tarification)}
+                        <input type="number" step="0.001" value={batiment.refTarification ?? batiment.tarification}
+                          onChange={(e) => updateBatiment(batiment.id, 'refTarification', e.target.value || batiment.tarification)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                       <div>
                         <label className="block text-gray-600 mb-1">Abonnement ref (€/an)</label>
-                        <input type="number" value={batiment.refAbonnement ?? ''}
-                          onChange={(e) => updateBatiment(batiment.id, 'refAbonnement', e.target.value || null)}
-                          placeholder={String(batiment.abonnement)}
+                        <input type="number" value={batiment.refAbonnement ?? batiment.abonnement}
+                          onChange={(e) => updateBatiment(batiment.id, 'refAbonnement', e.target.value || batiment.abonnement)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
                     </div>

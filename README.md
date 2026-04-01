@@ -20,8 +20,8 @@ npm run dev
 ```
 
 ## Comptes par défaut
-- Admin : admin@biomasse.local / admin123
-- User : user@unique.local / password
+- Admin : admin@biomasse.local / biomasse2026
+- User : user@unique.local / biomasse2026
 
 ## Tests
 ```bash
