@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/shared/Header';
+import { LoadingScreen } from '@/components/ui/Loading';
 
 interface Affaire {
   id: string;
@@ -108,10 +109,7 @@ export default function AffairesPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Chargement...</p>
-          </div>
+          <LoadingScreen message="Chargement des affaires..." />
         ) : filteredAffaires.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>{searchTerm || filterStatus !== 'tous' ? 'Aucune affaire ne correspond' : 'Aucune affaire pour le moment'}</p>

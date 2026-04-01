@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/shared/Header';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { Button, Input } from '@/components/ui/Form';
+import { LoadingScreen } from '@/components/ui/Loading';
 
 interface Cout {
   id: string;
@@ -307,10 +308,7 @@ export default function CoutsPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Chargement...</p>
-          </div>
+          <LoadingScreen message="Chargement des coûts..." />
         ) : couts.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm">
             <p className="text-gray-600 mb-4">Aucun coût défini</p>

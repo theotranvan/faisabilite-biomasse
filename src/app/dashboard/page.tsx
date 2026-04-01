@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/shared/Header';
 import { Card, CardHeader } from '@/components/ui/Layout';
+import { LoadingScreen } from '@/components/ui/Loading';
 
 interface Affaire {
   id: string;
@@ -131,10 +132,7 @@ export default function DashboardPage() {
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-4 text-gray-600">Chargement...</p>
-            </div>
+            <LoadingScreen message="Chargement de vos études..." />
           ) : filteredAffaires.length === 0 ? (
             <Card className="text-center py-16">
               <div className="space-y-4">

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/shared/Header';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { Button } from '@/components/ui/Form';
+import { LoadingScreen } from '@/components/ui/Loading';
 import {
   LineChart,
   Line,
@@ -87,7 +88,7 @@ export default function ResultatsPage() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center">Chargement des résultats...</div>
+          <LoadingScreen message="Chargement des résultats..." />
         </main>
       </div>
     );

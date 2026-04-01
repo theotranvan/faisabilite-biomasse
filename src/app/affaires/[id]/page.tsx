@@ -8,6 +8,7 @@ import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { Button, Input, Select, TextArea } from '@/components/ui/Form';
 import { BatimentTable } from '@/components/affaire/BatimentTable';
 import { ParcConfig } from '@/components/affaire/ParcConfig';
+import { LoadingFullPage } from '@/components/ui/Loading';
 import { SchemaSynoptiqueBiomasse } from '@/components/affaire/SchemaSynoptiqueBiomasse';
 import { IsolationBatimentForm } from '@/components/affaire/IsolationBatimentForm';
 import { IsolationParcRecap } from '@/components/affaire/IsolationParcRecap';
@@ -238,11 +239,7 @@ export default function AffaireDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Chargement...</p>
-      </div>
-    );
+    return <LoadingFullPage message="Chargement du projet..." />;
   }
 
   if (!affaire) {
