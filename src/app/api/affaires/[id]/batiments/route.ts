@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         if (!b.designation || b.designation.trim() === '') errors.push('Désignation manquante');
         if (b.surfaceChauffee != null && parseFloat(b.surfaceChauffee) < 0) errors.push('Surface chauffée ne peut pas être négative');
         if (b.deperditions != null && parseFloat(b.deperditions) < 0) errors.push('Déperditions ne peuvent pas être négatives');
-        if (b.rendementProduction != null && (parseFloat(b.rendementProduction) < 0 || parseFloat(b.rendementProduction) > 100)) errors.push('Rendement production doit être entre 0 et 100');
+        if (b.rendementProduction != null && (parseFloat(b.rendementProduction) < 0 || parseFloat(b.rendementProduction) > 110)) errors.push('Rendement production doit être entre 0 et 110');
         if (b.rendementDistribution != null && (parseFloat(b.rendementDistribution) < 0 || parseFloat(b.rendementDistribution) > 100)) errors.push('Rendement distribution doit être entre 0 et 100');
         if (b.rendementEmission != null && (parseFloat(b.rendementEmission) < 0 || parseFloat(b.rendementEmission) > 100)) errors.push('Rendement émission doit être entre 0 et 100');
         if (b.rendementRegulation != null && (parseFloat(b.rendementRegulation) < 0 || parseFloat(b.rendementRegulation) > 100)) errors.push('Rendement régulation doit être entre 0 et 100');

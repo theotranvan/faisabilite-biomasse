@@ -323,7 +323,7 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                     <div className="grid grid-cols-4 gap-4 text-sm">
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt production (%)</label>
-                        <input type="number" step="1" min="0" max="100" value={batiment.rendementProduction}
+                        <input type="number" step="1" min="0" max="110" value={batiment.rendementProduction}
                           onChange={(e) => updateBatiment(batiment.id, 'rendementProduction', e.target.value)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>

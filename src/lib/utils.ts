@@ -145,9 +145,9 @@ export function validateBatimentData(batiment: any): {
 
   if (
     batiment.rendementProduction < 50 ||
-    batiment.rendementProduction > 100
+    batiment.rendementProduction > 110
   ) {
-    errors.push('Rendement production doit être entre 50% et 100%');
+    errors.push('Rendement production doit être entre 50% et 110%');
   }
 
   if (
