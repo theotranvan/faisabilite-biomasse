@@ -1,0 +1,48 @@
+EMISSION DE CO2,,,ACTUELLE,REFERENCE,FUTURE,,,,Kg CO2/KWh,tCO2 / Tep,Kg SO2/KWh,tSO2 / Tep,,
+,,,Fioul,Fioul,Biomasse,,,Plaquette,0.013,0.163826,0.00025,0.0031505,,
+Consommation,,KWh,#REF!,#REF!,#REF!,,,Granulé,0.027,0.340254,0.00024,0.00302448,,
+PCI,,KWh/Kg,,,,,,Fuel,0.314,3.957028,0.00074,0.00932548,,
+Consommation,,tonne,#REF!,#REF!,#REF!,,,Gaz nat,0.243,3.062286,0.0007,0.0088214,,
+Masse,,tonne pour une TEP,,,,,,Propane,0.27,3.40254,0.0015,0.018903,,
+TEP,,,#REF!,#REF!,#REF!,,,Electricité,0.21,2.64642,0.00086,0.01083772,,
+Emission de CO2/TEP,,tonne CO2/Tep,,,,,,Tep,12602,KWh,,,,
+Emission de CO2,,tonne,#REF!,#REF!,#REF!,,,,,,,,,
+Emission de CO2,,tonne CO2/an,#REF!,#REF!,#REF!,,,,PCI Kwh/kg,t/Tep,,,,
+,,,,,,,,Fuel,11.86,1.063,,,,
+EMISSION DE SO2,,,ACTUELLE,REFERENCE,FUTURE,,,Gaz nat,10.83,1.164,,,,
+,,,Fioul,Fioul,Biomasse,,,Gaz propane,10.83,1.164,,,,
+Consommation,,KWh,#REF!,#REF!,#REF!,,,Bois,4.6,2.740,,,,
+PCI,,KWh/Kg,,,,,,Elec,,,,,,
+Consommation,,tonne,#REF!,#REF!,#REF!,,,,,,,,,
+Masse,,tonne pour une TEP,,,,,,Fuel,9.9624,PCI Kwh/l,,,,
+TEP,,,#REF!,#REF!,#REF!,,,,,,,,,
+Emission de SO2/TEP,,tonne SO2/Tep,,,,,,,,,,,,
+Emission de SO2,,tonne,#REF!,#REF!,#REF!,,,,PARC 1,,,PARC 1+2,,
+Emission de SO2,,tonne CO2/an,#REF!,#REF!,#REF!,,,,ACTUELLE,REFERENCE,FUTURE,ACTUELLE,REFERENCE,FUTURE
+,,,,,,,,elec, -      , -      , -      ,,#REF!, -      
+,,,,,,,,fuel,#REF!, -      ,,, -      , -      
+,,,,,,,,gaz propane,#REF!,#REF!, -      ,,,
+EMISSION DE CO2,,,ACTUELLE,REFERENCE,FUTURE,,,bois,#REF!,#REF!,#REF!,,,
+,,,Fioul+Elec,Fioul,Biomasse+fioul,,,gaz naturel,#REF!,#REF!,,#REF!,#REF!,
+Consommation,,KWh,#REF!,#REF!,0,,,,#REF!,#REF!,#REF!,#REF!,#REF!, -      
+PCI,,KWh/Kg,,,,,,,,,,,,
+Consommation,,tonne,#REF!,#REF!,0.00,,tonne,elec,,,,,,
+Masse,,tonne pour une TEP,,,,,,fuel,#REF!, -      , -      , -      , -      , -      
+TEP,,,#REF!,#REF!,0.00,,,gaz propane,#REF!,#REF!, -      , -      , -      , -      
+Emission de CO2/TEP,,tonne CO2/Tep,,,,,,bois,#REF!,#REF!,#REF!, -      , -      , -      
+Emission de CO2,,tonne,#REF!,#REF!,0.00,,,gaz naturel,#REF!,#REF!, -      ,#REF!,#REF!, -      
+Emission de CO2,,tonne CO2/an,#REF!,#REF!,0,,TEP,elec, -      , -      , -      , -      ,#REF!, -      
+,,,,,,,,fuel,#REF!, -      , -      , -      , -      , -      
+EMISSION DE SO2,,,ACTUELLE,REFERENCE,FUTURE,,,gaz propane,#REF!,#REF!, -      , -      , -      , -      
+,,,Fioul+Elec,Fioul,Biomasse+fioul,,,bois,#REF!,#REF!,#REF!, -      , -      , -      
+Consommation,,KWh,#REF!,#REF!,0,,,gaz naturel,#REF!,#REF!, -      ,#REF!,#REF!, -      
+PCI,,KWh/Kg,,,,,Emission de CO2,elec, -      , -      , -      , -      ,#REF!, -      
+Consommation,,tonne,#REF!,#REF!,0.000,,,fuel,#REF!, -      , -      , -      , -      , -      
+Masse,,tonne pour une TEP,,,,,,gaz propane,#REF!,#REF!, -      , -      , -      , -      
+TEP,,,#REF!,#REF!,0.000,,,bois,#REF!,#REF!,#REF!, -      , -      , -      
+Emission de SO2/TEP,,tonne SO2/Tep,,,,,,gaz naturel,#REF!,#REF!, -      ,#REF!,#REF!, -      
+Emission de SO2,,tonne,#REF!,#REF!,0.000,,Emission de SO2,elec, -      , -      , -      , -      ,#REF!, -      
+Emission de SO2,,tonne CO2/an,#REF!,#REF!,0.00,,,fuel,#REF!, -      , -      , -      , -      , -      
+,,,,,,,,gaz propane,#REF!,#REF!, -      , -      , -      , -      
+,,,,,,,,bois,#REF!,#REF!,#REF!, -      , -      , -      
+,,,,,,,,gaz naturel,#REF!,#REF!, -      ,#REF!,#REF!, -      

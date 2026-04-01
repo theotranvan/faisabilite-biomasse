@@ -1,0 +1,1274 @@
+[
+  {
+    "cell": "L3",
+    "formula": "(K3*$K$9)/1000",
+    "value": 0.163826,
+    "type": "n"
+  },
+  {
+    "cell": "M3",
+    "formula": "0.25/1000",
+    "value": 0.00025,
+    "type": "n"
+  },
+  {
+    "cell": "N3",
+    "formula": "(M3*$K$9)/1000",
+    "value": 0.0031505,
+    "type": "n"
+  },
+  {
+    "cell": "E4",
+    "formula": "K28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F4",
+    "formula": "L28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G4",
+    "formula": "M28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L4",
+    "formula": "(K4*$K$9)/1000",
+    "value": 0.340254,
+    "type": "n"
+  },
+  {
+    "cell": "N4",
+    "formula": "(M4*$K$9)/1000",
+    "value": 0.00302448,
+    "type": "n"
+  },
+  {
+    "cell": "L5",
+    "formula": "(K5*$K$9)/1000",
+    "value": 3.9570279999999998,
+    "type": "n"
+  },
+  {
+    "cell": "N5",
+    "formula": "(M5*$K$9)/1000",
+    "value": 0.00932548,
+    "type": "n"
+  },
+  {
+    "cell": "E6",
+    "formula": "SUM(K30:K34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F6",
+    "formula": "SUM(L30:L34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G6",
+    "formula": "SUM(M30:M34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L6",
+    "formula": "(K6*$K$9)/1000",
+    "value": 3.062286,
+    "type": "n"
+  },
+  {
+    "cell": "N6",
+    "formula": "(M6*$K$9)/1000",
+    "value": 0.0088214,
+    "type": "n"
+  },
+  {
+    "cell": "L7",
+    "formula": "(K7*$K$9)/1000",
+    "value": 3.4025400000000006,
+    "type": "n"
+  },
+  {
+    "cell": "N7",
+    "formula": "(M7*$K$9)/1000",
+    "value": 0.018903,
+    "type": "n"
+  },
+  {
+    "cell": "E8",
+    "formula": "SUM(K35:K39)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F8",
+    "formula": "SUM(L35:L39)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G8",
+    "formula": "SUM(M35:M39)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L8",
+    "formula": "(K8*$K$9)/1000",
+    "value": 2.64642,
+    "type": "n"
+  },
+  {
+    "cell": "N8",
+    "formula": "(M8*$K$9)/1000",
+    "value": 0.010837719999999999,
+    "type": "n"
+  },
+  {
+    "cell": "E10",
+    "formula": "SUM(K40:K44)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F10",
+    "formula": "SUM(L40:L44)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G10",
+    "formula": "SUM(M40:M44)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E11",
+    "formula": "E10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F11",
+    "formula": "F10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G11",
+    "formula": "G10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L12",
+    "formula": "$K$9/(K12*1000)",
+    "value": 1.0625632377740304,
+    "type": "n"
+  },
+  {
+    "cell": "L13",
+    "formula": "$K$9/(K13*1000)",
+    "value": 1.1636195752539242,
+    "type": "n"
+  },
+  {
+    "cell": "E14",
+    "formula": "E3",
+    "value": "Fioul",
+    "type": "s"
+  },
+  {
+    "cell": "F14",
+    "formula": "F3",
+    "value": "Fioul",
+    "type": "s"
+  },
+  {
+    "cell": "G14",
+    "formula": "G3",
+    "value": "Biomasse",
+    "type": "s"
+  },
+  {
+    "cell": "L14",
+    "formula": "$K$9/(K14*1000)",
+    "value": 1.1636195752539242,
+    "type": "n"
+  },
+  {
+    "cell": "E15",
+    "formula": "E4",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F15",
+    "formula": "F4",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G15",
+    "formula": "G4",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L15",
+    "formula": "$K$9/(K15*1000)",
+    "value": 2.7395652173913043,
+    "type": "n"
+  },
+  {
+    "cell": "E17",
+    "formula": "SUM(K30:K34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F17",
+    "formula": "SUM(L30:L34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G17",
+    "formula": "SUM(M30:M34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K18",
+    "formula": "K12*0.84",
+    "value": 9.962399999999999,
+    "type": "n"
+  },
+  {
+    "cell": "E19",
+    "formula": "E8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F19",
+    "formula": "F8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G19",
+    "formula": "G8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E21",
+    "formula": "SUM(K45:K49)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F21",
+    "formula": "SUM(L45:L49)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G21",
+    "formula": "SUM(M45:M49)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E22",
+    "formula": "E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F22",
+    "formula": "F21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G22",
+    "formula": "G21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O23",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,0.15,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K24",
+    "formula": "'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K25",
+    "formula": "'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L25",
+    "formula": "'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K26",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,J26,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L26",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,J26,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M26",
+    "formula": "'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!*1",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K27",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,J27,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L27",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,J27,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N27",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,0.6,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O27",
+    "formula": "SUMIF('Déperditions et consommations'!#REF!,0.6,'Déperditions et consommations'!#REF!)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E28",
+    "formula": "N28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F28",
+    "formula": "O28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G28",
+    "formula": "P28",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K28",
+    "formula": "SUM(K23:K27)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L28",
+    "formula": "SUM(L23:L27)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M28",
+    "formula": "SUM(M23:M27)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N28",
+    "formula": "SUM(N23:N27)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O28",
+    "formula": "SUM(O23:O27)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P28",
+    "formula": "SUM(P24:P27)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E30",
+    "formula": "SUM(N30:N34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F30",
+    "formula": "SUM(O30:O34)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G30",
+    "formula": "SUM(P30:P34)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K31",
+    "formula": "(K24/$K$12)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L31",
+    "formula": "(L24/$K$12)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M31",
+    "formula": "(M24/$K$12)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N31",
+    "formula": "(N24/$K$12)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O31",
+    "formula": "(O24/$K$12)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P31",
+    "formula": "(P24/$K$12)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E32",
+    "formula": "SUM(N35:N39)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F32",
+    "formula": "SUM(O35:O39)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G32",
+    "formula": "SUM(P35:P39)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K32",
+    "formula": "(K25/$K$14)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L32",
+    "formula": "(L25/$K$14)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M32",
+    "formula": "(M25/$K$14)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N32",
+    "formula": "(N25/$K$14)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O32",
+    "formula": "(O25/$K$14)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P32",
+    "formula": "(P25/$K$14)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K33",
+    "formula": "(K26/$K$15)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L33",
+    "formula": "(L26/$K$15)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M33",
+    "formula": "(M26/$K$15)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N33",
+    "formula": "(N26/$K$15)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O33",
+    "formula": "(O26/$K$15)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P33",
+    "formula": "(P26/$K$15)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E34",
+    "formula": "SUM(N40:N44)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F34",
+    "formula": "SUM(O40:O44)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G34",
+    "formula": "SUM(P40:P44)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K34",
+    "formula": "(K27/$K$13)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L34",
+    "formula": "(L27/$K$13)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M34",
+    "formula": "(M27/$K$13)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N34",
+    "formula": "(N27/$K$13)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O34",
+    "formula": "(O27/$K$13)/1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P34",
+    "formula": "(P27/$K$13)/1000",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E35",
+    "formula": "E34",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F35",
+    "formula": "F34",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G35",
+    "formula": "G34",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K35",
+    "formula": "K23/$K$9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "L35",
+    "formula": "L23/$K$9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M35",
+    "formula": "M23/$K$9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N35",
+    "formula": "N23/$K$9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O35",
+    "formula": "O23/$K$9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P35",
+    "formula": "P23/$K$9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K36",
+    "formula": "K31/$L$12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L36",
+    "formula": "L31/$L$12",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M36",
+    "formula": "M31/$L$12",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N36",
+    "formula": "N31/$L$12",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O36",
+    "formula": "O31/$L$12",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P36",
+    "formula": "P31/$L$12",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K37",
+    "formula": "K32/$L$14",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L37",
+    "formula": "L32/$L$14",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M37",
+    "formula": "M32/$L$14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N37",
+    "formula": "N32/$L$14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O37",
+    "formula": "O32/$L$14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P37",
+    "formula": "P32/$L$14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K38",
+    "formula": "K33/$L$15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L38",
+    "formula": "L33/$L$15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M38",
+    "formula": "M33/$L$15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N38",
+    "formula": "N33/$L$15",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O38",
+    "formula": "O33/$L$15",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P38",
+    "formula": "P33/$L$15",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E39",
+    "formula": "E28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F39",
+    "formula": "F28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G39",
+    "formula": "G28",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K39",
+    "formula": "K34/$L$13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L39",
+    "formula": "L34/$L$13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M39",
+    "formula": "M34/$L$13",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N39",
+    "formula": "N34/$L$13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O39",
+    "formula": "O34/$L$13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P39",
+    "formula": "P34/$L$13",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K40",
+    "formula": "K35*$L$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "L40",
+    "formula": "L35*$L$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M40",
+    "formula": "M35*$L$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N40",
+    "formula": "N35*$L$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O40",
+    "formula": "O35*$L$8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P40",
+    "formula": "P35*$L$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E41",
+    "formula": "E30",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F41",
+    "formula": "F30",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G41",
+    "formula": "G30",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K41",
+    "formula": "K36*$L$5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L41",
+    "formula": "L36*$L$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M41",
+    "formula": "M36*$L$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N41",
+    "formula": "N36*$L$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O41",
+    "formula": "O36*$L$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P41",
+    "formula": "P36*$L$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K42",
+    "formula": "K37*$L$7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L42",
+    "formula": "L37*$L$7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M42",
+    "formula": "M37*$L$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N42",
+    "formula": "N37*$L$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O42",
+    "formula": "O37*$L$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P42",
+    "formula": "P37*$L$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E43",
+    "formula": "E32",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F43",
+    "formula": "F32",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G43",
+    "formula": "G32",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K43",
+    "formula": "K38*$L$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L43",
+    "formula": "L38*$L$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M43",
+    "formula": "M38*$L$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N43",
+    "formula": "N38*$L$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O43",
+    "formula": "O38*$L$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P43",
+    "formula": "P38*$L$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K44",
+    "formula": "K39*$L$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L44",
+    "formula": "L39*$L$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M44",
+    "formula": "M39*$L$6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N44",
+    "formula": "N39*$L$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O44",
+    "formula": "O39*$L$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P44",
+    "formula": "P39*$L$6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E45",
+    "formula": "SUM(N45:N49)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F45",
+    "formula": "SUM(O45:O49)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G45",
+    "formula": "SUM(P45:P49)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K45",
+    "formula": "K35*$N$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "L45",
+    "formula": "L35*$N$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M45",
+    "formula": "M35*$N$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N45",
+    "formula": "N35*$N$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O45",
+    "formula": "O35*$N$8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P45",
+    "formula": "P35*$N$8",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E46",
+    "formula": "E45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F46",
+    "formula": "F45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G46",
+    "formula": "G45",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K46",
+    "formula": "K36*$N$5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L46",
+    "formula": "L36*$N$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M46",
+    "formula": "M36*$N$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N46",
+    "formula": "N36*$N$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O46",
+    "formula": "O36*$N$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P46",
+    "formula": "P36*$N$5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K47",
+    "formula": "K37*$N$7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L47",
+    "formula": "L37*$N$7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M47",
+    "formula": "M37*$N$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N47",
+    "formula": "N37*$N$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O47",
+    "formula": "O37*$N$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P47",
+    "formula": "P37*$N$7",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K48",
+    "formula": "K38*$N$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L48",
+    "formula": "L38*$N$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M48",
+    "formula": "M38*$N$3",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N48",
+    "formula": "N38*$N$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "O48",
+    "formula": "O38*$N$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "P48",
+    "formula": "P38*$N$3",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K49",
+    "formula": "K39*$N$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L49",
+    "formula": "L39*$N$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M49",
+    "formula": "M39*$N$6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N49",
+    "formula": "N39*$N$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O49",
+    "formula": "O39*$N$6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "P49",
+    "formula": "P39*$N$6",
+    "value": 0,
+    "type": "n"
+  }
+]

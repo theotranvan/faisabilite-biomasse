@@ -1,0 +1,164 @@
+[
+  {
+    "cell": "F14",
+    "formula": "SUM(F10:F13)",
+    "value": 500000,
+    "type": "n"
+  },
+  {
+    "cell": "F15",
+    "formula": "SUM(G10:G13)",
+    "value": 500000,
+    "type": "n"
+  },
+  {
+    "cell": "F16",
+    "formula": "F14-F15",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D19",
+    "formula": "D4",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E19",
+    "formula": "E4",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F19",
+    "formula": "F4",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D20",
+    "formula": "D5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E20",
+    "formula": "E5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F20",
+    "formula": "F5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D21",
+    "formula": "D6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E21",
+    "formula": "E6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F21",
+    "formula": "F6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F23",
+    "formula": "F19+F22+F20+F21",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F24",
+    "formula": "F23+F16",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F25",
+    "formula": "F23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E28",
+    "formula": "$F$23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F28",
+    "formula": "E28*D28",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E29",
+    "formula": "$F$23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F29",
+    "formula": "E29*D29",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E30",
+    "formula": "$F$23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F30",
+    "formula": "E30*D30",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E31",
+    "formula": "$F$23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F31",
+    "formula": "E31*D31",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F33",
+    "formula": "SUM(F28:F31)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F35",
+    "formula": "F19+F33",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F36",
+    "formula": "F35*0.2",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F37",
+    "formula": "F36+F35",
+    "value": 0,
+    "type": "n"
+  }
+]

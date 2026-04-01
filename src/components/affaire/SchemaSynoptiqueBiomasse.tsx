@@ -29,6 +29,15 @@ function fmt(n: number, decimals = 1): string {
   return n.toLocaleString('fr-FR', { maximumFractionDigits: decimals, minimumFractionDigits: 0 });
 }
 
+const COMBUSTIBLE_LABELS: Record<string, string> = {
+  GAZ_NATUREL: 'Gaz naturel',
+  FUEL: 'Fioul',
+  GAZ_PROPANE: 'Propane',
+  ELECTRICITE: 'Électricité',
+  BOIS_DECHIQUETTE: 'Bois déchiqueté',
+  BOIS_GRANULES: 'Granulés',
+};
+
 export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
   const {
     puissanceChaudiereBois, rendementChaudiereBois,
@@ -184,7 +193,7 @@ export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
             {puissanceChaudiere2 > 0 ? `${fmt(puissanceChaudiere2, 0)} kW` : '-'}
           </text>
           <text x={55} y={73} textAnchor="middle" fontSize={8} fill="#9ca3af">
-            {combustibleAppoint || '-'}
+            {COMBUSTIBLE_LABELS[combustibleAppoint] || combustibleAppoint || '-'}
           </text>
         </g>
         {/* Valeurs appoint */}

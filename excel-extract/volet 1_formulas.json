@@ -1,0 +1,242 @@
+[
+  {
+    "cell": "D4",
+    "formula": "CONCAT(\"Consommation avant travaux (\",D2,\")\")",
+    "value": "Consommation avant travaux (kWhEP)",
+    "type": "s"
+  },
+  {
+    "cell": "F4",
+    "formula": "CONCAT(\"Consommation après travaux (\",D2,\")\")",
+    "value": "Consommation après travaux (kWhEP)",
+    "type": "s"
+  },
+  {
+    "cell": "H4",
+    "formula": "CONCAT(\"Gains sur les consos (\",D2,\")\")",
+    "value": "Gains sur les consos (kWhEP)",
+    "type": "s"
+  },
+  {
+    "cell": "B5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C5",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D5",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E5",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F5",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H5",
+    "formula": "(LEFT(D5,LEN(D5)-LEN($D$2)-1)-LEFT(F5,LEN(F5)-LEN($D$2)-1))/LEFT(D5,LEN(D5)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C6",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D6",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E6",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F6",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H6",
+    "formula": "(LEFT(D6,LEN(D6)-LEN($D$2)-1)-LEFT(F6,LEN(F6)-LEN($D$2)-1))/LEFT(D6,LEN(D6)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B7",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C7",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D7",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E7",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F7",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H7",
+    "formula": "(LEFT(D7,LEN(D7)-LEN($D$2)-1)-LEFT(F7,LEN(F7)-LEN($D$2)-1))/LEFT(D7,LEN(D7)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B8",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C8",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D8",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E8",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F8",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H8",
+    "formula": "(LEFT(D8,LEN(D8)-LEN($D$2)-1)-LEFT(F8,LEN(F8)-LEN($D$2)-1))/LEFT(D8,LEN(D8)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B9",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C9",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D9",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E9",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F9",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H9",
+    "formula": "(LEFT(D9,LEN(D9)-LEN($D$2)-1)-LEFT(F9,LEN(F9)-LEN($D$2)-1))/LEFT(D9,LEN(D9)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B10",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C10",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D10",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E10",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" W\")",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F10",
+    "formula": "CONCAT(TEXT('Déperditions et consommations'!#REF!,\"# ##0\"),\" \",$D$2)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H10",
+    "formula": "(LEFT(D10,LEN(D10)-LEN($D$2)-1)-LEFT(F10,LEN(F10)-LEN($D$2)-1))/LEFT(D10,LEN(D10)-LEN($D$2)-1)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "H11",
+    "formula": "SUM((LEFT(D5:D10,LEN(D5:D10)-LEN($D$2)-1))*H5:H10)/SUM(VALUE(LEFT(D5:D10,LEN(D5:D10)-LEN($D$2)-1)))",
+    "value": 23,
+    "type": "e"
+  }
+]

@@ -1,0 +1,1412 @@
+[
+  {
+    "cell": "G3",
+    "formula": "'Synthese sans subvention'!G3:H3",
+    "value": "Mixte fuel elec gaz propane",
+    "type": "s"
+  },
+  {
+    "cell": "I3",
+    "formula": "'Synthese sans subvention'!I3:J3",
+    "value": "Fuel",
+    "type": "s"
+  },
+  {
+    "cell": "K3",
+    "formula": "'Synthese sans subvention'!K3:L3",
+    "value": "PLAQUETTE",
+    "type": "s"
+  },
+  {
+    "cell": "S3",
+    "formula": "'Synthese sans subvention'!S3:T3",
+    "value": "Fuel",
+    "type": "s"
+  },
+  {
+    "cell": "U3",
+    "formula": "'Synthese sans subvention'!U3:V3",
+    "value": "Fuel",
+    "type": "s"
+  },
+  {
+    "cell": "W3",
+    "formula": "'Synthese sans subvention'!W3:X3",
+    "value": "PLAQUETTE",
+    "type": "s"
+  },
+  {
+    "cell": "AE3",
+    "formula": "'Synthese sans subvention'!AE3:AF3",
+    "value": "Mixte Gaz - fuel - Elec",
+    "type": "s"
+  },
+  {
+    "cell": "AG3",
+    "formula": "'Synthese sans subvention'!AG3:AH3",
+    "value": "GAZ - fuel",
+    "type": "s"
+  },
+  {
+    "cell": "AI3",
+    "formula": "'Synthese sans subvention'!AI3:AJ3",
+    "value": "PLAQUETTE",
+    "type": "s"
+  },
+  {
+    "cell": "G5",
+    "formula": "'Synthese sans subvention'!G5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I5",
+    "formula": "'Synthese sans subvention'!I5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K5",
+    "formula": "'Synthese sans subvention'!K5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S5",
+    "formula": "'Synthese sans subvention'!S5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U5",
+    "formula": "'Synthese sans subvention'!U5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W5",
+    "formula": "'Synthese sans subvention'!W5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE5",
+    "formula": "'Synthese sans subvention'!AE5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG5",
+    "formula": "'Synthese sans subvention'!AG5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI5",
+    "formula": "'Synthese sans subvention'!AI5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G6",
+    "formula": "'Synthese sans subvention'!G6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I6",
+    "formula": "'Synthese sans subvention'!I6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K6",
+    "formula": "'Synthese sans subvention'!K6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S6",
+    "formula": "'Synthese sans subvention'!S6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U6",
+    "formula": "'Synthese sans subvention'!U6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W6",
+    "formula": "'Synthese sans subvention'!W6",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE6",
+    "formula": "'Synthese sans subvention'!AE6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG6",
+    "formula": "'Synthese sans subvention'!AG6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI6",
+    "formula": "'Synthese sans subvention'!AI6",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K7",
+    "formula": "'Synthese sans subvention'!K7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W7",
+    "formula": "'Synthese sans subvention'!W7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI7",
+    "formula": "'Synthese sans subvention'!AI7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G9",
+    "formula": "'Synthese sans subvention'!G9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I9",
+    "formula": "'Synthese sans subvention'!I9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K9",
+    "formula": "'Synthese sans subvention'!K9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S9",
+    "formula": "G9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U9",
+    "formula": "I9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "W9",
+    "formula": "'Synthese sans subvention'!W9",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE9",
+    "formula": "'Synthese sans subvention'!AE9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG9",
+    "formula": "'Synthese sans subvention'!AG9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI9",
+    "formula": "'Synthese sans subvention'!AI9",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G10",
+    "formula": "'Synthese sans subvention'!G10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S10",
+    "formula": "G10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE10",
+    "formula": "'Synthese sans subvention'!AE10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG10",
+    "formula": "'Synthese sans subvention'!AG10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI10",
+    "formula": "'Synthese sans subvention'!AI10",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "G11",
+    "formula": "'Synthese sans subvention'!G11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "I11",
+    "formula": "'Synthese sans subvention'!I11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K11",
+    "formula": "'Synthese sans subvention'!K11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S11",
+    "formula": "'Synthese sans subvention'!S11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "U11",
+    "formula": "'Synthese sans subvention'!U11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "W11",
+    "formula": "'Synthese sans subvention'!W11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE11",
+    "formula": "'Synthese sans subvention'!AE11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG11",
+    "formula": "'Synthese sans subvention'!AG11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI11",
+    "formula": "'Synthese sans subvention'!AI11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K12",
+    "formula": "'Synthese sans subvention'!K12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W12",
+    "formula": "'Synthese sans subvention'!W12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI12",
+    "formula": "'Synthese sans subvention'!AI12",
+    "value": 270,
+    "type": "n"
+  },
+  {
+    "cell": "K13",
+    "formula": "'Synthese sans subvention'!K13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W13",
+    "formula": "'Synthese sans subvention'!W13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI13",
+    "formula": "'Synthese sans subvention'!AI13",
+    "value": 1080,
+    "type": "n"
+  },
+  {
+    "cell": "K14",
+    "formula": "'Synthese sans subvention'!K14",
+    "value": "Plaquette",
+    "type": "s"
+  },
+  {
+    "cell": "L14",
+    "formula": "'Synthese sans subvention'!L14",
+    "value": "forestiere",
+    "type": "s"
+  },
+  {
+    "cell": "W14",
+    "formula": "'Synthese sans subvention'!W14",
+    "value": "Plaquette",
+    "type": "s"
+  },
+  {
+    "cell": "X14",
+    "formula": "'Synthese sans subvention'!X14",
+    "value": "forestiere",
+    "type": "s"
+  },
+  {
+    "cell": "AI14",
+    "formula": "'Synthese sans subvention'!AI14",
+    "value": "Plaquette",
+    "type": "s"
+  },
+  {
+    "cell": "AJ14",
+    "formula": "'Synthese sans subvention'!AJ14",
+    "value": "forestiere",
+    "type": "s"
+  },
+  {
+    "cell": "K15",
+    "formula": "'Synthese sans subvention'!K15",
+    "value": 0.3,
+    "type": "n"
+  },
+  {
+    "cell": "W15",
+    "formula": "'Synthese sans subvention'!W15",
+    "value": 0.3,
+    "type": "n"
+  },
+  {
+    "cell": "AI15",
+    "formula": "'Synthese sans subvention'!AI15",
+    "value": 0.3,
+    "type": "n"
+  },
+  {
+    "cell": "G16",
+    "formula": "'Synthese sans subvention'!G16",
+    "value": "Varie",
+    "type": "s"
+  },
+  {
+    "cell": "H16",
+    "formula": "IF('Synthese sans subvention'!H16=0,\"\",'Synthese sans subvention'!H16)",
+    "value": "",
+    "type": "s"
+  },
+  {
+    "cell": "I16",
+    "formula": "'Synthese sans subvention'!I16",
+    "value": 9.96,
+    "type": "n"
+  },
+  {
+    "cell": "K16",
+    "formula": "'Synthese sans subvention'!K16",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S16",
+    "formula": "'Synthese sans subvention'!S16",
+    "value": "Varie",
+    "type": "s"
+  },
+  {
+    "cell": "T16",
+    "formula": "IF('Synthese sans subvention'!T16=0,\"\",'Synthese sans subvention'!T16)",
+    "value": "KWh/Kg",
+    "type": "s"
+  },
+  {
+    "cell": "U16",
+    "formula": "I16",
+    "value": 9.96,
+    "type": "n"
+  },
+  {
+    "cell": "W16",
+    "formula": "'Synthese sans subvention'!W16",
+    "value": 3800,
+    "type": "n"
+  },
+  {
+    "cell": "AI16",
+    "formula": "'Synthese sans subvention'!AI16",
+    "value": 3780,
+    "type": "n"
+  },
+  {
+    "cell": "K17",
+    "formula": "'Synthese sans subvention'!K17",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W17",
+    "formula": "'Synthese sans subvention'!W17",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI17",
+    "formula": "'Synthese sans subvention'!AI17",
+    "value": 0.25,
+    "type": "n"
+  },
+  {
+    "cell": "K19",
+    "formula": "'Synthese sans subvention'!K19",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W19",
+    "formula": "K19",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI19",
+    "formula": "'Synthese sans subvention'!AI19",
+    "value": 113.4,
+    "type": "n"
+  },
+  {
+    "cell": "G20",
+    "formula": "'solution biomasse'!F26",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "I20",
+    "formula": "G20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "K20",
+    "formula": "I20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "W20",
+    "formula": "K20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "AE20",
+    "formula": "'Synthese sans subvention'!AE20",
+    "value": 0.07,
+    "type": "n"
+  },
+  {
+    "cell": "AG20",
+    "formula": "AE20",
+    "value": 0.07,
+    "type": "n"
+  },
+  {
+    "cell": "AI20",
+    "formula": "AG20",
+    "value": 0.07,
+    "type": "n"
+  },
+  {
+    "cell": "G21",
+    "formula": "'Synthese sans subvention'!G21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "I21",
+    "formula": "G21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "K21",
+    "formula": "I21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "W21",
+    "formula": "K21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "AE21",
+    "formula": "'Synthese sans subvention'!AE21",
+    "value": 0.17,
+    "type": "n"
+  },
+  {
+    "cell": "AG21",
+    "formula": "AE21",
+    "value": 0.17,
+    "type": "n"
+  },
+  {
+    "cell": "AI21",
+    "formula": "AG21",
+    "value": 0.17,
+    "type": "n"
+  },
+  {
+    "cell": "G22",
+    "formula": "K22",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "I22",
+    "formula": "K22",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "K22",
+    "formula": "0.04",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "W22",
+    "formula": "K22",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "AE22",
+    "formula": "AI22",
+    "value": 0.030000000000000002,
+    "type": "n"
+  },
+  {
+    "cell": "AG22",
+    "formula": "AI22",
+    "value": 0.030000000000000002,
+    "type": "n"
+  },
+  {
+    "cell": "AI22",
+    "formula": "AI19/AI16",
+    "value": 0.030000000000000002,
+    "type": "n"
+  },
+  {
+    "cell": "K23",
+    "formula": "I23",
+    "value": 0.13,
+    "type": "n"
+  },
+  {
+    "cell": "W23",
+    "formula": "K23",
+    "value": 0.13,
+    "type": "n"
+  },
+  {
+    "cell": "AE23",
+    "formula": "'Synthese sans subvention'!AE23",
+    "value": 0.12,
+    "type": "n"
+  },
+  {
+    "cell": "AG23",
+    "formula": "'Synthese sans subvention'!AG23",
+    "value": 0.12,
+    "type": "n"
+  },
+  {
+    "cell": "AI23",
+    "formula": "AG23",
+    "value": 0.12,
+    "type": "n"
+  },
+  {
+    "cell": "K25",
+    "formula": "'Synthese sans subvention'!K25",
+    "value": "30 m3",
+    "type": "s"
+  },
+  {
+    "cell": "AI26",
+    "formula": "'Synthese sans subvention'!AI26",
+    "value": 177,
+    "type": "n"
+  },
+  {
+    "cell": "K27",
+    "formula": "'Synthese sans subvention'!K27",
+    "value": "Pâles",
+    "type": "s"
+  },
+  {
+    "cell": "K28",
+    "formula": "'Synthese sans subvention'!K28",
+    "value": "Vis",
+    "type": "s"
+  },
+  {
+    "cell": "W29",
+    "formula": "K29",
+    "value": 120,
+    "type": "n"
+  },
+  {
+    "cell": "AI29",
+    "formula": "'Synthese sans subvention'!AI29",
+    "value": 400,
+    "type": "n"
+  },
+  {
+    "cell": "G30",
+    "formula": "'Synthese sans subvention'!G30",
+    "value": "multiple",
+    "type": "s"
+  },
+  {
+    "cell": "I30",
+    "formula": "'Synthese sans subvention'!I30",
+    "value": "multiples",
+    "type": "s"
+  },
+  {
+    "cell": "S30",
+    "formula": "'Synthese sans subvention'!S30",
+    "value": "multiple",
+    "type": "s"
+  },
+  {
+    "cell": "U30",
+    "formula": "'Synthese sans subvention'!U30",
+    "value": "multiples",
+    "type": "s"
+  },
+  {
+    "cell": "W30",
+    "formula": "K30",
+    "value": "Sans objet",
+    "type": "s"
+  },
+  {
+    "cell": "AE30",
+    "formula": "'Synthese sans subvention'!AE30",
+    "value": "multiple",
+    "type": "s"
+  },
+  {
+    "cell": "AG30",
+    "formula": "'Synthese sans subvention'!AG30",
+    "value": "multiples",
+    "type": "s"
+  },
+  {
+    "cell": "AI30",
+    "formula": "'Synthese sans subvention'!AI30",
+    "value": 500,
+    "type": "n"
+  },
+  {
+    "cell": "W31",
+    "formula": "K31",
+    "value": 134,
+    "type": "n"
+  },
+  {
+    "cell": "AI31",
+    "formula": "'Synthese sans subvention'!AI31",
+    "value": 1023,
+    "type": "n"
+  },
+  {
+    "cell": "I33",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "K33",
+    "formula": "'solution biomasse'!M27",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U33",
+    "formula": "'Synthese sans subvention'!U33",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "W33",
+    "formula": "'Synthese sans subvention'!W33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG33",
+    "formula": "'Synthese sans subvention'!AG33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI33",
+    "formula": "'Synthese sans subvention'!AI33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K34",
+    "formula": "'solution biomasse'!M29",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W34",
+    "formula": "W36+W37+W35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI34",
+    "formula": "AI36+AI37+AI35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B35",
+    "formula": "'solution biomasse'!H31",
+    "value": "Subvention COT ENR",
+    "type": "s"
+  },
+  {
+    "cell": "K35",
+    "formula": "'solution biomasse'!M31",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "N35",
+    "formula": "B35",
+    "value": "Subvention COT ENR",
+    "type": "s"
+  },
+  {
+    "cell": "W35",
+    "formula": "K35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI35",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B36",
+    "formula": "'solution biomasse'!H54",
+    "value": "Subvention complémentaire",
+    "type": "s"
+  },
+  {
+    "cell": "K36",
+    "formula": "'solution biomasse'!M32",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "N36",
+    "formula": "B36",
+    "value": "Subvention complémentaire",
+    "type": "s"
+  },
+  {
+    "cell": "W36",
+    "formula": "'solution biomasse'!M54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI36",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B37",
+    "formula": "'solution biomasse'!H33",
+    "value": "DETR/DSIL",
+    "type": "s"
+  },
+  {
+    "cell": "K37",
+    "formula": "'solution biomasse'!M33",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AI37",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I38",
+    "formula": "I33",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "K38",
+    "formula": "K33-K34",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U38",
+    "formula": "U33",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "W38",
+    "formula": "W33-W34",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG38",
+    "formula": "AG33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI38",
+    "formula": "AI33-AI34",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E39",
+    "formula": "'solution biomasse'!I14",
+    "value": 0.02,
+    "type": "n"
+  },
+  {
+    "cell": "I39",
+    "formula": "'Synthese sans subvention'!I38",
+    "value": 9118.96,
+    "type": "n"
+  },
+  {
+    "cell": "K39",
+    "formula": "'solution biomasse'!M37",
+    "value": 37131,
+    "type": "n"
+  },
+  {
+    "cell": "Q39",
+    "formula": "'solution biomasse'!U14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "U39",
+    "formula": "I39",
+    "value": 9118.96,
+    "type": "n"
+  },
+  {
+    "cell": "W39",
+    "formula": "'solution biomasse'!M59",
+    "value": 23082,
+    "type": "n"
+  },
+  {
+    "cell": "AC39",
+    "formula": "'solution biomasse'!AG14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AG39",
+    "formula": "'Synthese sans subvention'!AG38",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI39",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I40",
+    "formula": "'Synthese sans subvention'!I39",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "K40",
+    "formula": "'solution biomasse'!M38",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U40",
+    "formula": "'Synthese sans subvention'!U39",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "W40",
+    "formula": "'solution biomasse'!M60",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG40",
+    "formula": "'Synthese sans subvention'!AG39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G41",
+    "formula": "'Synthese sans subvention'!G40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I41",
+    "formula": "'Synthese sans subvention'!I40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K41",
+    "formula": "'solution biomasse'!F12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S41",
+    "formula": "G41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U41",
+    "formula": "I41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W41",
+    "formula": "K41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE41",
+    "formula": "'Synthese sans subvention'!AE40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG41",
+    "formula": "'Synthese sans subvention'!AG40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI41",
+    "formula": "'Synthese sans subvention'!AI40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G42",
+    "formula": "'Synthese sans subvention'!G41",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "I42",
+    "formula": "'Synthese sans subvention'!I41",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "K42",
+    "formula": "'solution biomasse'!F14",
+    "value": 1200,
+    "type": "n"
+  },
+  {
+    "cell": "S42",
+    "formula": "G42",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "U42",
+    "formula": "I42",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "W42",
+    "formula": "K42",
+    "value": 1200,
+    "type": "n"
+  },
+  {
+    "cell": "AE42",
+    "formula": "'Synthese sans subvention'!AE41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG42",
+    "formula": "'Synthese sans subvention'!AG41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI42",
+    "formula": "'Synthese sans subvention'!AI41",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G44",
+    "formula": "'solution biomasse'!D21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I44",
+    "formula": "'solution biomasse'!E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K44",
+    "formula": "K41+K42+K43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S44",
+    "formula": "S41+S42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U44",
+    "formula": "U41+U42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W44",
+    "formula": "W41+W42+W43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE44",
+    "formula": "AE41+AE42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG44",
+    "formula": "AG41+AG42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI44",
+    "formula": "AI41+AI42+AI43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K45",
+    "formula": "IF(K46>I46,0,((K38-I38)/(I46-K46)))",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W45",
+    "formula": "IF(W46>U46,0,((W38-U38)/(U46-W46)))",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI45",
+    "formula": "((AI38-AG38))/(AG46-AI46)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G46",
+    "formula": "G44",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I46",
+    "formula": "I44+I40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K46",
+    "formula": "K44+K40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S46",
+    "formula": "S44",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U46",
+    "formula": "U44+U40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W46",
+    "formula": "W44+W40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE46",
+    "formula": "AE44",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG46",
+    "formula": "AG44+AG40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI46",
+    "formula": "AI44+AI40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K47",
+    "formula": "I46-K46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W47",
+    "formula": "U46-W46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI47",
+    "formula": "AG46-AI46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I48",
+    "formula": "G46-I46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K48",
+    "formula": "G46-K46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U48",
+    "formula": "S46-U46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W48",
+    "formula": "S46-W46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG48",
+    "formula": "AE46-AG46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI48",
+    "formula": "AE46-AI46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G54",
+    "formula": "'Synthese sans subvention'!G53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I54",
+    "formula": "'Synthese sans subvention'!I53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K54",
+    "formula": "'Synthese sans subvention'!K53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S54",
+    "formula": "G54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U54",
+    "formula": "I54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W54",
+    "formula": "K54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE54",
+    "formula": "'Synthese sans subvention'!AE53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG54",
+    "formula": "'Synthese sans subvention'!AG53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI54",
+    "formula": "'Synthese sans subvention'!AI53",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G55",
+    "formula": "'Synthese sans subvention'!G54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I55",
+    "formula": "'Synthese sans subvention'!I54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K55",
+    "formula": "'Synthese sans subvention'!K54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S55",
+    "formula": "G55",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U55",
+    "formula": "I55",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W55",
+    "formula": "K55",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE55",
+    "formula": "'Synthese sans subvention'!AE54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG55",
+    "formula": "'Synthese sans subvention'!AG54",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI55",
+    "formula": "#REF!*1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U59",
+    "formula": "(U38-W38)/(U46-W46)",
+    "value": 23,
+    "type": "e"
+  }
+]

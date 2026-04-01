@@ -1,0 +1,194 @@
+[
+  {
+    "cell": "F8",
+    "formula": "chiffrage_ref_Parc4!F13",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F9",
+    "formula": "SUM(F6:F8)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F10",
+    "formula": "chiffrage_ref_Parc4!F14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F11",
+    "formula": "F9-F10",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F14",
+    "formula": "D14*E14",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F15",
+    "formula": "D15*E15",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F16",
+    "formula": "D16*E16",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F17",
+    "formula": "D17*E17",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F18",
+    "formula": "D18*E18",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F19",
+    "formula": "D19*E19",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D20",
+    "formula": "Donnees_biomasse!H5",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F20",
+    "formula": "D20*E20",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F21",
+    "formula": "D21*E21",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D22",
+    "formula": "chiffrage_ref_Parc4!D19",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E22",
+    "formula": "chiffrage_ref_Parc4!E19",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F22",
+    "formula": "D22*E22",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F23",
+    "formula": "D23*E23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F24",
+    "formula": "SUM(F14:F23)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F25",
+    "formula": "F24+F11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F26",
+    "formula": "F24",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E29",
+    "formula": "$F$24",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F29",
+    "formula": "E29*D29",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E30",
+    "formula": "$F$24",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F30",
+    "formula": "E30*D30",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E31",
+    "formula": "$F$24",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F31",
+    "formula": "E31*D31",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E32",
+    "formula": "$F$24",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F32",
+    "formula": "E32*D32",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F34",
+    "formula": "SUM(F29:F32)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F36",
+    "formula": "F14+F34",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F37",
+    "formula": "F36*0.2",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F38",
+    "formula": "F37+F36",
+    "value": 0,
+    "type": "n"
+  }
+]

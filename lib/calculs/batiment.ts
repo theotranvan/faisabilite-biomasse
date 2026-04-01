@@ -202,15 +202,26 @@ export function calculsBatimentComplet(
 }
 
 /**
- * Étiquette énergétique (DPE-like) based on kWhep/m²/an
+ * DPE thresholds per building type (from Excel Etiquette sheet)
+ * Each array: [A, B, C, D, E, F] upper bounds in kWhep/m²/an
  */
-export function calculEtiquetteEnergetique(consommationKwhepPerM2: number): string {
-  if (consommationKwhepPerM2 <= 50) return 'A';
-  if (consommationKwhepPerM2 <= 90) return 'B';
-  if (consommationKwhepPerM2 <= 150) return 'C';
-  if (consommationKwhepPerM2 <= 230) return 'D';
-  if (consommationKwhepPerM2 <= 330) return 'E';
-  if (consommationKwhepPerM2 <= 450) return 'F';
+const DPE_THRESHOLDS: Record<string, number[]> = {
+  LOGEMENTS:            [50,  90, 150, 230, 330,  450],
+  BUREAUX:              [50, 110, 210, 350, 540,  750],
+  OCCUPATION_CONTINUE: [100, 210, 370, 580, 830, 1130],
+  AUTRES:               [30,  90, 170, 270, 380,  510],
+};
+
+/**
+ * Étiquette énergétique (DPE-like) based on kWhep/m²/an
+ * Uses building-type-specific thresholds per Excel formula
+ */
+export function calculEtiquetteEnergetique(consommationKwhepPerM2: number, typeBatiment?: string): string {
+  const thresholds = DPE_THRESHOLDS[typeBatiment || 'LOGEMENTS'] || DPE_THRESHOLDS.LOGEMENTS;
+  const grades = ['A', 'B', 'C', 'D', 'E', 'F'];
+  for (let i = 0; i < grades.length; i++) {
+    if (consommationKwhepPerM2 <= thresholds[i]) return grades[i];
+  }
   return 'G';
 }
 

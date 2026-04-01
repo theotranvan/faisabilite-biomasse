@@ -1,0 +1,10 @@
+,unité,kWhEP,,,,,
+,,M5 = energie primaire,,,,,
+Bâtiment,Puissance avant travaux (W),Consommation avant travaux (kWhEP),Puissance après travaux (W),Consommation après travaux (kWhEP),Coût estimatif (HT) ,Gains sur les consos (kWhEP),Gains sur les conso (kWh)
+#REF!,#REF!,#REF!,#REF!,#REF!," 25,000.00 € ",#REF!,-231%
+#REF!,#REF!,#REF!,#REF!,#REF!, -- ,#REF!,26%
+#REF!,#REF!,#REF!,#REF!,#REF!, -- ,#REF!,26%
+#REF!,#REF!,#REF!,#REF!,#REF!," 11,000.00 € ",#REF!,67%
+#REF!,#REF!,#REF!,#REF!,#REF!, 400.00 € ,#REF!,22%
+#REF!,#REF!,#REF!,#REF!,#REF!," 2,300.00 € ",#REF!,30%
+,,,,,,#REF!,

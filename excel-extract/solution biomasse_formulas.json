@@ -1,0 +1,452 @@
+[
+  {
+    "cell": "L5",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M5",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D6",
+    "formula": "'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D7",
+    "formula": "'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!+'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E7",
+    "formula": "'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F7",
+    "formula": "'Déperditions et consommations'!#REF!*0*'solution biomasse'!$F$27",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L7",
+    "formula": "L8+L9+L10",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M7",
+    "formula": "M8+M9+M10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F8",
+    "formula": "('Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!-'Déperditions et consommations'!#REF!)*1*'solution biomasse'!$F$28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M8",
+    "formula": "(M5-L5)*I8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E9",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M10",
+    "formula": "(M5-L5)*I10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D12",
+    "formula": "SUM(D5:D10)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E12",
+    "formula": "SUM(E5:E10)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F12",
+    "formula": "SUM(F5:F10)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K12",
+    "formula": "IF(K5-K7=0,\"\",K5-K7)",
+    "value": "",
+    "type": "s"
+  },
+  {
+    "cell": "L12",
+    "formula": "IF(L5-L7=0,\"\",L5-L7)",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M12",
+    "formula": "IF(M5-M7=0,\"\",M5-M7)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D14",
+    "formula": "150*5",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "E14",
+    "formula": "150*5",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "L16",
+    "formula": "(L5+L14)/15",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "M16",
+    "formula": "M14/15+M5/15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K18",
+    "formula": "D21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L18",
+    "formula": "E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M18",
+    "formula": "F21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K19",
+    "formula": "K16+K18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L19",
+    "formula": "L16+L18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M19",
+    "formula": "M16+M18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D21",
+    "formula": "+D12+D14+D18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E21",
+    "formula": "+E12+E14+E18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F21",
+    "formula": "+F12+F14+F18",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L21",
+    "formula": "M19-L19",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F24",
+    "formula": "E21-F21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L27",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M27",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "F28",
+    "formula": "0.0443*1.2",
+    "value": 0.05316,
+    "type": "n"
+  },
+  {
+    "cell": "L29",
+    "formula": "L30+L31+L32",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M29",
+    "formula": "IF((M33+M31+M32)/M27>0.8,0.8*M27,M33+M31+M32)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M31",
+    "formula": "(#REF!+#REF!-#REF!)*I31/100",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K35",
+    "formula": "K27-K29",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "L35",
+    "formula": "L27-L29",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M35",
+    "formula": "M27-M29",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O35",
+    "formula": "M35-L35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O36",
+    "formula": "O35/L42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L37",
+    "formula": "L14",
+    "value": 9118.96,
+    "type": "n"
+  },
+  {
+    "cell": "L38",
+    "formula": "L16",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "M38",
+    "formula": "M37/15+M35/15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K39",
+    "formula": "D21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L39",
+    "formula": "E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M39",
+    "formula": "F21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K40",
+    "formula": "K38+K39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L40",
+    "formula": "L38+L39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M40",
+    "formula": "M38+M39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L42",
+    "formula": "M40-L40",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L49",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M49",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L51",
+    "formula": "L52+L53+L54",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "M51",
+    "formula": "IF((M55+M53+M54)/M49>0.8,0.8*M49,M55+M53+M54)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M53",
+    "formula": "(#REF!+#REF!-#REF!)*I31/100",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M54",
+    "formula": "(#REF!+#REF!)*I54/100",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K57",
+    "formula": "K49-K51",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "L57",
+    "formula": "L49-L51",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "M57",
+    "formula": "M49-M51",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O57",
+    "formula": "M57-L57",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "O58",
+    "formula": "O57/L64",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L59",
+    "formula": "L37",
+    "value": 9118.96,
+    "type": "n"
+  },
+  {
+    "cell": "L60",
+    "formula": "L59/15+L57/15",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "M60",
+    "formula": "M59/15+M57/15",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K61",
+    "formula": "D21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L61",
+    "formula": "E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M61",
+    "formula": "F21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K62",
+    "formula": "K60+K61",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L62",
+    "formula": "L60+L61",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "M62",
+    "formula": "M60+M61",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "L64",
+    "formula": "M62-L62",
+    "value": 23,
+    "type": "e"
+  }
+]

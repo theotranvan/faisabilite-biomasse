@@ -1,0 +1,1040 @@
+[
+  {
+    "cell": "G5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K5",
+    "formula": "I5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W5",
+    "formula": "U5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG5",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI5",
+    "formula": "AG5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K6",
+    "formula": "'CO2 SO2'!M25",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W6",
+    "formula": "'CO2 SO2'!P25",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG6",
+    "formula": "'Déperditions et consommations'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI6",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!AI23)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K7",
+    "formula": "'solution biomasse'!F8/'solution biomasse'!F28",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W7",
+    "formula": "K7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI7",
+    "formula": "'solution biomasse'!#REF!/'Synthese sans subvention'!AI22",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G9",
+    "formula": "('CO2 SO2'!K24)/9.96",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I9",
+    "formula": "('CO2 SO2'!L24)/9.96",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K9",
+    "formula": "'CO2 SO2'!M24/9.96",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE9",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!S20)/9.96",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG9",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!AG20)/9.96",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI9",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!AG20)/9.96",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G10",
+    "formula": "('CO2 SO2'!K25)/13.835",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I10",
+    "formula": "('CO2 SO2'!L25)/13.835",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K10",
+    "formula": "'CO2 SO2'!M25/13.835",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S10",
+    "formula": "G10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W10",
+    "formula": "K10",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE10",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!AE23)/'Synthese sans subvention'!AE16",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG10",
+    "formula": "('solution biomasse'!#REF!/'Synthese sans subvention'!AG23)/AG16",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G11",
+    "formula": "'CO2 SO2'!K23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "I11",
+    "formula": "'CO2 SO2'!L23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "K11",
+    "formula": "'CO2 SO2'!M23",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "S11",
+    "formula": "G11",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE11",
+    "formula": "'solution biomasse'!#REF!/'Synthese sans subvention'!AE21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG11",
+    "formula": "'solution biomasse'!#REF!/'Synthese sans subvention'!AG21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI11",
+    "formula": "'solution biomasse'!#REF!/'Synthese sans subvention'!AE21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K12",
+    "formula": "Car_biomasse!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W12",
+    "formula": "K12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K13",
+    "formula": "Car_biomasse!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W13",
+    "formula": "K13",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI13",
+    "formula": "AI12/AI17",
+    "value": 1080,
+    "type": "n"
+  },
+  {
+    "cell": "K16",
+    "formula": "Car_biomasse!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S16",
+    "formula": "G16",
+    "value": "Varie",
+    "type": "s"
+  },
+  {
+    "cell": "K17",
+    "formula": "Car_biomasse!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W17",
+    "formula": "K17",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K19",
+    "formula": "K22*K16",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G20",
+    "formula": "'solution biomasse'!F26",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "I20",
+    "formula": "G20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "K20",
+    "formula": "I20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "S20",
+    "formula": "G20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "U20",
+    "formula": "S20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "W20",
+    "formula": "U20",
+    "value": 0.1,
+    "type": "n"
+  },
+  {
+    "cell": "G21",
+    "formula": "'solution biomasse'!F30",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "I21",
+    "formula": "G21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "K21",
+    "formula": "I21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "S21",
+    "formula": "U21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "U21",
+    "formula": "W21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "W21",
+    "formula": "K21",
+    "value": 0.1788,
+    "type": "n"
+  },
+  {
+    "cell": "G22",
+    "formula": "'solution biomasse'!F28",
+    "value": 0.05316,
+    "type": "n"
+  },
+  {
+    "cell": "I22",
+    "formula": "K22",
+    "value": 0.05316,
+    "type": "n"
+  },
+  {
+    "cell": "K22",
+    "formula": "'solution biomasse'!F28",
+    "value": 0.05316,
+    "type": "n"
+  },
+  {
+    "cell": "S22",
+    "formula": "U22",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "U22",
+    "formula": "W22",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "W22",
+    "formula": "0.04",
+    "value": 0.04,
+    "type": "n"
+  },
+  {
+    "cell": "AI22",
+    "formula": "AI19/AI16",
+    "value": 0.030000000000000002,
+    "type": "n"
+  },
+  {
+    "cell": "G23",
+    "formula": "'solution biomasse'!F27",
+    "value": 0.1502,
+    "type": "n"
+  },
+  {
+    "cell": "K23",
+    "formula": "'solution biomasse'!F27",
+    "value": 0.1502,
+    "type": "n"
+  },
+  {
+    "cell": "S23",
+    "formula": "G23",
+    "value": 0.1502,
+    "type": "n"
+  },
+  {
+    "cell": "W23",
+    "formula": "K23",
+    "value": 0.1502,
+    "type": "n"
+  },
+  {
+    "cell": "S30",
+    "formula": "G30",
+    "value": "multiple",
+    "type": "s"
+  },
+  {
+    "cell": "U30",
+    "formula": "I30",
+    "value": "multiples",
+    "type": "s"
+  },
+  {
+    "cell": "AE30",
+    "formula": "S30",
+    "value": "multiple",
+    "type": "s"
+  },
+  {
+    "cell": "AG30",
+    "formula": "U30",
+    "value": "multiples",
+    "type": "s"
+  },
+  {
+    "cell": "I33",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "K33",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U33",
+    "formula": "chiffrage_ref_Parc1!F35",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "W33",
+    "formula": "'solution biomasse'!M5",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG33",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI33",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I37",
+    "formula": "I33",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "K37",
+    "formula": "K33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U37",
+    "formula": "U33",
+    "value": 30000,
+    "type": "n"
+  },
+  {
+    "cell": "W37",
+    "formula": "W33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG37",
+    "formula": "AG33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI37",
+    "formula": "AI33",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "E38",
+    "formula": "'solution biomasse'!I14",
+    "value": 0.02,
+    "type": "n"
+  },
+  {
+    "cell": "I38",
+    "formula": "'solution biomasse'!L37",
+    "value": 9118.96,
+    "type": "n"
+  },
+  {
+    "cell": "K38",
+    "formula": "'solution biomasse'!M14",
+    "value": 61351,
+    "type": "n"
+  },
+  {
+    "cell": "Q38",
+    "formula": "E38",
+    "value": 0.02,
+    "type": "n"
+  },
+  {
+    "cell": "U38",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W38",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AC38",
+    "formula": "Q38",
+    "value": 0.02,
+    "type": "n"
+  },
+  {
+    "cell": "AG38",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI38",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I39",
+    "formula": "'solution biomasse'!L16",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "K39",
+    "formula": "'solution biomasse'!M16",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U39",
+    "formula": "I39",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "W39",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG39",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI39",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G40",
+    "formula": "'solution biomasse'!D12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I40",
+    "formula": "'solution biomasse'!E12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K40",
+    "formula": "'solution biomasse'!F12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI40",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G41",
+    "formula": "'solution biomasse'!D14",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "I41",
+    "formula": "'solution biomasse'!E14",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "K41",
+    "formula": "'solution biomasse'!F14",
+    "value": 1200,
+    "type": "n"
+  },
+  {
+    "cell": "S41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI41",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K42",
+    "formula": "'solution biomasse'!F18",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "G43",
+    "formula": "'solution biomasse'!D21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I43",
+    "formula": "'solution biomasse'!E21",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K43",
+    "formula": "K40+K41+K42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S43",
+    "formula": "S40+S41+S42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U43",
+    "formula": "U40+U41+U42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W43",
+    "formula": "W40+W41+W42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE43",
+    "formula": "AE40+AE41+AE42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG43",
+    "formula": "AG40+AG41+AG42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI43",
+    "formula": "AI40+AI41+AI42",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K44",
+    "formula": "IF(K45>I45,0,((K37-I37)/(I45-K45)))",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W44",
+    "formula": "IF(W45>U45,0,((W37-U37)/(U45-W45)))",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G45",
+    "formula": "G43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I45",
+    "formula": "I43+I39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K45",
+    "formula": "K43+K39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S45",
+    "formula": "S43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U45",
+    "formula": "U43+U39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W45",
+    "formula": "W43+W39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AE45",
+    "formula": "AE43",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG45",
+    "formula": "AG43+AG39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI45",
+    "formula": "AI43+AI39",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K46",
+    "formula": "I45-K45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W46",
+    "formula": "U45-W45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI46",
+    "formula": "AG45-AI45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I47",
+    "formula": "G45-I45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K47",
+    "formula": "G45-K45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U47",
+    "formula": "S45-U45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W47",
+    "formula": "S45-W45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG47",
+    "formula": "AE45-AG45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI47",
+    "formula": "AE45-AI45",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G53",
+    "formula": "'CO2 SO2'!E11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I53",
+    "formula": "'CO2 SO2'!F11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K53",
+    "formula": "'CO2 SO2'!G11",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S53",
+    "formula": "'CO2 SO2'!E35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U53",
+    "formula": "'CO2 SO2'!F35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W53",
+    "formula": "'CO2 SO2'!G35",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE53",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG53",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI53",
+    "formula": "#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "G54",
+    "formula": "'CO2 SO2'!E22",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I54",
+    "formula": "'CO2 SO2'!F22",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K54",
+    "formula": "'CO2 SO2'!G22",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S54",
+    "formula": "'CO2 SO2'!E46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "U54",
+    "formula": "'CO2 SO2'!F46",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "W54",
+    "formula": "'CO2 SO2'!G46",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AE54",
+    "formula": "#REF!*1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AG54",
+    "formula": "#REF!*1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "AI54",
+    "formula": "#REF!*1000",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "I58",
+    "formula": "(K37-I37)/(I45-K45)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "S58",
+    "formula": "(W37-U37)/(U45-W45)",
+    "value": 23,
+    "type": "e"
+  }
+]

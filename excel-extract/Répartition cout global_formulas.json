@@ -1,0 +1,182 @@
+[
+  {
+    "cell": "B5",
+    "formula": "'solution biomasse'!L38",
+    "value": 2607.9306666666666,
+    "type": "n"
+  },
+  {
+    "cell": "C5",
+    "formula": "'solution biomasse'!M38",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D5",
+    "formula": "'solution biomasse'!M60",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "J5",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K5",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C6",
+    "formula": "'solution biomasse'!M16-'solution biomasse'!M38",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D6",
+    "formula": "'solution biomasse'!M16-'solution biomasse'!M60",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K6",
+    "formula": "'solution biomasse'!#REF!-'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B7",
+    "formula": "'solution biomasse'!E14",
+    "value": 750,
+    "type": "n"
+  },
+  {
+    "cell": "C7",
+    "formula": "D7",
+    "value": 1200,
+    "type": "n"
+  },
+  {
+    "cell": "D7",
+    "formula": "'solution biomasse'!F14",
+    "value": 1200,
+    "type": "n"
+  },
+  {
+    "cell": "J7",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K7",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B8",
+    "formula": "'solution biomasse'!E12",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C8",
+    "formula": "D8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D8",
+    "formula": "'solution biomasse'!F6+'solution biomasse'!F7",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "J8",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K8",
+    "formula": "'solution biomasse'!#REF!+'solution biomasse'!#REF!+'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C9",
+    "formula": "'solution biomasse'!F8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D9",
+    "formula": "'solution biomasse'!F8",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K9",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B10",
+    "formula": "C10",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C10",
+    "formula": "'solution biomasse'!M62",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "D10",
+    "formula": "'solution biomasse'!M62",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "J10",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "K10",
+    "formula": "'solution biomasse'!#REF!",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B42",
+    "formula": "'solution biomasse'!M35",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C42",
+    "formula": "'solution biomasse'!M57",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "B43",
+    "formula": "SUM('Bilan Actualisé'!D13:R13)",
+    "value": 23,
+    "type": "e"
+  },
+  {
+    "cell": "C43",
+    "formula": "SUM('Bilan Actualisé'!$D$43:$R$43)",
+    "value": 23,
+    "type": "e"
+  }
+]

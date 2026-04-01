@@ -89,7 +89,8 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
   };
 
   const addLine = () => {
-    const newId = Math.max(...(formData.travauxChaufferie?.map(l => parseInt(l.id)) || [0])) + 1;
+    const ids = (formData.travauxChaufferie || []).map(l => parseInt(l.id)).filter(n => !isNaN(n));
+    const newId = (ids.length > 0 ? Math.max(...ids) : 0) + 1;
     setFormData(prev => ({
       ...prev,
       travauxChaufferie: [

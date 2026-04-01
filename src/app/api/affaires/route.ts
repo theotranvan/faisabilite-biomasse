@@ -2,25 +2,12 @@ import { db, getSessionUserId } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
-// Get all affaires visible to the current user (own + team affaires)
+// Get all affaires (shared workspace — all users see all affaires)
 export async function GET(_req: NextRequest) {
   try {
-    const userId = await getSessionUserId();
-
-    // Find user's teams
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      include: { equipes: { select: { id: true } } },
-    });
-    const equipeIds = user?.equipes.map(e => e.id) || [];
+    await getSessionUserId(); // ensure authenticated
 
     const affaires = await db.affaire.findMany({
-      where: {
-        OR: [
-          { userId },
-          { equipeId: { in: equipeIds } },
-        ],
-      },
       include: {
         batiments: true,
         parcs: true,
@@ -94,6 +81,7 @@ export async function POST(req: NextRequest) {
         augmentationBiomasse: data.augmentationBiomasse || 0.02,
         tauxEmprunt: data.tauxEmprunt || 0.02,
         dureeEmprunt: data.dureeEmprunt || 15,
+        villeMonotone: data.villeMonotone || 'Bourges',
         statut: 'BROUILLON',
       },
     });

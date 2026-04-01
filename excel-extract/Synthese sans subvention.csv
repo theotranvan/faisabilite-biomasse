@@ -1,0 +1,54 @@
+,,,,,Solution actuelle,,Solution de référence,,Solution biomasse,,,,,,,,Solution actuelle,,Solution de référence,,Solution biomasse ,,,,,,,,Solution actuelle,,Solution de référence,,Solution biomasse ,
+,,,,,Mixte fuel elec gaz propane,,Fuel,,PLAQUETTE,,,,,,,,Fuel,,Fuel,,PLAQUETTE,,,,,,,,Mixte Gaz - fuel - Elec,,GAZ - fuel,,PLAQUETTE,
+Bilan thermique,,,,,,,,,,,,Bilan thermique,,,,,,,,,,,,Bilan thermique,,,,,,,,,,
+Déperditions,,,,,#REF!,W,#REF!,W,#REF!,W,,Déperditions,,,,,#REF!,W,#REF!,W,#REF!,W,,Déperditions,,,,,#REF!,W,#REF!,W,#REF!,W
+Consommation chauffage autre que biomasse,,,,,#REF!,KWh,#REF!,KWh,0,KWh,,Consommation chauffage autre que biomasse,,,,,#REF!,KWh,#REF!,KWh,0,KWh,,Consommation chauffage autre que biomasse,,,,,#REF!,KWh,#REF!,KWh,#REF!,KWh
+Consommation chauffage biomasse,,,,,,,,,#REF!,KWh,,Consommation chauffage biomasse,,,,,,,,,#REF!,KWh,,Consommation chauffage biomasse,,,,,,,,,#REF!,KWh
+Approvisionnement (Tous les coûts de fonctionnement sont exprimés en € TTC),,,,,,,,,,,,Approvisionnement (Tous les coûts de fonctionnement sont exprimés en € TTC),,,,,,,,,,,,Approvisionnement (Tous les coûts de fonctionnement sont exprimés en € TTC),,,,,,,,,,
+Consommation combustible fuel,,,,,#REF!,litres,0,litres,0,litres,,Consommation combustible fuel,,,,,"30,032",litres,"21,836",litres,0,litres,,Consommation combustible fuel,,,,,#REF!,litres,#REF!,litres,#REF!,litres
+Consommation combustible gaz,,,,,#REF!,Kg,#REF!,Kg,0,kg,,Consommation combustible gaz,,,,,#REF!,Kg,0,Kg,0,kg,,Consommation combustible gaz,,,,,#REF!,Kg,#REF!,Kg,,Kg
+Consommation combustible elec,,,,,0,KWh, -      ,KWh,0,KWh,,Consommation combustible elec,,,,,0,KWh,0,KWh,0,KWh,,Consommation combustible elec,,,,,#REF!,KWh,#REF!,KWh,#REF!,KWh
+Consommation combustible biomasse,,,,,,,,,#REF!,tonnes,,Consommation combustible biomasse,,,,,,,,,#REF!,tonnes,,Consommation combustible biomasse,,,,,,,,,270,tonnes
+Volume biomasse,,,,,,,,,#REF!,m3,,Volume biomasse,,,,,,,,,#REF!,m3,,Volume biomasse,,,,,,,,,1080,m3
+Nature combustible,,,,,,,,,Plaquette,forestiere,,Nature combustible,,,,,,,,,Plaquette,forestiere,,Nature combustible,,,,,,,,,Plaquette,forestiere
+Humidité,,,,,,,,,30%,maxi,,Humidité,,,,,,,,,30%,maxi,,Humidité,,,,,,,,,30%,maxi
+PCI,,,,,Varie,,9.96,KWh/Kg,#REF!,KWh/tonne,,PCI,,,,,Varie,KWh/Kg,12.79,KWh/Kg,3800,KWh/tonne,,PCI,,,,,12.79,KWh/Kg,12.79,KWh/Kg,3780,KWh/tonne
+Masse volumique,,,,,,,,,#REF!,Kg/m3,,Masse volumique,,,,,,,,,#REF!,Kg/m3,,Masse volumique,,,,,,,,,0.25,tonnes/m3
+Volume livraison,,,,,,,,,,,,Volume livraison,,,,,,,,,,,,Volume livraison,,,,,,,,,,
+Tarification énergie,,,,,,,,,#REF!,€ TTC/tonne,,Tarification énergie,,,,,,,,,125.4,€ TTC/tonne,,Tarification énergie,,,,,,,,,113.4,€ / tonne
+,Fuel,,,,0.100,€ TTC/KWh,0.100,€ TTC/KWh,0.100,€ TTC/KWh,,,Fuel,,,,0.10,€ TTC/KWh,0.10,€ TTC/KWh,0.10,€ TTC/KWh,,,Fuel,,,,0.07,€ TTC/KWh,0.07,€ TTC/KWh,,
+,Elec,,,,0.179,€ TTC/KWh,0.179,€ TTC/KWh,0.179,€ TTC/KWh,,,Elec,,,,0.179,€ TTC/KWh,0.179,€ TTC/KWh,0.179,€ TTC/KWh,,,Elec,,,,0.17,€ TTC/KWh,0.17,€ TTC/KWh,,
+,Bois,,,,0.053,€ TTC/KWh,0.053,€ TTC/KWh,0.053,€ TTC/KWh,,,Bois,,,,0.04,€ TTC/KWh,0.04,€ TTC/KWh,0.04,€ TTC/KWh,,,Bois,,,,,,,,0.0300,€/KWh
+,Gaz,,,,0.150,€ TTC/KWh,0.150,€ TTC/KWh,0.150,€ TTC/KWh,,,Gaz,,,,0.15,€ TTC/KWh,0.15,€ TTC/KWh,0.150,€ TTC/KWh,,,Gaz,,,,0.12,€ TTC/KWh,0.12,€ TTC/KWh,0.12,€/KWh
+Chaufferie + réseau de chaleur,,,,,,,,,,,,Chaufferie + réseau de chaleur,,,,,,,,,,,,Chaufferie + réseau de chaleur,,,,,,,,,,
+Volume de livraison,,,,,,,,,30 m3,m3,,Volume de livraison,,,,,,,,,30 m3,m3,,Volume de livraison,,,,,,,,,> 30 m3,m3
+Stockage par silo,,,,,,,,,117,m3,,Stockage par silo,,,,,,,,,45,m3,,Stockage par silo,,,,,,,,,177,m3 utile
+Désilage,,,,,,,,,Pâles,,,Désilage,,,,,,,,,Pâles,,,Désilage,,,,,,,,,Racleurs,
+Alimentation,,,,,,,,,Vis,,,Alimentation,,,,,,,,,Vis,,,Alimentation,,,,,,,,,tapis,
+Chaudière biomasse,,,,,,,,,120,KW,,Chaudière biomasse,,,,,,,,,90,KW,,Chaudière biomasse,,,,,,,,,400,KW
+Chaudière énergie fossile,,,,,multiple,KW,multiples,KW,,KW,,Chaudière énergie fossile,,,,,multiple,KW,multiples,KW,99,KW,,Chaudière énergie fossile,,,,,multiple,KW,multiples,KW,500,KW
+Longueur du réseau de chaleur,,,,,0,m,0,m,134,ml,,Longeur du réseau de chaleur,,,,,0,m,0,m,98,ml,,Longeur du réseau de chaleur,,,,,0,m,0,m,1023,m
+Bilan économique (les coûts d'investissement sont exprimés en HT et les coûts de fonctionnement en € TTC),,,,,,,,,,,,Bilan économique (les coûts d'investissement sont exprimés en HT et les coûts de fonctionnement en € TTC),,,,,,,,,,,,Bilan économique (les coûts d'investissement sont exprimés en HT et les coûts de fonctionnement en € TTC),,,,,,,,,,
+Montant investissement,,,,,,€,"30,000.00",€,#REF!,€,,Montant investissement,,,,,,€,"30,000.00",€,#REF!,€,,Montant investissement,,,,,,€,#REF!,€,#REF!,€
+Total subvention,,,,,,,,,,€,,Total subvention,,,,,,,,,,€,,Total subvention,,,,,,,,,,€
+,,,,,,,,,,€,,,,,,,,,,,,€,,,,,,,,,,,,€
+,,,,,,,,,,€,,,,,,,,,,,,€,,,,,,,,,,,,€
+Investissement restant à la charge du client,,,,,,€,"30,000.00",€,#REF!,€,,Investissement restant à la charge du client,,,,,,€," 30,000.00    ",€,#REF!,€,,Investissement restant à la charge de la commune,,,,,,€,#REF!,€,#REF!,€
+Emprunt sur 15 ans,,,2%,,,€,"9,118.96",€,"61,351.00",€,,Emprunt sur 15 ans,,,2%,,,€,#REF!,€,#REF!,€,,Emprunt sur 20 ans,,,2%,,,€,#REF!,€,#REF!,€
+Annuité d'emprunt sur 15 ans,,,,,,€/an,"2,607.93",€/an,#REF!,€/an,,Annuité d'emprunt sur 15 ans,,,,,,€/an," 2,607.93    ",€/an,#REF!,€/an,,Annuité d'emprunt sur 20 ans,,,,,,€/an,#REF!,€/an,#REF!,€/an
+Coût de fonctionnement P1,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Coût de fonctionnement P1,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Coût de fonctionnement P1,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an
+Coût de fonctionnement P2,,,,,750.00,€/an,750.00,€/an,"1,200.00",€/an,,Coût de fonctionnement P2,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Coût de fonctionnement P2,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an
+Coût de fonctionnement P3,,,,,,€/an,,€/an,0,€/an,,Coût de fonctionnement P3,,,,,,€/an,,€/an,,€/an,,Coût de fonctionnement P3,,,,,,€/an,,€/an,,€/an
+Coût de fonctionnement annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Coût de fonctionnement annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Coût de fonctionnement annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an
+Temps de retour / solution de référence,,,,,,,,,#REF!,ans,,Temps de retour / solution de référence,,,,,,,,,#REF!,an,,Temps de retour / solution de référence,,,,,,,,,0 ,an
+Bilan coût global annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Bilan coût global annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an,,Bilan coût global annuel,,,,,#REF!,€/an,#REF!,€/an,#REF!,€/an
+Economie / solution de référence,,,,,S.O,€/an,S.O,€/an,#REF!,€/an,,Economie / solution de référence,,,,,S.O,€/an,S.O,€/an,#REF!,€/an,,Economie / solution de référence,,,,,S.O,€/an,S.O,€/an,#REF!,€/an
+Economie / solution actuelle,,,,,S.O,€/an,#REF!,€/an,#REF!,€/an,,Economie / solution actuelle,,,,,S.O,€/an,#REF!,€/an,#REF!,€/an,,Economie / solution actuelle,,,,,S.O,€/an,#REF!,€/an,#REF!,€/an
+Montage juridique,,,,,,,,,,,,Montage juridique,,,,,,,,,,,,Montage juridique,,,,,,,,,,
+Investissement,,,,,Sans Objet,,Maître d'ouvrage,,Maître d'ouvrage,,,Investissement,,,,,Sans Objet,,Maître d'ouvrage,,Maître d'ouvrage,,,Investissement,,,,,Sans Objet,,Maître d'ouvrage,,Maître d'ouvrage,
+Entretient courant,,,,,Sans Objet,,Sans Objet,,Personnel de la commune,,,Entretient courant,,,,,Sans Objet,,Sans Objet,,Personnel de la commune,,,Entretient courant,,,,,Sans Objet,,Sans Objet,,Personnel Communal,
+Entretient spécifique,,,,,Sans Objet,,Prestataire,,Prestataire,,,Entretient spécifique,,,,,Sans Objet,,Prestataire,,Prestataire,,,Entretient spécifique,,,,,Sans Objet,,Prestataire,,Prestataire,
+Impact environnemental,,,,,,,,,,,,Impact environnemental,,,,,,,,,,,,Impact environnemental,,,,,,,,,,
+Quantité de CO2 émise,,,,,#REF!,tonnes CO2/an,#REF!,tonnes CO2/an,#REF!,tonnes CO2/an,,Quantité de CO2 émise,,,,,#REF!,tonnes CO2/an,#REF!,tonnes CO2/an,0,tonnes CO2/an,,Quantité de CO2 émise,,,,,#REF!,tonnes CO2/an,#REF!,tonnes CO2/an,#REF!,tonnes CO2/an
+Quantité de SO2 émise,,,,,#REF!,Kg SO2 / an,#REF!,Kg SO2 / an,#REF!,Kg SO2 / an,,Quantité de SO2 émise,,,,,#REF!,Kg SO2 / an,#REF!,Kg SO2 / an,0.00,Kg SO2 / an,,Quantité de SO2 émise,,,,,#REF!,Kg SO2 / an,#REF!,Kg SO2 / an,#REF!,Kg SO2 / an
+,,,,,,,#REF!,,,,,,,,,,#REF!,,,,,,,,,,,,,,,,,

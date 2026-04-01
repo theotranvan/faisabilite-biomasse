@@ -1,0 +1,92 @@
+[
+  [
+    "",
+    "unité",
+    "kWhEP",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "",
+    "",
+    "M5 = energie primaire",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Bâtiment",
+    "Puissance avant travaux (W)",
+    "Consommation avant travaux (kWhEP)",
+    "Puissance après travaux (W)",
+    "Consommation après travaux (kWhEP)",
+    "Coût estimatif (HT) ",
+    "Gains sur les consos (kWhEP)",
+    "Gains sur les conso (kWh)"
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    25000,
+    "",
+    -2.31
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "--",
+    "",
+    0.26
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "--",
+    "",
+    0.26
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    11000,
+    "",
+    0.67
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    400,
+    "",
+    0.22
+  ],
+  [
+    "",
+    "",
+    "",
+    "",
+    "",
+    2300,
+    "",
+    0.3
+  ]
+]

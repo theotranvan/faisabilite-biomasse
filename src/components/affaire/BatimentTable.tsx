@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Form';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
+import { ENERGY_TARIFS, COEF_INTERMITTENCE, TYPES_INSTALLATION } from '@/lib/enums';
 
 interface Batiment {
   id: string;
   numero: number;
   designation: string;
   typeBatiment: string;
+  typeInstallation?: string;
   surfaceChauffee: number;
   volumeChauffe: number;
   parc: number;
@@ -99,9 +101,42 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
   };
 
   const updateBatiment = (id: string, field: string, value: any) => {
-    setBatiments(batiments.map(b =>
-      b.id === id ? { ...b, [field]: field.includes('rendement') || field === 'coefIntermittence' || field === 'tarification' ? parseFloat(value) : isNaN(value) ? value : parseFloat(value) } : b
-    ));
+    setBatiments(batiments.map(b => {
+      if (b.id !== id) return b;
+      const parsedValue = field.includes('rendement') || field === 'coefIntermittence' || field === 'tarification'
+        ? parseFloat(value) : isNaN(value) ? value : parseFloat(value);
+      const updated = { ...b, [field]: parsedValue };
+
+      // Auto-fill tarif + abonnement when typeEnergie changes
+      if (field === 'typeEnergie' && ENERGY_TARIFS[value]) {
+        updated.tarification = ENERGY_TARIFS[value].tarification;
+        updated.abonnement = ENERGY_TARIFS[value].abonnement;
+      }
+
+      // Auto-fill ref tarif + abonnement when refTypeEnergie changes
+      if (field === 'refTypeEnergie' && value && ENERGY_TARIFS[value]) {
+        updated.refTarification = ENERGY_TARIFS[value].tarification;
+        updated.refAbonnement = ENERGY_TARIFS[value].abonnement;
+      }
+
+      // Auto-fill coefIntermittence when typeBatiment changes
+      if (field === 'typeBatiment' && COEF_INTERMITTENCE[value] != null) {
+        updated.coefIntermittence = COEF_INTERMITTENCE[value];
+      }
+
+      // Auto-fill 4 rendements when typeInstallation changes
+      if (field === 'typeInstallation') {
+        const preset = TYPES_INSTALLATION.find(t => t.value === value);
+        if (preset) {
+          updated.rendementProduction = preset.rendementProduction;
+          updated.rendementDistribution = preset.rendementDistribution;
+          updated.rendementEmission = preset.rendementEmission;
+          updated.rendementRegulation = preset.rendementRegulation;
+        }
+      }
+
+      return updated;
+    }));
   };
 
   const deleteBatiment = (id: string) => {
@@ -272,6 +307,19 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                 {batiments.map((batiment) => (
                   <div key={batiment.id} className="mb-4 p-4 bg-white rounded border border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-3">{batiment.designation}</h4>
+                    {/* Type d'installation → pré-remplit les 4 rendements */}
+                    <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Type d&apos;installation chauffage</label>
+                      <select
+                        value={batiment.typeInstallation || ''}
+                        onChange={(e) => updateBatiment(batiment.id, 'typeInstallation', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      >
+                        <option value="">Sélectionner pour pré-remplir les rendements...</option>
+                        {TYPES_INSTALLATION.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1 italic">💡 Sélectionnez un type de chaudière pour pré-remplir les rendements. Vous pouvez ensuite les ajuster.</p>
+                    </div>
                     <div className="grid grid-cols-4 gap-4 text-sm">
                       <div>
                         <label className="block text-gray-600 mb-1">Rdt production (%)</label>

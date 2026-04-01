@@ -108,6 +108,13 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                   <option value="">Sélectionner...</option>
                   {TYPES_BIOMASSE.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
+                {parc.typeBiomasse && BIOMASSE_CHARACTERISTICS[parc.typeBiomasse] && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
+                    <span className="font-semibold">PCI:</span> {BIOMASSE_CHARACTERISTICS[parc.typeBiomasse].pci} kWh/kg &nbsp;|&nbsp;
+                    <span className="font-semibold">Masse vol.:</span> {BIOMASSE_CHARACTERISTICS[parc.typeBiomasse].masseVolumique} kg/m³ &nbsp;|&nbsp;
+                    <span className="font-semibold">Cendres:</span> {(BIOMASSE_CHARACTERISTICS[parc.typeBiomasse].tauxCendre * 100).toFixed(1)}%
+                  </div>
+                )}
               </div>
 
               <div>

@@ -237,6 +237,9 @@ model ChiffragReference {
   tauxFraisDivers       Float    @default(0.02)
   tauxAleas             Float    @default(0.05)
   
+  // Emprunt (coût total du crédit, saisi manuellement comme dans l'Excel)
+  empruntRef            Float    @default(0)
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
@@ -278,6 +281,9 @@ model ChiffrageBiomasse {
   // Exploitation (€)
   montantP2               Float    @default(1200)
   consoElecSupplementaire Float?
+  
+  // Emprunt (coût total du crédit, saisi manuellement comme dans l'Excel)
+  empruntBio              Float    @default(0)
   
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

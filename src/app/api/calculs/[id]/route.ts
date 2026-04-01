@@ -97,12 +97,12 @@ export async function GET(
       return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
     }
 
-    const DJU = affaire.djuRetenu || 1977;
-    const tempInt = affaire.tempIntBase || 19;
-    const tempExt = affaire.tempExtBase || -7;
-    const dureeEmprunt = affaire.dureeEmprunt || 15;
-    const tauxAugFossile = affaire.augmentationFossile || 0.04;
-    const tauxAugBiomasse = affaire.augmentationBiomasse || 0.02;
+    const DJU = affaire.djuRetenu ?? 1977;
+    const tempInt = affaire.tempIntBase ?? 19;
+    const tempExt = affaire.tempExtBase ?? -7;
+    const dureeEmprunt = affaire.dureeEmprunt ?? 15;
+    const tauxAugFossile = affaire.augmentationFossile ?? 0.04;
+    const tauxAugBiomasse = affaire.augmentationBiomasse ?? 0.02;
 
     // Transform DB rows to calculation types
     const batimentsCalc = affaire.batiments.map(transformBatiment);
@@ -112,12 +112,13 @@ export async function GET(
       const calculs = calculsBatimentComplet(bat, DJU, tempInt, tempExt);
       const surface = bat.surfaceChauffee || 1;
       const consoKwhepPerM2 = calculs.consoKWhepEI / surface;
-      const etiquetteDpe = calculEtiquetteEnergetique(consoKwhepPerM2);
+      const etiquetteDpe = calculEtiquetteEnergetique(consoKwhepPerM2, bat.typeBatiment);
 
       return {
         numero: bat.numero,
         designation: bat.designation,
         parc: bat.parc,
+        typeBatiment: bat.typeBatiment,
         rendement_moyen: calculs.rendementMoyenEI,
         conso_kwhep: calculs.consoKWhepEI,
         conso_pcs: calculs.consoPCSEI,
@@ -188,7 +189,7 @@ export async function GET(
         };
         investHT = calculInvestissementHTRef(lignesChaufferie, fraisAnnexes);
         investTTC = calculInvestissementTTCRef(investHT);
-        annuiteRefParc = calculAnnuiteRef(investHT, 0, dureeEmprunt);
+        annuiteRefParc = calculAnnuiteRef(investHT, chiffrageRef.empruntRef || 0, dureeEmprunt);
       }
 
       // Biomasse calculations
@@ -233,7 +234,7 @@ export async function GET(
         const subBrut = investBioHT * (subRates / 100);
         subventionsBio = Math.min(subBrut, investBioHT * 0.80);
         const investBioNet = investBioHT - subventionsBio;
-        annuiteBiomasse = investBioNet / dureeEmprunt;
+        annuiteBiomasse = (investBioNet + (chiffrageBio.empruntBio || 0)) / dureeEmprunt;
       }
 
       totalCoutActuel += coutActuel;

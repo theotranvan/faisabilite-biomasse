@@ -5,6 +5,28 @@ import { Button } from '@/components/ui/Form';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import jsPDF from 'jspdf';
 
+// DPE thresholds per building type (from Excel Etiquette sheet)
+const DPE_THRESHOLDS_MAP: Record<string, number[]> = {
+  LOGEMENTS:            [50,  90, 150, 230, 330,  450],
+  BUREAUX:              [50, 110, 210, 350, 540,  750],
+  OCCUPATION_CONTINUE: [100, 210, 370, 580, 830, 1130],
+  AUTRES:               [30,  90, 170, 270, 380,  510],
+};
+const DPE_COLORS = [
+  [0, 128, 0], [50, 180, 50], [180, 200, 0],
+  [255, 215, 0], [255, 165, 0], [255, 100, 0], [220, 0, 0],
+];
+const DPE_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+function getDpeClasses(typeBatiment?: string) {
+  const thresholds = DPE_THRESHOLDS_MAP[typeBatiment || 'LOGEMENTS'] || DPE_THRESHOLDS_MAP.LOGEMENTS;
+  return DPE_LABELS.map((label, i) => ({
+    label,
+    min: i === 0 ? 0 : thresholds[i - 1] + 1,
+    max: i < thresholds.length ? thresholds[i] : 9999,
+    color: DPE_COLORS[i],
+  }));
+}
+
 interface PDFExportProps {
   affaireId: string;
   referenceAffaire: string;
@@ -55,17 +77,6 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       pdf.text(subtitle, pageWidth / 2, y, { align: 'center' });
       y += 15;
 
-      // DPE scale definition (official French thresholds)
-      const dpeClasses = [
-        { label: 'A', min: 0, max: 50, color: [0, 128, 0] },
-        { label: 'B', min: 51, max: 90, color: [50, 180, 50] },
-        { label: 'C', min: 91, max: 150, color: [180, 200, 0] },
-        { label: 'D', min: 151, max: 230, color: [255, 215, 0] },
-        { label: 'E', min: 231, max: 330, color: [255, 165, 0] },
-        { label: 'F', min: 331, max: 450, color: [255, 100, 0] },
-        { label: 'G', min: 451, max: 9999, color: [220, 0, 0] },
-      ];
-
       const allBatiments = calcData?.batiments || [];
       const batiments = parcFilter != null
         ? allBatiments.filter((b: any) => b.parc === parcFilter)
@@ -81,6 +92,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
 
         const consoPerM2 = bat.conso_kwhep_per_m2 || 0;
         const dpeLabel = bat.etiquette_dpe || 'N/A';
+        const dpeClasses = getDpeClasses(bat.typeBatiment);
 
         // Building header
         pdf.setFontSize(14);
@@ -307,17 +319,9 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       // ===== SECTION 3: ETIQUETTES DPE =====
       y += 5;
       sectionTitle('2', 'Etiquettes energetiques DPE');
-      const dpeClasses = [
-        { label: 'A', min: 0, max: 50, color: [0, 128, 0] },
-        { label: 'B', min: 51, max: 90, color: [50, 180, 50] },
-        { label: 'C', min: 91, max: 150, color: [180, 200, 0] },
-        { label: 'D', min: 151, max: 230, color: [255, 215, 0] },
-        { label: 'E', min: 231, max: 330, color: [255, 165, 0] },
-        { label: 'F', min: 331, max: 450, color: [255, 100, 0] },
-        { label: 'G', min: 451, max: 9999, color: [220, 0, 0] },
-      ];
 
       for (const bat of bats) {
+        const dpeClasses = getDpeClasses(bat.typeBatiment);
         checkPage(100);
         pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');

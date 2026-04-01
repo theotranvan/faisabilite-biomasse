@@ -1,0 +1,80 @@
+[
+  {
+    "cell": "R4",
+    "formula": "IF(S4=\"Electricité\",P4*2.3,P4)",
+    "value": 70189,
+    "type": "n"
+  },
+  {
+    "cell": "U4",
+    "formula": "IF(S4=\"Gaz naturel\",T4*1.1,IF(S4=\"Gaz propane\",T4*1.1,T4))",
+    "value": 70189,
+    "type": "n"
+  },
+  {
+    "cell": "X4",
+    "formula": "W4+(U4*V4)",
+    "value": 9124.57,
+    "type": "n"
+  },
+  {
+    "cell": "R5",
+    "formula": "IF(S5=\"Electricité\",Q5*2.3,Q5)",
+    "value": 138000,
+    "type": "n"
+  },
+  {
+    "cell": "U5",
+    "formula": "IF(S5=\"Gaz naturel\",T5*1.1,IF(S5=\"Gaz propane\",T5*1.1,T5))",
+    "value": 58868,
+    "type": "n"
+  },
+  {
+    "cell": "X5",
+    "formula": "W5+(U5*V5)",
+    "value": 13304.168,
+    "type": "n"
+  },
+  {
+    "cell": "AF5",
+    "formula": "IF(Z5=\"Gaz naturel\",AE5*1.1,IF(Z5=\"Gaz propane\",AE5*1.1,AE5))",
+    "value": 64791.91106642089,
+    "type": "n"
+  },
+  {
+    "cell": "AH5",
+    "formula": "AE5*AA5",
+    "value": 50066.47673314341,
+    "type": "n"
+  },
+  {
+    "cell": "R6",
+    "formula": "IF(S6=\"Electricité\",Q6*2.3,Q6)",
+    "value": 32000,
+    "type": "n"
+  },
+  {
+    "cell": "U6",
+    "formula": "IF(S6=\"Gaz naturel\",T6*1.1,IF(S6=\"Gaz propane\",T6*1.1,T6))",
+    "value": 31464,
+    "type": "n"
+  },
+  {
+    "cell": "X6",
+    "formula": "W6+(U6*V6)",
+    "value": 4090.32,
+    "type": "n"
+  },
+  {
+    "cell": "AF6",
+    "formula": "IF(Z6=\"Gaz naturel\",AE6*1.1,IF(Z6=\"Gaz propane\",AE6*1.1,AE6))",
+    "value": 34420.702754036065,
+    "type": "n"
+  },
+  {
+    "cell": "AH6",
+    "formula": "AE6*AA6",
+    "value": 25033.23836657168,
+    "type": "n"
+  }
+]

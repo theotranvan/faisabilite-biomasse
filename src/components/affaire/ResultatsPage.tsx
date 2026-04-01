@@ -19,6 +19,19 @@ import {
 } from '@/lib/calculs';
 import type { Batiment } from '@/lib/calculs';
 
+// Map DB enum energy type to display name used by calc functions
+function mapEnergyType(dbType: string | null | undefined): string {
+  const map: Record<string, string> = {
+    FUEL: 'Fuel',
+    GAZ_NATUREL: 'Gaz naturel',
+    GAZ_PROPANE: 'Gaz propane',
+    ELECTRICITE: 'Electricité',
+    BOIS_DECHIQUETTE: 'Plaquette',
+    BOIS_GRANULES: 'Granulé',
+  };
+  return map[dbType || ''] || dbType || 'Fuel';
+}
+
 // Convert flat DB batiment to nested Batiment type expected by calculs
 function dbBatimentToCalcBatiment(db: any): Batiment {
   return {
@@ -37,7 +50,7 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
       coefIntermittence: db.coefIntermittence || 1,
       consommationsCalculees: db.consommationsCalculees || 0,
       consommationsReelles: db.consommationsReelles || 0,
-      typeEnergie: db.typeEnergie || 'Fuel',
+      typeEnergie: mapEnergyType(db.typeEnergie),
       tarification: db.tarification || 0,
       abonnement: db.abonnement || 0,
     },
@@ -50,7 +63,7 @@ function dbBatimentToCalcBatiment(db: any): Batiment {
       coefIntermittence: db.coefIntermittence || 1,
       consommationsCalculees: db.consommationsCalculees || 0,
       consommationsReelles: db.consommationsReelles || 0,
-      typeEnergie: db.refTypeEnergie ?? db.typeEnergie ?? 'Fuel',
+      typeEnergie: mapEnergyType(db.refTypeEnergie ?? db.typeEnergie),
       tarification: (db.refTarification ?? db.tarification) || 0,
       abonnement: (db.refAbonnement ?? db.abonnement) || 0,
     },
@@ -132,12 +145,12 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
         // Use chiffrages passed as props (per-parc)
 
         // Parameters
-        const DJU = affaire.djuRetenu || 1977;
-        const tempInt = affaire.tempIntBase || 19;
-        const tempExt = affaire.tempExtBase || -7;
-        const dureeEmprunt = affaire.dureeEmprunt || 15;
-        const tauxAugFossile = affaire.augmentationFossile || 0.04;
-        const tauxAugBiomasse = affaire.augmentationBiomasse || 0.02;
+        const DJU = affaire.djuRetenu ?? 1977;
+        const tempInt = affaire.tempIntBase ?? 19;
+        const tempExt = affaire.tempExtBase ?? -7;
+        const dureeEmprunt = affaire.dureeEmprunt ?? 15;
+        const tauxAugFossile = affaire.augmentationFossile ?? 0.04;
+        const tauxAugBiomasse = affaire.augmentationBiomasse ?? 0.02;
 
         // Convert flat DB batiments to calc-compatible nested format
         const calcBatiments = batiments.map(dbBatimentToCalcBatiment);
@@ -181,7 +194,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             const feeRate = (chiffrageRef.tauxBureauControle || 0) + (chiffrageRef.tauxMaitriseOeuvre || 0) +
               (chiffrageRef.tauxFraisDivers || 0) + (chiffrageRef.tauxAleas || 0);
             investHT = sousTotalChaufferie * (1 + feeRate);
-            annuiteRefParc = investHT / dureeEmprunt;
+            annuiteRefParc = (investHT + (chiffrageRef.empruntRef || 0)) / dureeEmprunt;
           }
 
           // Parc config
@@ -233,7 +246,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             const subBrut = investBioHT * (subRates / 100);
             subventionsBio = Math.min(subBrut, investBioHT * 0.80);
             const investBioNet = investBioHT - subventionsBio;
-            annuiteBiomasse = investBioNet / dureeEmprunt;
+            annuiteBiomasse = (investBioNet + (chiffrageBio.empruntBio || 0)) / dureeEmprunt;
           }
 
           // CO2/SO2 — real calculations by fuel type
@@ -254,7 +267,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           const batimentDetails = batsInParc.map(b => {
             const consoKWhepEI = b.calculs?.consoKWhepEI || 0;
             const surface = b.surfaceChauffee || 1;
-            const dpe = calculEtiquetteEnergetique(consoKWhepEI / surface);
+            const dpe = calculEtiquetteEnergetique(consoKWhepEI / surface, b.typeBatiment);
             return {
               numero: b.numero,
               designation: b.designation,
@@ -369,18 +382,21 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           if (resMono.ok) {
             const temperatures = await resMono.json();
             if (Array.isArray(temperatures) && temperatures.length > 0) {
-              const depParDegre = (sel.puissance * 1000) / (tempInt - tempExt);
-              const puissanceGenBase = affaire.parcs?.[0]?.puissanceChaudiereBois || 0;
-              const points = temperatures
-                .map((t: number) => Math.max(0, depParDegre * (tempInt - t)))
-                .filter((p: number) => p > 0)
-                .sort((a: number, b: number) => b - a)
-                .map((p: number, i: number) => ({
-                  heure: i,
-                  puissance: p / 1000,
-                  generateur: puissanceGenBase,
-                }));
-              setMonotoneChartData(points);
+              const deltaT = tempInt - tempExt;
+              if (deltaT > 0) {
+                const depParDegre = (sel.puissance * 1000) / deltaT;
+                const puissanceGenBase = affaire.parcs?.[0]?.puissanceChaudiereBois || 0;
+                const points = temperatures
+                  .map((t: number) => Math.max(0, depParDegre * (tempInt - t)))
+                  .filter((p: number) => p > 0)
+                  .sort((a: number, b: number) => b - a)
+                  .map((p: number, i: number) => ({
+                    heure: i,
+                    puissance: p / 1000,
+                    generateur: puissanceGenBase,
+                  }));
+                setMonotoneChartData(points);
+              }
             }
           }
         } catch { /* monotone optionnelle */ }
@@ -415,7 +431,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
   const coutGlobalRef = sel.coutRef + sel.annuiteRef;
   const coutGlobalBio = sel.coutBiomasse + sel.annuiteBiomasse;
   const gainExploitation = coutGlobalRef - coutGlobalBio;
-  const surcout = sel.investBioHT - sel.investHT;
+  const surcout = (sel.investBioHT - sel.subventionsBio) - sel.investHT;
   const tempsRetour = gainExploitation > 0 ? surcout / gainExploitation : 0;
   const economies20ans = projections.reduce((s, y) => s + y.economie, 0);
 

@@ -1,0 +1,242 @@
+[
+  [
+    "Désignation",
+    "U",
+    "Qte",
+    "Prix unitaire\r\n€",
+    "Prix total\r\n€",
+    ""
+  ],
+  [
+    "Synthèse des couts d'investissement de la solution biomasse",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Travaux d'isolation : (pour information non compris dans le total)",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Travaux d'isolation des bâtiments",
+    "",
+    "",
+    "",
+    501140,
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Sous total",
+    501140,
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Déjà réalisé:",
+    0,
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Reste à réaliser",
+    501140,
+    ""
+  ],
+  [
+    "Travaux chaufferie",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "VRD - Aménagements extérieur",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Gros œuvre",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Charpente-couverture",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Process bois (chaudière + dessileur+fosse dépotage..)",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Chaudière appoint",
+    "U",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "Hydraulique chaufferie",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Réseau de chaleur",
+    "ml",
+    0,
+    "",
+    0,
+    ""
+  ],
+  [
+    "Sous-station",
+    "U",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "Installation réseau hydraulique dans bât existants",
+    "U",
+    0,
+    0,
+    0,
+    ""
+  ],
+  [
+    "Autre travaux de chauffage",
+    "Ens",
+    1,
+    "",
+    0,
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Sous total",
+    0,
+    ""
+  ],
+  [
+    "TOTAL DES TRAVAUX DE LA SOLUTION BIOMASSE",
+    "",
+    "",
+    "",
+    501140,
+    ""
+  ],
+  [
+    "TOTAL DES TRAVAUX DE LA SOLUTION BIOMASSE SANS ISOLATION",
+    "",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "Frais annexes sur travaux chaufferie",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Bureau de contrôle,SPS …",
+    "%",
+    0.03,
+    0,
+    0,
+    ""
+  ],
+  [
+    "Maîtrise d'œuvre",
+    "%",
+    0.09,
+    0,
+    0,
+    ""
+  ],
+  [
+    "Frais divers de consultation",
+    "%",
+    0.02,
+    0,
+    0,
+    ""
+  ],
+  [
+    "Aléas de chantier",
+    "%",
+    0.05,
+    0,
+    0,
+    ""
+  ],
+  [
+    "TOTAL DES FRAIS ANEXES",
+    "",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "TOTAL DES INVESTISSEMENTS DE LA SOLUTION BIOMASSE",
+    "",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "TVA",
+    "",
+    "",
+    "",
+    0,
+    ""
+  ],
+  [
+    "TOTAL TTC",
+    "",
+    "",
+    "",
+    0,
+    ""
+  ]
+]

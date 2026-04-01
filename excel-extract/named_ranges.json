@@ -1,0 +1,125 @@
+[
+  {
+    "Name": "Car_biomasse",
+    "Ref": "Car_biomasse!$B$4:$F$15"
+  },
+  {
+    "Name": "Cout_CHbat",
+    "Ref": "BDD_cout!$V$2:$X$100"
+  },
+  {
+    "Name": "Cout_CHbois",
+    "Ref": "BDD_cout!$R$2:$T$100"
+  },
+  {
+    "Name": "Cout_GO",
+    "Ref": "BDD_cout!$N$2:$P$100"
+  },
+  {
+    "Name": "Cout_VRD",
+    "Ref": "BDD_cout!$J$2:$L$100"
+  },
+  {
+    "Name": "departements",
+    "Ref": "Meteo!$B$5:$B$100"
+  },
+  {
+    "Name": "Designation_CHbat",
+    "Ref": "BDD_cout!$V$3:$V$100"
+  },
+  {
+    "Name": "Designation_CHbois",
+    "Ref": "BDD_cout!$R$3:$R$100"
+  },
+  {
+    "Name": "Designation_GO",
+    "Ref": "BDD_cout!$N$3:$N$100"
+  },
+  {
+    "Name": "Dmeteo",
+    "Ref": "Meteo!$A$4:$AF$100"
+  },
+  {
+    "Name": "Donneesenergies",
+    "Ref": "Energies!$B$2:$D$12"
+  },
+  {
+    "Name": "Energies",
+    "Ref": "Energies!$B$3:$B$12"
+  },
+  {
+    "Name": "Heure",
+    "Ref": "Utile!$C$2:$C$25"
+  },
+  {
+    "Name": "listebat",
+    "Ref": "Donnees!$A$4:$A$100"
+  },
+  {
+    "Name": "Produits_VRD",
+    "Ref": "BDD_cout!$J$3:$J$100"
+  },
+  {
+    "Name": "rendement",
+    "Ref": "Utile!$A$2:$A$101"
+  },
+  {
+    "Name": "Reseau_Ch",
+    "Ref": "Utile!$I$1:$J$12"
+  },
+  {
+    "Name": "Sections",
+    "Ref": "Utile!$I$2:$I$12"
+  },
+  {
+    "Name": "Sourcebatiment",
+    "Ref": "Donnees!$A$4:$F$54"
+  },
+  {
+    "Name": "Sourcecoutbat",
+    "Ref": "BDD_cout!$B$3:$D$100"
+  },
+  {
+    "Name": "Sourceinitial",
+    "Ref": "Donnees!$A$1:$AG$107"
+  },
+  {
+    "Name": "Text_monotone",
+    "Ref": "Utile!$L$1:$M$17"
+  },
+  {
+    "Name": "Type_bat",
+    "Ref": "Utile!$G$2:$G$5"
+  },
+  {
+    "Name": "Type_biomasse",
+    "Ref": "Car_biomasse!$B$5:$B$15"
+  },
+  {
+    "Name": "typebat",
+    "Ref": "Etiquette!$B$25:$B$28"
+  },
+  {
+    "Name": "Version",
+    "Ref": "Utile!$E$2:$E$7"
+  },
+  {
+    "Name": "Villes_monotone",
+    "Ref": "Utile!$L$1:$L$17"
+  },
+  {
+    "Name": "_xlnm.Print_Area",
+    "Sheet": 20,
+    "Ref": "'CO2 SO2'!$B$2:$G$22,'CO2 SO2'!$B$26:$G$46"
+  },
+  {
+    "Name": "_xlnm.Print_Area",
+    "Sheet": 27,
+    "Ref": "Monotone_2!$AG$1:$AS$24,Monotone_2!$AY$1:$BE$26"
+  },
+  {
+    "Name": "_xlnm.Print_Area",
+    "Sheet": 18,
+    "Ref": "'solution biomasse'!#REF!,'solution biomasse'!$C$2:$F$21,'solution biomasse'!$H$2:$M$21,'solution biomasse'!$H$24:$M$51,'solution biomasse'!#REF!,'solution biomasse'!#REF!,'solution biomasse'!#REF!,'solution biomasse'!#REF!"
+  }
+]

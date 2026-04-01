@@ -1,0 +1,512 @@
+[
+  {
+    "cell": "C25",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B25,Donnees!$D$4:$D$54)",
+    "value": 200,
+    "type": "n"
+  },
+  {
+    "cell": "D25",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B25,Donnees!$R$4:$R$54)",
+    "value": 102189,
+    "type": "n"
+  },
+  {
+    "cell": "E25",
+    "formula": "D25/D29",
+    "value": 0.4254524561907498,
+    "type": "n"
+  },
+  {
+    "cell": "F25",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B25,Donnees!$AF$4:$AF$54)",
+    "value": 34420.702754036065,
+    "type": "n"
+  },
+  {
+    "cell": "C26",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B26,Donnees!$D$4:$D$54)",
+    "value": 200,
+    "type": "n"
+  },
+  {
+    "cell": "D26",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B26,Donnees!$R$4:$R$54)",
+    "value": 138000,
+    "type": "n"
+  },
+  {
+    "cell": "E26",
+    "formula": "D26/D29",
+    "value": 0.5745475438092502,
+    "type": "n"
+  },
+  {
+    "cell": "F26",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B26,Donnees!$AF$4:$AF$54)",
+    "value": 64791.91106642089,
+    "type": "n"
+  },
+  {
+    "cell": "K26",
+    "formula": "E25*50+E26*50+E27*100+E28*30",
+    "value": 50,
+    "type": "n"
+  },
+  {
+    "cell": "L26",
+    "formula": "K26+1",
+    "value": 51,
+    "type": "n"
+  },
+  {
+    "cell": "M26",
+    "formula": "E25*90+E26*110+E27*210+E28*90",
+    "value": 101.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "N26",
+    "formula": "M26+1",
+    "value": 102.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "O26",
+    "formula": "E25*150+E26*210+E27*370+E28*170",
+    "value": 184.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "P26",
+    "formula": "O26+1",
+    "value": 185.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "Q26",
+    "formula": "E25*230+E26*350+E27*580+E28*270",
+    "value": 298.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "R26",
+    "formula": "Q26+1",
+    "value": 299.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "S26",
+    "formula": "E25*330+E26*540+E27*830+E28*380",
+    "value": 450.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "T26",
+    "formula": "S26+1",
+    "value": 451.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "U26",
+    "formula": "E25*450+E26*750+E27*1130+E28*510",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "V26",
+    "formula": "U26",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "C27",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B27,Donnees!$D$4:$D$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D27",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B27,Donnees!$R$4:$R$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E27",
+    "formula": "D27/D29",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F27",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B27,Donnees!$AF$4:$AF$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "C28",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B28,Donnees!$D$4:$D$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "D28",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B28,Donnees!$R$4:$R$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "E28",
+    "formula": "D28/D29",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "F28",
+    "formula": "SUMIF(Donnees!$C$4:$C$54,Etiquette!B28,Donnees!$AF$4:$AF$54)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "C29",
+    "formula": "SUM(C25:C28)",
+    "value": 400,
+    "type": "n"
+  },
+  {
+    "cell": "D29",
+    "formula": "SUM(D25:D28)",
+    "value": 240189,
+    "type": "n"
+  },
+  {
+    "cell": "F29",
+    "formula": "SUM(F25:F28)",
+    "value": 99212.61382045696,
+    "type": "n"
+  },
+  {
+    "cell": "D30",
+    "formula": "D29/C29",
+    "value": 600.4725,
+    "type": "n"
+  },
+  {
+    "cell": "F30",
+    "formula": "F29/C29",
+    "value": 248.03153455114239,
+    "type": "n"
+  },
+  {
+    "cell": "Z31",
+    "formula": "K26",
+    "value": 50,
+    "type": "n"
+  },
+  {
+    "cell": "AI31",
+    "formula": "IF(D30<Z31,D30,0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ31",
+    "formula": "IF(AI31=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AN31",
+    "formula": "Z31",
+    "value": 50,
+    "type": "n"
+  },
+  {
+    "cell": "AW31",
+    "formula": "IF(F30<AN31,F30,0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX31",
+    "formula": "IF(AW31=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "Y33",
+    "formula": "L26",
+    "value": 51,
+    "type": "n"
+  },
+  {
+    "cell": "AA33",
+    "formula": "M26",
+    "value": 101.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "AI33",
+    "formula": "IF(D30<Y35,(IF(D30>Z31,D30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ33",
+    "formula": "IF(AI33=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AM33",
+    "formula": "Y33",
+    "value": 51,
+    "type": "n"
+  },
+  {
+    "cell": "AO33",
+    "formula": "AA33",
+    "value": 101.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "AW33",
+    "formula": "IF(F30<AM35,(IF(F30>AN31,R30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX33",
+    "formula": "IF(AW33=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "Y35",
+    "formula": "N26",
+    "value": 102.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "AA35",
+    "formula": "O26",
+    "value": 184.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "AI35",
+    "formula": "IF(D30<Y37,(IF(D30>AA33,D30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ35",
+    "formula": "IF(AI35=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AM35",
+    "formula": "Y35",
+    "value": 102.490950876185,
+    "type": "n"
+  },
+  {
+    "cell": "AO35",
+    "formula": "AA35",
+    "value": 184.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "AW35",
+    "formula": "IF(F30<AM37,(IF(F30>AO33,F30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX35",
+    "formula": "IF(AW35=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "Y37",
+    "formula": "P26",
+    "value": 185.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "AA37",
+    "formula": "Q26",
+    "value": 298.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "AI37",
+    "formula": "IF(D30<Y39,(IF(D30>AA35,D30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ37",
+    "formula": "IF(AI37=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AM37",
+    "formula": "Y37",
+    "value": 185.47285262855502,
+    "type": "n"
+  },
+  {
+    "cell": "AO37",
+    "formula": "AA37",
+    "value": 298.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "AW37",
+    "formula": "IF(F30<AM39,(IF(F30>AO35,F30,0)),0)",
+    "value": 248.03153455114239,
+    "type": "n"
+  },
+  {
+    "cell": "AX37",
+    "formula": "IF(AW37=0,0,\"kWhep/m².an\")",
+    "value": "kWhep/m².an",
+    "type": "s"
+  },
+  {
+    "cell": "Y39",
+    "formula": "R26",
+    "value": 299.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "AA39",
+    "formula": "S26",
+    "value": 450.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "AI39",
+    "formula": "IF(D30<Y41,(IF(D30>AA37,D30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ39",
+    "formula": "IF(AI39=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AM39",
+    "formula": "Y39",
+    "value": 299.94570525711003,
+    "type": "n"
+  },
+  {
+    "cell": "AO39",
+    "formula": "AA39",
+    "value": 450.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "AW39",
+    "formula": "IF(F30<AM41,(IF(F30>AO37,F30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX39",
+    "formula": "IF(AW39=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "Y41",
+    "formula": "T26",
+    "value": 451.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "AA41",
+    "formula": "U26",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "AI41",
+    "formula": "IF(D30<(AA41+1),(IF(D30>AA39,D30,0)),0)",
+    "value": 600.4725,
+    "type": "n"
+  },
+  {
+    "cell": "AJ41",
+    "formula": "IF(AI41=0,0,\"kWhep/m².an\")",
+    "value": "kWhep/m².an",
+    "type": "s"
+  },
+  {
+    "cell": "AM41",
+    "formula": "Y41",
+    "value": 451.65498419994253,
+    "type": "n"
+  },
+  {
+    "cell": "AO41",
+    "formula": "AA41",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "AW41",
+    "formula": "IF(F30<(AO41+1),(IF(F30>AO39,F30,0)),0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX41",
+    "formula": "IF(AW41=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "Z43",
+    "formula": "V26",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "AI43",
+    "formula": "IF(D30>Z43,D30,0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AJ43",
+    "formula": "IF(AI43=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AN43",
+    "formula": "Z43",
+    "value": 622.3642631427751,
+    "type": "n"
+  },
+  {
+    "cell": "AW43",
+    "formula": "IF(F30>AN43,F30,0)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "AX43",
+    "formula": "IF(AW43=0,0,\"kWhep/m².an\")",
+    "value": 0,
+    "type": "n"
+  }
+]

@@ -70,10 +70,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (maitriseOeuvre !== undefined) data.tauxMaitriseOeuvre = maitriseOeuvre;
     if (fraisDivers !== undefined) data.tauxFraisDivers = fraisDivers;
     if (aleas !== undefined) data.tauxAleas = aleas;
+    // Emprunt
+    if (emprunt_biomasse !== undefined) data.empruntBio = parseFloat(emprunt_biomasse) || 0;
 
-    // Vérifier que l'affaire existe
-    const affaire = await db.affaire.findFirst({
-      where: { id, userId: await getSessionUserId() }
+    // Vérifier que l'affaire existe (shared workspace — all users can edit)
+    await getSessionUserId(); // ensure authenticated
+    const affaire = await db.affaire.findUnique({
+      where: { id }
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/shared/Header';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { Button, Input, Select, TextArea } from '@/components/ui/Form';
+import { DEPARTEMENTS, ENERGY_TARIFS, DEPT_TO_VILLE_MONOTONE } from '@/lib/enums';
 
 interface FormAffaire {
   nomClient: string;
@@ -18,6 +19,7 @@ interface FormAffaire {
   augmentationFossile: number;
   augmentationBiomasse: number;
   dureeEmprunt: number;
+  villeMonotone: string;
 }
 
 interface Batiment {
@@ -44,26 +46,12 @@ interface Chiffrage {
   dureeEmprunt: number;
 }
 
-const DEPARTEMENTS = [
-  { value: '01', label: '01 - Ain' },
-  { value: '13', label: '13 - Bouches-du-Rhône' },
-  { value: '18', label: '18 - Cher' },
-  { value: '21', label: '21 - Côte-d\'Or' },
-  { value: '38', label: '38 - Isère' },
-  { value: '42', label: '42 - Loire' },
-  { value: '59', label: '59 - Nord' },
-  { value: '63', label: '63 - Puy-de-Dôme' },
-  { value: '69', label: '69 - Rhône' },
-  { value: '75', label: '75 - Paris' },
-  { value: '92', label: '92 - Hauts-de-Seine' },
-];
-
 const ENERGIES = [
-  { value: 'Fuel', label: 'Fuel' },
-  { value: 'Gaz naturel', label: 'Gaz naturel' },
-  { value: 'Gaz propane', label: 'Gaz propane' },
-  { value: 'Electricité', label: 'Électricité' },
-  { value: 'Bois plaquette', label: 'Bois plaquette' },
+  { value: 'FUEL', label: 'Fioul' },
+  { value: 'GAZ_NATUREL', label: 'Gaz naturel' },
+  { value: 'GAZ_PROPANE', label: 'Gaz propane' },
+  { value: 'ELECTRICITE', label: 'Électricité' },
+  { value: 'BOIS_DECHIQUETTE', label: 'Bois plaquette' },
 ];
 
 const TYPES_INSTALLATION = [
@@ -136,6 +124,7 @@ export default function NewAffairePage() {
     augmentationFossile: 0.04,
     augmentationBiomasse: 0.02,
     dureeEmprunt: 15,
+    villeMonotone: DEPT_TO_VILLE_MONOTONE['18'] || 'Bourges',
   });
 
   // Load DJU + tempExtBase for default département on mount
@@ -167,7 +156,7 @@ export default function NewAffairePage() {
       rendementRegulation: 90,
       consommationsCalculees: 70000,
       consommationsReelles: 71000,
-      typeEnergie: 'Fuel',
+      typeEnergie: 'FUEL',
       tarification: 0.13,
       abonnement: 0,
     },
@@ -195,6 +184,12 @@ export default function NewAffairePage() {
 
     // Auto-fetch DJU and tempExtBase when département changes
     if (name === 'departement') {
+      // Auto-fill villeMonotone from département mapping
+      const villeM = DEPT_TO_VILLE_MONOTONE[value];
+      if (villeM) {
+        setAffaire(prev => ({ ...prev, villeMonotone: villeM }));
+      }
+
       fetch(`/api/meteo/${value}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
@@ -213,7 +208,7 @@ export default function NewAffairePage() {
   const handleBatimentChange = (idx: number, field: string, value: any) => {
     const newBatiments = [...batiments];
     
-    // Si on change le type d'installation, charger les présets
+    // Si on change le type d'installation, charger les présets rendements
     if (field === 'typeInstallation') {
       const preset = TYPES_INSTALLATION.find(t => t.value === value);
       if (preset) {
@@ -235,6 +230,12 @@ export default function NewAffairePage() {
           ? parseFloat(value) || 0
           : value,
       };
+
+      // Auto-fill tarification + abonnement when typeEnergie changes
+      if (field === 'typeEnergie' && ENERGY_TARIFS[value]) {
+        newBatiments[idx].tarification = ENERGY_TARIFS[value].tarification;
+        newBatiments[idx].abonnement = ENERGY_TARIFS[value].abonnement;
+      }
     }
     setBatiments(newBatiments);
   };
@@ -254,7 +255,7 @@ export default function NewAffairePage() {
         rendementRegulation: 90,
         consommationsCalculees: 70000,
         consommationsReelles: 71000,
-        typeEnergie: 'Fuel',
+        typeEnergie: 'FUEL',
         tarification: 0.13,
         abonnement: 0,
       },
@@ -295,6 +296,7 @@ export default function NewAffairePage() {
               augmentationFossile: affaire.augmentationFossile,
               augmentationBiomasse: affaire.augmentationBiomasse,
               dureeEmprunt: affaire.dureeEmprunt,
+              villeMonotone: affaire.villeMonotone,
               notes: affaire.notes,
               statut: 'BROUILLON',
             }),
@@ -391,6 +393,7 @@ export default function NewAffairePage() {
             augmentationFossile: affaire.augmentationFossile,
             augmentationBiomasse: affaire.augmentationBiomasse,
             dureeEmprunt: affaire.dureeEmprunt,
+            villeMonotone: affaire.villeMonotone,
             notes: affaire.notes,
             statut: 'BROUILLON',
           }),
@@ -831,7 +834,7 @@ export default function NewAffairePage() {
                     {batiments.map((bat, idx) => {
                       // Calculer l'étiquette DPE
                       const consoKwhep =
-                        bat.typeEnergie === 'Electricité'
+                        (bat.typeEnergie === 'ELECTRICITE' || bat.typeEnergie === 'Electricité')
                           ? bat.consommationsReelles * 2.3
                           : bat.consommationsReelles;
                       const surfaceChauffee = 100; // Default surface

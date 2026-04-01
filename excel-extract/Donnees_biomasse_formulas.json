@@ -1,0 +1,50 @@
+[
+  {
+    "cell": "B2",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A2,Donnees!$Y$2:$Y$104)",
+    "value": 10,
+    "type": "n"
+  },
+  {
+    "cell": "G2",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A2,Donnees!$AH$2:$AH$104)",
+    "value": 25033.23836657168,
+    "type": "n"
+  },
+  {
+    "cell": "B3",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A3,Donnees!$Y$2:$Y$104)",
+    "value": 20,
+    "type": "n"
+  },
+  {
+    "cell": "G3",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A3,Donnees!$AH$2:$AH$104)",
+    "value": 50066.47673314341,
+    "type": "n"
+  },
+  {
+    "cell": "B4",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A4,Donnees!$Y$2:$Y$104)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "G4",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A4,Donnees!$AH$2:$AH$104)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "B5",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A5,Donnees!$Y$2:$Y$104)",
+    "value": 0,
+    "type": "n"
+  },
+  {
+    "cell": "G5",
+    "formula": "SUMIF(Donnees!$F$2:$F$104,Donnees_biomasse!A5,Donnees!$AH$2:$AH$104)",
+    "value": 0,
+    "type": "n"
+  }
+]

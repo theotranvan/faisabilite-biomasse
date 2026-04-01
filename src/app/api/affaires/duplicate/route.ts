@@ -36,16 +36,22 @@ export async function POST(req: NextRequest) {
         augmentationBiomasse: sourceAffaire.augmentationBiomasse,
         tauxEmprunt: sourceAffaire.tauxEmprunt,
         dureeEmprunt: sourceAffaire.dureeEmprunt,
+        villeMonotone: sourceAffaire.villeMonotone,
+        tarifFuelExploitation: sourceAffaire.tarifFuelExploitation,
+        tarifGazExploitation: sourceAffaire.tarifGazExploitation,
+        tarifBoisExploitation: sourceAffaire.tarifBoisExploitation,
+        tarifElecExploitation: sourceAffaire.tarifElecExploitation,
       }
     });
 
     // Copy batiments
     const sourceBatiments = await db.batiment.findMany({
-      where: { affaireId }
+      where: { affaireId },
+      include: { travauxIsolation: { include: { lignes: true } } }
     });
 
     for (const bat of sourceBatiments) {
-      await db.batiment.create({
+      const newBat = await db.batiment.create({
         data: {
           affaireId: newAffaireId,
           numero: bat.numero,
@@ -71,8 +77,31 @@ export async function POST(req: NextRequest) {
           refRendementDistribution: bat.refRendementDistribution,
           refRendementEmission: bat.refRendementEmission,
           refRendementRegulation: bat.refRendementRegulation,
+          refTarification: bat.refTarification,
+          refAbonnement: bat.refAbonnement,
         }
       });
+
+      // Copy travaux d'isolation
+      if (bat.travauxIsolation) {
+        const newTravaux = await db.travauxIsolation.create({
+          data: {
+            batimentId: newBat.id,
+          }
+        });
+        for (const ligne of bat.travauxIsolation.lignes) {
+          await db.travauxIsolationLigne.create({
+            data: {
+              travauxIsolationId: newTravaux.id,
+              designation: ligne.designation,
+              unite: ligne.unite,
+              quantite: ligne.quantite,
+              prixUnitaire: ligne.prixUnitaire,
+              dejaRealise: ligne.dejaRealise,
+            }
+          });
+        }
+      }
     }
 
     // Copy parcs
@@ -93,6 +122,11 @@ export async function POST(req: NextRequest) {
           longueurReseau: parc.longueurReseau,
           sectionReseau: parc.sectionReseau,
           pourcentageCouvertureBois: parc.pourcentageCouvertureBois,
+          volumeCamion: parc.volumeCamion,
+          volumeSilo: parc.volumeSilo,
+          kmHaieAn: parc.kmHaieAn,
+          stereAn: parc.stereAn,
+          combustibleAppoint: parc.combustibleAppoint,
         }
       });
     }
@@ -121,6 +155,7 @@ export async function POST(req: NextRequest) {
             tauxMaitriseOeuvre: sourceChiffragRef.tauxMaitriseOeuvre,
             tauxFraisDivers: sourceChiffragRef.tauxFraisDivers,
             tauxAleas: sourceChiffragRef.tauxAleas,
+            empruntRef: sourceChiffragRef.empruntRef,
           }
         });
       }
@@ -151,6 +186,11 @@ export async function POST(req: NextRequest) {
             tauxAleas: sourceChiffragBio.tauxAleas,
             tauxSubventionCotEnr: sourceChiffragBio.tauxSubventionCotEnr,
             tauxAideDepartementale: sourceChiffragBio.tauxAideDepartementale,
+            tauxDetrDsil: sourceChiffragBio.tauxDetrDsil,
+            subventionComplementaire: sourceChiffragBio.subventionComplementaire,
+            montantP2: sourceChiffragBio.montantP2,
+            consoElecSupplementaire: sourceChiffragBio.consoElecSupplementaire,
+            empruntBio: sourceChiffragBio.empruntBio,
           }
         });
       }

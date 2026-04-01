@@ -19,6 +19,7 @@ import { PDFExportButton } from '@/components/affaire/PDFExportButton';
 import { AffaireActions } from '@/components/affaire/AffaireActions';
 
 import { calculConsoSortieParcChaudieresRef } from '@/lib/calculs';
+import { DEPARTEMENTS, DEPT_TO_VILLE_MONOTONE } from '@/lib/enums';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,19 +53,6 @@ const TABS: TabConfig[] = [
   { id: 'resultats', label: 'Résultats', icon: '📊' },
   { id: 'validation', label: 'Validation', icon: '✓' },
   { id: 'export', label: 'Export', icon: '📄' },
-];
-
-const DEPARTEMENTS = [
-  { value: '75', label: '75 - Paris' },
-  { value: '92', label: '92 - Hauts-de-Seine' },
-  { value: '93', label: '93 - Seine-Saint-Denis' },
-  { value: '94', label: '94 - Val-de-Marne' },
-  { value: '13', label: '13 - Bouches-du-Rhône' },
-  { value: '69', label: '69 - Rhône' },
-  { value: '59', label: '59 - Nord' },
-  { value: '21', label: '21 - Côte-d\'Or' },
-  { value: '38', label: '38 - Isère' },
-  { value: '63', label: '63 - Puy-de-Dôme' },
 ];
 
 export default function AffaireDetailPage() {
@@ -170,6 +158,12 @@ export default function AffaireDetailPage() {
 
     // Auto-fetch DJU and tempExtBase when département changes
     if (name === 'departement') {
+      // Auto-fill villeMonotone from département mapping
+      const villeM = DEPT_TO_VILLE_MONOTONE[value];
+      if (villeM) {
+        setEditData(prev => ({ ...prev, villeMonotone: villeM }));
+      }
+
       fetch(`/api/meteo/${value}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
@@ -592,9 +586,9 @@ export default function AffaireDetailPage() {
                 }));
                 consoBatimentsParParc[parcNum] = calculConsoSortieParcChaudieresRef(
                   calcBats as any, parcNum,
-                  (affaire as any).djuRetenu || 1977,
-                  (affaire as any).tempIntBase || 19,
-                  (affaire as any).tempExtBase || -7
+                  (affaire as any).djuRetenu ?? 1977,
+                  (affaire as any).tempIntBase ?? 19,
+                  (affaire as any).tempExtBase ?? -7
                 );
               }
             });

@@ -1,0 +1,56 @@
+[
+  [
+    "Tableau des énergies",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Energie",
+    "Abonnement",
+    "Tarification €TTC/KWh",
+    ""
+  ],
+  [
+    "Bois déchiquetté",
+    0,
+    0.053,
+    ""
+  ],
+  [
+    "Bois granulés",
+    0,
+    0.1162,
+    ""
+  ],
+  [
+    "Bois soufflerie",
+    0,
+    0.053,
+    ""
+  ],
+  [
+    "Electricité",
+    "",
+    0.226,
+    ""
+  ],
+  [
+    "Fuel",
+    0,
+    0.13,
+    ""
+  ],
+  [
+    "Gaz naturel",
+    "",
+    0.978,
+    ""
+  ],
+  [
+    "Gaz propane",
+    0,
+    0.1652,
+    ""
+  ]
+]

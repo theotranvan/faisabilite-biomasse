@@ -1,0 +1,236 @@
+[
+  [
+    "Désignation",
+    "U",
+    "Qte",
+    "Prix unitaire\r\n€",
+    "Prix total\r\n€",
+    "déjà réalisé",
+    ""
+  ],
+  [
+    "Installation / remplacement de chaudière",
+    "U",
+    5,
+    5000,
+    25000,
+    "",
+    ""
+  ],
+  [
+    "Installation réseau hydraulique",
+    "U",
+    0,
+    0,
+    0,
+    "",
+    ""
+  ],
+  [
+    "Autre travaux de chauffage",
+    "U",
+    0,
+    0,
+    0,
+    "",
+    ""
+  ],
+  [
+    "Synthèse des couts d'investissement de la solution de référence",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Travaux d'isolation : (pour information non compris dans le total)",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Bâtiment 1",
+    "",
+    "",
+    "",
+    501140,
+    0,
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Sous total",
+    501140,
+    "",
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Déjà réalisé:",
+    0,
+    "",
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Reste à réaliser",
+    501140,
+    "",
+    ""
+  ],
+  [
+    "Travaux chaufferie",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Installation / remplacement de chaudière",
+    "U",
+    5,
+    5000,
+    25000,
+    "",
+    ""
+  ],
+  [
+    "Installation réseau hydraulique",
+    "U",
+    0,
+    0,
+    0,
+    "",
+    ""
+  ],
+  [
+    "Autre travaux de chauffage",
+    "U",
+    0,
+    0,
+    0,
+    "",
+    ""
+  ],
+  [
+    "",
+    "",
+    "",
+    "Sous total",
+    25000,
+    "",
+    ""
+  ],
+  [
+    "TOTAL DES TRAVAUX DE LA SOLUTION DE REFERENCE ",
+    "",
+    "",
+    "",
+    526140,
+    "",
+    ""
+  ],
+  [
+    "TOTAL DES TRAVAUX DE LA SOLUTION DE REFERENCE SANS ISOLATION",
+    "",
+    "",
+    "",
+    25000,
+    "",
+    ""
+  ],
+  [
+    "Frais annexes sur travaux chaufferie",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  [
+    "Bureau de contrôle,SPS …",
+    "%",
+    0,
+    25000,
+    0,
+    "",
+    ""
+  ],
+  [
+    "Maîtrise d'œuvre",
+    "%",
+    0.13,
+    25000,
+    3250,
+    "",
+    ""
+  ],
+  [
+    "Frais divers de consultation",
+    "%",
+    0.02,
+    25000,
+    500,
+    "",
+    ""
+  ],
+  [
+    "Aléas de chantier",
+    "%",
+    0.05,
+    25000,
+    1250,
+    "",
+    ""
+  ],
+  [
+    "TOTAL DES FRAIS ANEXES",
+    "",
+    "",
+    "",
+    5000,
+    "",
+    ""
+  ],
+  [
+    "TOTAL DES INVESTISSEMENTS DE LA SOLUTION DE REFERENCE",
+    "",
+    "",
+    "",
+    30000,
+    "",
+    ""
+  ],
+  [
+    "TVA",
+    "",
+    "",
+    "",
+    6000,
+    "",
+    ""
+  ],
+  [
+    "TOTAL TTC",
+    "",
+    "",
+    "",
+    36000,
+    "",
+    ""
+  ]
+]

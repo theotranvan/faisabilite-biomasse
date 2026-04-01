@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const {
       parc: _parc, sousTotalChaufferie, emprunt, dureeEmprunt,
       id: _id, parcId: _parcId, createdAt: _ca, updatedAt: _ua,
-      affaireId: _aid,
+      affaireId: _aid, emprunt_ref,
       ...rest
     } = rawData;
 
@@ -82,10 +82,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (rest.tauxFraisDivers !== undefined) data.tauxFraisDivers = rest.tauxFraisDivers;
     if (rest.aleas !== undefined) data.tauxAleas = rest.aleas;
     if (rest.tauxAleas !== undefined) data.tauxAleas = rest.tauxAleas;
+    // Emprunt
+    if (emprunt_ref !== undefined) data.empruntRef = parseFloat(emprunt_ref) || 0;
 
-    // Vérifier que l'affaire existe
-    const affaire = await db.affaire.findFirst({
-      where: { id, userId: await getSessionUserId() }
+    // Vérifier que l'affaire existe (shared workspace — all users can edit)
+    await getSessionUserId(); // ensure authenticated
+    const affaire = await db.affaire.findUnique({
+      where: { id }
     });
     if (!affaire) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

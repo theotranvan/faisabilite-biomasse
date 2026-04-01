@@ -125,8 +125,9 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
   const totalSubventions = Math.min(totalSubventionsBrut, maxSubventions);
   const isPlafonne = totalSubventionsBrut > maxSubventions;
 
-  const investissementHTNetSubventions = sousTotalTravaux - totalSubventions;
-  const investissementTTC = investissementHTNetSubventions * 1.2;
+  // TVA sur le HT total AVANT subventions (conforme Excel)
+  const investissementTTC = sousTotalTravaux * 1.2;
+  const resteACharge = investissementTTC - totalSubventions;
 
   return (
     <div className="space-y-6">
@@ -276,15 +277,27 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="space-y-2">
               <div className="flex justify-between py-2">
-                <span className="font-semibold">Investissement HT (net subventions) :</span>
+                <span className="font-semibold">Investissement HT :</span>
                 <span className="font-bold text-lg">
-                  {investissementHTNetSubventions.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
+                  {sousTotalTravaux.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
+                </span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="font-semibold">Subventions :</span>
+                <span className="font-bold text-lg text-green-600">
+                  - {totalSubventions.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
                 </span>
               </div>
               <div className="flex justify-between py-2 border-t-2 border-gray-400">
                 <span className="font-semibold">Investissement TTC (20%) :</span>
                 <span className="font-bold text-lg text-blue-600">
                   {investissementTTC.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-t border-gray-300">
+                <span className="font-semibold">Reste à charge (TTC - subventions) :</span>
+                <span className="font-bold text-lg text-red-600">
+                  {resteACharge.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
                 </span>
               </div>
             </div>
