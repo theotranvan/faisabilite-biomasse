@@ -199,290 +199,461 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
+      const margin = 18;
       const contentWidth = pageWidth - 2 * margin;
       let y = 20;
+      let currentPage = 1;
 
-      const addFooter = (pageNum: number) => {
-        pdf.setFontSize(8);
-        pdf.setTextColor(150);
-        pdf.text(`Rapport Faisabilite Biomasse - ${referenceAffaire} - Page ${pageNum}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+      // ─── Color palette ───
+      const BLUE = [22, 78, 159] as const;
+      const BLUE_LIGHT = [235, 242, 255] as const;
+      const GREEN_DARK = [16, 124, 65] as const;
+      const GREEN_LIGHT = [232, 248, 239] as const;
+      const GRAY = [100, 110, 120] as const;
+      const GRAY_LIGHT = [245, 247, 250] as const;
+      const RED = [200, 40, 40] as const;
+
+      // ─── Reusable helpers ───
+      const setColor = (c: readonly [number, number, number]) => pdf.setTextColor(c[0], c[1], c[2]);
+      const setFill = (c: readonly [number, number, number]) => pdf.setFillColor(c[0], c[1], c[2]);
+
+      const addHeader = () => {
+        // Top colored bar
+        setFill(BLUE);
+        pdf.rect(0, 0, pageWidth, 6, 'F');
+        // Header line
+        pdf.setFontSize(7);
+        setColor(GRAY);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Combiosol - Rapport de faisabilite biomasse`, margin, 12);
+        pdf.text(referenceAffaire, pageWidth - margin, 12, { align: 'right' });
+        // Separator
+        pdf.setDrawColor(BLUE[0], BLUE[1], BLUE[2]);
+        pdf.setLineWidth(0.3);
+        pdf.line(margin, 14.5, pageWidth - margin, 14.5);
       };
+
+      const addFooterToPage = (pageNum: number) => {
+        pdf.setPage(pageNum);
+        pdf.setDrawColor(200, 205, 210);
+        pdf.setLineWidth(0.2);
+        pdf.line(margin, pageHeight - 14, pageWidth - margin, pageHeight - 14);
+        pdf.setFontSize(7);
+        setColor(GRAY);
+        pdf.text(`${nomClient} - ${ville}`, margin, pageHeight - 9);
+        pdf.text(`Page ${pageNum}`, pageWidth / 2, pageHeight - 9, { align: 'center' });
+        pdf.text(new Date().toLocaleDateString('fr-FR'), pageWidth - margin, pageHeight - 9, { align: 'right' });
+      };
+
+      const newPage = () => {
+        pdf.addPage();
+        currentPage++;
+        addHeader();
+        y = 22;
+      };
+
       const checkPage = (need: number) => {
-        if (y + need > pageHeight - 20) {
-          addFooter(pdf.getNumberOfPages());
-          pdf.addPage();
-          y = 20;
+        if (y + need > pageHeight - 22) {
+          newPage();
         }
       };
-      const drawLine = () => { pdf.setDrawColor(200); pdf.line(margin, y, pageWidth - margin, y); y += 5; };
-      const sectionTitle = (num: string, title: string) => {
-        checkPage(20);
+
+      const sectionTitle = (title: string) => {
+        checkPage(18);
+        y += 4;
+        setFill(BLUE);
+        pdf.rect(margin, y - 4.5, 3, 10, 'F');
         pdf.setFontSize(14);
-        pdf.setTextColor(0, 70, 160);
-        pdf.text(`${num}. ${title}`, margin, y);
-        y += 3;
-        pdf.setDrawColor(0, 70, 160);
-        pdf.setLineWidth(0.5);
-        pdf.line(margin, y, margin + 60, y);
-        y += 8;
+        pdf.setFont('helvetica', 'bold');
+        setColor(BLUE);
+        pdf.text(title, margin + 7, y + 3);
+        y += 12;
+        pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(0, 0, 0);
         pdf.setFontSize(10);
       };
-      const addRow = (label: string, value: string) => {
-        checkPage(8);
+
+      const subTitle = (text: string) => {
+        checkPage(12);
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        setColor(BLUE);
+        pdf.text(text, margin + 4, y);
+        y += 7;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
         pdf.setFontSize(10);
-        pdf.text(label, margin + 5, y);
-        pdf.text(value, pageWidth - margin, y, { align: 'right' });
-        y += 6;
       };
-      const fmtEur = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' EUR';
+
+      const addRow = (label: string, value: string, opts?: { bold?: boolean; color?: readonly [number, number, number]; bg?: readonly [number, number, number] }) => {
+        checkPage(7);
+        if (opts?.bg) {
+          setFill(opts.bg);
+          pdf.rect(margin, y - 4, contentWidth, 7, 'F');
+        }
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', opts?.bold ? 'bold' : 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(label, margin + 5, y);
+        if (opts?.color) setColor(opts.color);
+        pdf.text(value, pageWidth - margin - 5, y, { align: 'right' });
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont('helvetica', 'normal');
+        y += 7;
+      };
+
+      const fmtEur = (v: number) => {
+        const formatted = Math.round(v).toLocaleString('fr-FR');
+        return formatted + ' EUR';
+      };
       const fmtNum = (v: number, d = 0) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
 
-      // ===== PAGE DE GARDE =====
-      pdf.setFillColor(0, 70, 160);
-      pdf.rect(0, 0, pageWidth, 80, 'F');
-      pdf.setFontSize(28);
+      // ═════════════════════════════════════════
+      // PAGE DE GARDE
+      // ═════════════════════════════════════════
+      // Blue header block
+      setFill(BLUE);
+      pdf.rect(0, 0, pageWidth, 95, 'F');
+
+      // Small brand line
+      pdf.setFontSize(10);
+      pdf.setTextColor(180, 200, 240);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('COMBIOSOL', margin, 22);
+
+      // Main title
+      pdf.setFontSize(32);
+      pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Rapport de Faisabilite', pageWidth / 2, 35, { align: 'center' });
-      pdf.setFontSize(20);
-      pdf.text('Chaufferie Biomasse', pageWidth / 2, 50, { align: 'center' });
+      pdf.text('Rapport de', margin, 48);
+      pdf.text('Faisabilite Biomasse', margin, 62);
+
+      // Subtitle badge
       pdf.setFontSize(12);
-      const coverRef = parcFilter != null
-        ? `${referenceAffaire} - Parc ${parcFilter}`
-        : referenceAffaire;
-      pdf.text(coverRef, pageWidth / 2, 68, { align: 'center' });
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(200, 220, 255);
+      const coverRef = parcFilter != null ? `${referenceAffaire} - Parc ${parcFilter}` : referenceAffaire;
+      pdf.text(coverRef, margin, 78);
 
-      y = 100;
+      // Date badge right side
+      pdf.setFontSize(9);
+      pdf.setTextColor(180, 200, 240);
+      pdf.text(new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }), pageWidth - margin, 78, { align: 'right' });
+
+      // Accent line below header
+      pdf.setFillColor(46, 184, 92);
+      pdf.rect(0, 95, pageWidth, 2.5, 'F');
+
+      // Client info section
+      y = 115;
+      pdf.setFontSize(10);
+      setColor(GRAY);
+      pdf.text('CLIENT', margin, y);
+      y += 8;
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(14);
-      pdf.text(`Client : ${nomClient}`, margin, y); y += 10;
-      pdf.text(`Localisation : ${ville}`, margin, y); y += 10;
-      if (affaireData?.departement) {
-        pdf.text(`Departement : ${affaireData.departement}`, margin, y); y += 10;
+      pdf.text(nomClient, margin, y);
+      y += 10;
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      setColor(GRAY);
+      pdf.text(`${ville}${affaireData?.departement ? ` (${affaireData.departement})` : ''}`, margin, y);
+
+      // Parameters box
+      y += 20;
+      setFill(GRAY_LIGHT);
+      pdf.roundedRect(margin, y - 5, contentWidth, 40, 3, 3, 'F');
+      y += 2;
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      setColor(BLUE);
+      pdf.text('PARAMETRES DE L\'ETUDE', margin + 8, y);
+      y += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(0, 0, 0);
+      const params = [
+        [`DJU retenu : ${affaireData?.djuRetenu || 'N/A'}`, `T ext. base : ${affaireData?.tempExtBase ?? 'N/A'} C`],
+        [`T int. base : ${affaireData?.tempIntBase ?? 'N/A'} C`, `Duree emprunt : ${affaireData?.dureeEmprunt || 15} ans`],
+        [`Aug. fossile : ${((affaireData?.augmentationFossile || 0.04) * 100).toFixed(1)}%/an`, `Aug. biomasse : ${((affaireData?.augmentationBiomasse || 0.02) * 100).toFixed(1)}%/an`],
+      ];
+      for (const row of params) {
+        pdf.text(row[0], margin + 8, y);
+        pdf.text(row[1], margin + contentWidth / 2, y);
+        y += 6;
       }
-      pdf.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, margin, y); y += 20;
 
-      // Paramètres
-      if (affaireData) {
-        pdf.setFontSize(11);
-        pdf.setTextColor(80);
-        pdf.text(`DJU retenu : ${affaireData.djuRetenu || 'N/A'}  |  T ext. base : ${affaireData.tempExtBase ?? 'N/A'}C  |  T int. base : ${affaireData.tempIntBase ?? 'N/A'}C`, margin, y);
-        y += 8;
-        pdf.text(`Duree emprunt : ${affaireData.dureeEmprunt || 15} ans  |  Aug. fossile : ${((affaireData.augmentationFossile || 0.04) * 100).toFixed(1)}%/an  |  Aug. biomasse : ${((affaireData.augmentationBiomasse || 0.02) * 100).toFixed(1)}%/an`, margin, y);
-      }
+      addFooterToPage(1);
 
-      addFooter(1);
-
-      // ===== SECTION 2: BATIMENTS =====
-      pdf.addPage(); y = 20;
-      sectionTitle('1', parcFilter != null ? `Batiments analyses - Parc ${parcFilter}` : 'Batiments analyses');
+      // ═════════════════════════════════════════
+      // SECTION 1: BATIMENTS
+      // ═════════════════════════════════════════
+      newPage();
+      sectionTitle('Batiments analyses');
 
       const allBats = calcData?.batiments || [];
-      const bats = parcFilter != null
-        ? allBats.filter((b: any) => b.parc === parcFilter)
-        : allBats;
+      const bats = parcFilter != null ? allBats.filter((b: any) => b.parc === parcFilter) : allBats;
+
       if (bats.length === 0) {
-        pdf.text('Aucun batiment disponible.', margin + 5, y); y += 8;
+        pdf.setFontSize(10);
+        setColor(GRAY);
+        pdf.text('Aucun batiment disponible.', margin + 5, y);
+        y += 8;
       } else {
         // Table header
-        checkPage(12);
-        pdf.setFillColor(240, 240, 245);
-        pdf.rect(margin, y - 4, contentWidth, 8, 'F');
-        pdf.setFontSize(9);
-        pdf.setTextColor(60);
-        const cols = [margin + 2, margin + 15, margin + 50, margin + 80, margin + 105, margin + 130, margin + 155];
-        pdf.text('No', cols[0], y);
-        pdf.text('Designation', cols[1], y);
-        pdf.text(`Surface (m${String.fromCharCode(178)})`, cols[2], y);
-        pdf.text('Conso kWhep', cols[3], y);
-        pdf.text('Cout EI (EUR/an)', cols[4], y);
-        pdf.text('Cout Ref (EUR/an)', cols[5], y);
-        pdf.text('DPE', cols[6], y);
-        y += 6;
+        checkPage(14);
+        setFill(BLUE);
+        pdf.rect(margin, y - 5, contentWidth, 8, 'F');
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+
+        const cols = [margin + 3, margin + 12, margin + 48, margin + 76, margin + 104, margin + 132, margin + 158];
+        pdf.text('No', cols[0], y - 0.5);
+        pdf.text('Designation', cols[1], y - 0.5);
+        pdf.text('Surface (m2)', cols[2], y - 0.5);
+        pdf.text('Conso kWhep', cols[3], y - 0.5);
+        pdf.text('Cout EI (EUR/an)', cols[4], y - 0.5);
+        pdf.text('Cout Ref (EUR/an)', cols[5], y - 0.5);
+        pdf.text('DPE', cols[6], y - 0.5);
+        y += 5;
+        pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(0, 0, 0);
 
-        for (const bat of bats) {
-          checkPage(8);
-          pdf.setFontSize(9);
+        for (let i = 0; i < bats.length; i++) {
+          const bat = bats[i];
+          checkPage(7);
+          if (i % 2 === 0) {
+            setFill(GRAY_LIGHT);
+            pdf.rect(margin, y - 4, contentWidth, 6.5, 'F');
+          }
+          pdf.setFontSize(8);
           pdf.text(`${bat.numero}`, cols[0], y);
-          pdf.text(bat.designation || '', cols[1], y);
+          const desig = (bat.designation || '').substring(0, 22);
+          pdf.text(desig, cols[1], y);
           pdf.text(fmtNum(bat.surface_chauffee || 0), cols[2], y);
           pdf.text(fmtNum(bat.conso_kwhep || 0), cols[3], y);
           pdf.text(fmtEur(bat.cout_annuel || 0), cols[4], y);
           pdf.text(fmtEur(bat.cout_annuel_ref || 0), cols[5], y);
-          pdf.text(bat.etiquette_dpe || 'N/A', cols[6], y);
-          y += 6;
+          // DPE badge
+          const dpeLabel = bat.etiquette_dpe || 'N/A';
+          const dpeCls = getDpeClasses(bat.typeBatiment).find(c => c.label === dpeLabel);
+          if (dpeCls) {
+            pdf.setFillColor(dpeCls.color[0], dpeCls.color[1], dpeCls.color[2]);
+            pdf.roundedRect(cols[6] - 1, y - 3.5, 10, 5, 1, 1, 'F');
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(dpeLabel, cols[6] + 1.5, y);
+            pdf.setFont('helvetica', 'normal');
+          } else {
+            pdf.text(dpeLabel, cols[6], y);
+          }
+          pdf.setTextColor(0, 0, 0);
+          y += 6.5;
         }
       }
 
-      // ===== SECTION 3: ETIQUETTES DPE =====
-      y += 5;
-      sectionTitle('2', 'Etiquettes energetiques DPE');
+      // ═════════════════════════════════════════
+      // SECTION 2: ETIQUETTES DPE
+      // ═════════════════════════════════════════
+      y += 6;
+      sectionTitle('Etiquettes energetiques DPE');
 
       for (const bat of bats) {
         const dpeClasses = getDpeClasses(bat.typeBatiment);
-        checkPage(100);
-        pdf.setFontSize(11);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(`${bat.designation} (${fmtNum(bat.surface_chauffee || 0)} m${String.fromCharCode(178)})`, margin + 5, y);
-        pdf.setFont('helvetica', 'normal');
-        y += 8;
-        const barH = 8;
+        checkPage(90);
+
+        subTitle(`${bat.designation} (${fmtNum(bat.surface_chauffee || 0)} m2)`);
+
+        const barH = 7.5;
         const arrowTip = 5;
         for (let i = 0; i < dpeClasses.length; i++) {
           const cls = dpeClasses[i];
-          const barW = 35 + i * 11;
+          const barW = 32 + i * 10;
           const isActive = cls.label === bat.etiquette_dpe;
           const bx = margin + 5;
+
           // Arrow bar + tip
           pdf.setFillColor(cls.color[0], cls.color[1], cls.color[2]);
           pdf.rect(bx, y, barW, barH, 'F');
           pdf.triangle(bx + barW, y, bx + barW + arrowTip, y + barH / 2, bx + barW, y + barH, 'F');
+
           // Letter
-          pdf.setFontSize(10);
+          pdf.setFontSize(9);
           pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(255, 255, 255);
-          pdf.text(cls.label, bx + 4, y + 6);
+          pdf.text(cls.label, bx + 3, y + 5.5);
+
           // Threshold
           const thX = bx + barW + arrowTip + 3;
           pdf.setFontSize(7);
           pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(100, 100, 100);
-          if (cls.max < 9999) {
-            pdf.text(`${cls.min} a ${cls.max}`, thX, y + 5.5);
-          } else {
-            pdf.text(`> ${cls.min}`, thX, y + 5.5);
-          }
+          setColor(GRAY);
+          pdf.text(cls.max < 9999 ? `${cls.min} a ${cls.max}` : `> ${cls.min}`, thX, y + 5);
+
           if (isActive) {
             pdf.setDrawColor(30, 30, 30);
-            pdf.setLineWidth(1.5);
-            pdf.rect(bx - 1, y - 0.5, barW + arrowTip + 2, barH + 1);
+            pdf.setLineWidth(1.2);
+            pdf.rect(bx - 0.5, y - 0.5, barW + arrowTip + 1.5, barH + 1);
+            pdf.setLineWidth(0.2);
+            // Value display
             pdf.setFontSize(10);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(0, 0, 0);
-            pdf.text(`${Math.round(bat.conso_kwhep_per_m2 || 0)} kWh/m${String.fromCharCode(178)}/an`, thX + 25, y + 6);
+            const consoText = `${Math.round(bat.conso_kwhep_per_m2 || 0)} kWh/m2/an`;
+            pdf.text(consoText, thX + 28, y + 5.5);
           }
-          y += barH + 1.5;
+
+          y += barH + 1.2;
         }
-        y += 10;
+        y += 8;
       }
 
-      // ===== SECTION 4: ANALYSE FINANCIERE =====
-      pdf.addPage(); y = 20;
-      sectionTitle('3', 'Analyse financiere');
+      // ═════════════════════════════════════════
+      // SECTION 3: ANALYSE FINANCIERE
+      // ═════════════════════════════════════════
+      newPage();
+      sectionTitle('Analyse financiere');
 
       const chiffrageArr = calcData?.chiffrage || [];
       const parcAgrArr = calcData?.parcAgregation || [];
-      const chiff = parcFilter != null
-        ? chiffrageArr.find((c: any) => c.parc === parcFilter)
-        : chiffrageArr.length === 1 ? chiffrageArr[0] : null;
-      if (chiff) {
-        addRow('Investissement reference HT', chiff.investissement_ht != null ? fmtEur(chiff.investissement_ht) : 'N/A');
-        addRow('Investissement biomasse HT', fmtEur(chiff.investissement_bio_ht || 0));
-        addRow('Subventions biomasse', fmtEur(chiff.subventions_bio || 0));
-        addRow('Net a investir (biomasse)', fmtEur((chiff.investissement_bio_ht || 0) - (chiff.subventions_bio || 0)));
-        addRow('Annuite reference', chiff.annuite != null ? fmtEur(chiff.annuite) : 'N/A');
-        addRow('Annuite biomasse', fmtEur(chiff.annuite_biomasse || 0));
-        y += 5; drawLine();
-      } else if (parcFilter == null && chiffrageArr.length > 1) {
-        // Multiple parcs, no filter: show summary for each
-        for (const c of chiffrageArr) {
-          pdf.setFontSize(11);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(`Parc ${c.parc}`, margin + 5, y); y += 7;
-          pdf.setFont('helvetica', 'normal');
-          addRow('Investissement reference HT', c.investissement_ht != null ? fmtEur(c.investissement_ht) : 'N/A');
-          addRow('Investissement biomasse HT', fmtEur(c.investissement_bio_ht || 0));
-          addRow('Subventions biomasse', fmtEur(c.subventions_bio || 0));
-          addRow('Net a investir (biomasse)', fmtEur((c.investissement_bio_ht || 0) - (c.subventions_bio || 0)));
-          addRow('Annuite reference', c.annuite != null ? fmtEur(c.annuite) : 'N/A');
-          addRow('Annuite biomasse', fmtEur(c.annuite_biomasse || 0));
-          y += 3; drawLine();
-        }
-      }
+      const renderFinanceBlock = (chiff: any, parc: any, label?: string) => {
+        if (label) subTitle(label);
 
-      const parc = parcFilter != null
-        ? parcAgrArr.find((p: any) => p.parc === parcFilter)
-        : parcAgrArr.length === 1 ? parcAgrArr[0] : null;
-      if (parc) {
-        addRow('Cout exploitation reference', fmtEur(parc.cout_total || 0) + '/an');
-        addRow('Cout exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
-        addRow('Economie annuelle', fmtEur((parc.cout_total || 0) - (parc.cout_biomasse || 0)) + '/an');
+        // Investment box
+        checkPage(55);
+        setFill(BLUE_LIGHT);
+        pdf.roundedRect(margin, y - 5, contentWidth, 50, 2, 2, 'F');
+        y += 1;
+        addRow('Investissement reference HT', chiff?.investissement_ht != null ? fmtEur(chiff.investissement_ht) : 'N/A', { bold: true });
+        addRow('Investissement biomasse HT', fmtEur(chiff?.investissement_bio_ht || 0));
+        addRow('Subventions biomasse', fmtEur(chiff?.subventions_bio || 0), { color: GREEN_DARK });
+        addRow('Net a investir (biomasse)', fmtEur((chiff?.investissement_bio_ht || 0) - (chiff?.subventions_bio || 0)), { bold: true });
+        addRow('Annuite reference', chiff?.annuite != null ? fmtEur(chiff.annuite) : 'N/A');
+        addRow('Annuite biomasse', fmtEur(chiff?.annuite_biomasse || 0));
         y += 5;
-      } else if (parcFilter == null && parcAgrArr.length > 1) {
-        for (const p of parcAgrArr) {
+
+        // Cost comparison box
+        if (parc) {
           checkPage(30);
-          pdf.setFontSize(11);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(`Parc ${p.parc}`, margin + 5, y); y += 7;
-          pdf.setFont('helvetica', 'normal');
-          addRow('Cout exploitation reference', fmtEur(p.cout_total || 0) + '/an');
-          addRow('Cout exploitation biomasse', fmtEur(p.cout_biomasse || 0) + '/an');
-          addRow('Economie annuelle', fmtEur((p.cout_total || 0) - (p.cout_biomasse || 0)) + '/an');
-          y += 3;
+          setFill(GREEN_LIGHT);
+          pdf.roundedRect(margin, y - 5, contentWidth, 28, 2, 2, 'F');
+          y += 1;
+          addRow('Cout exploitation reference', fmtEur(parc.cout_total || 0) + '/an');
+          addRow('Cout exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
+          const eco = (parc.cout_total || 0) - (parc.cout_biomasse || 0);
+          addRow('Economie annuelle', fmtEur(eco) + '/an', { bold: true, color: eco >= 0 ? GREEN_DARK : RED });
+          y += 5;
+        }
+      };
+
+      if (parcFilter != null) {
+        const chiff = chiffrageArr.find((c: any) => c.parc === parcFilter);
+        const parc = parcAgrArr.find((p: any) => p.parc === parcFilter);
+        renderFinanceBlock(chiff, parc);
+      } else if (chiffrageArr.length === 1) {
+        renderFinanceBlock(chiffrageArr[0], parcAgrArr[0]);
+      } else {
+        for (const c of chiffrageArr) {
+          const p = parcAgrArr.find((pa: any) => pa.parc === c.parc);
+          renderFinanceBlock(c, p, `Parc ${c.parc}`);
         }
       }
 
-      // ===== SECTION 5: BILAN 20 ANS =====
-      y += 5;
-      sectionTitle('4', 'Bilan actualise sur 20 ans');
+      // ═════════════════════════════════════════
+      // SECTION 4: BILAN 20 ANS
+      // ═════════════════════════════════════════
+      newPage();
+      sectionTitle('Bilan actualise sur 20 ans');
 
       const bilan = parcFilter != null
         ? (calcData?.bilanParParc?.[parcFilter] || [])
         : (calcData?.bilanActualize || []);
+
       if (bilan.length > 0) {
         // Table header
-        checkPage(12);
-        pdf.setFillColor(240, 240, 245);
-        pdf.rect(margin, y - 4, contentWidth, 8, 'F');
+        checkPage(14);
+        setFill(BLUE);
+        pdf.rect(margin, y - 5, contentWidth, 8, 'F');
         pdf.setFontSize(8);
-        pdf.setTextColor(60);
-        const bCols = [margin + 2, margin + 20, margin + 55, margin + 90, margin + 125];
-        pdf.text('Annee', bCols[0], y);
-        pdf.text('Cout initial (EUR)', bCols[1], y);
-        pdf.text('Cout reference (EUR)', bCols[2], y);
-        pdf.text('Cout biomasse (EUR)', bCols[3], y);
-        pdf.text('Economie (EUR)', bCols[4], y);
-        y += 6;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        const bCols = [margin + 4, margin + 22, margin + 57, margin + 92, margin + 130];
+        pdf.text('Annee', bCols[0], y - 0.5);
+        pdf.text('Cout initial (EUR)', bCols[1], y - 0.5);
+        pdf.text('Cout reference (EUR)', bCols[2], y - 0.5);
+        pdf.text('Cout biomasse (EUR)', bCols[3], y - 0.5);
+        pdf.text('Economie (EUR)', bCols[4], y - 0.5);
+        y += 5;
+        pdf.setFont('helvetica', 'normal');
 
         let totalEconomies = 0;
-        pdf.setTextColor(0, 0, 0);
-        for (const row of bilan) {
+        for (let i = 0; i < bilan.length; i++) {
+          const row = bilan[i];
           checkPage(6);
+          // Zebra striping
+          if (i % 2 === 0) {
+            setFill(GRAY_LIGHT);
+            pdf.rect(margin, y - 3.5, contentWidth, 5.5, 'F');
+          }
           pdf.setFontSize(8);
+          pdf.setTextColor(0, 0, 0);
           pdf.text(`${row.annee}`, bCols[0], y);
           pdf.text(fmtEur(row.cout_initial || 0), bCols[1], y);
           pdf.text(row.cout_reference != null ? fmtEur(row.cout_reference) : 'N/A', bCols[2], y);
           pdf.text(fmtEur(row.cout_biomasse || 0), bCols[3], y);
+
           const eco = row.economies_bio_vs_ref || 0;
           totalEconomies += eco;
-          pdf.setTextColor(eco >= 0 ? 0 : 200, eco >= 0 ? 128 : 0, 0);
+          pdf.setFont('helvetica', 'bold');
+          if (eco >= 0) { setColor(GREEN_DARK); } else { setColor(RED); }
           pdf.text(fmtEur(eco), bCols[4], y);
+          pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(0, 0, 0);
-          y += 5;
+          y += 5.5;
         }
 
-        y += 5;
+        // Total bar
+        y += 3;
+        checkPage(14);
+        setFill(GREEN_LIGHT);
+        pdf.roundedRect(margin, y - 5, contentWidth, 12, 2, 2, 'F');
         pdf.setFontSize(11);
-        pdf.setTextColor(0, 100, 0);
-        pdf.text(`Economies cumulees sur 20 ans : ${fmtEur(totalEconomies)}`, margin + 5, y);
-        pdf.setTextColor(0, 0, 0);
+        pdf.setFont('helvetica', 'bold');
+        setColor(GREEN_DARK);
+        pdf.text('Economies cumulees sur 20 ans :', margin + 8, y + 2);
+        pdf.text(fmtEur(totalEconomies), pageWidth - margin - 8, y + 2, { align: 'right' });
+        y += 12;
       }
 
-      // ===== SECTION 6: IMPACT ENVIRONNEMENTAL =====
-      checkPage(40);
-      y += 10;
-      sectionTitle('5', 'Impact environnemental');
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text('Les donnees detaillees CO2 et SO2 sont disponibles dans l\'onglet Resultats de l\'application.', margin + 5, y);
-      y += 8;
-      pdf.text('La solution biomasse permet une reduction significative des emissions de gaz a effet de serre', margin + 5, y);
-      y += 6;
-      pdf.text('par rapport aux solutions fossiles (fuel, gaz).', margin + 5, y);
+      // ═════════════════════════════════════════
+      // SECTION 5: IMPACT ENVIRONNEMENTAL
+      // ═════════════════════════════════════════
+      checkPage(50);
+      y += 4;
+      sectionTitle('Impact environnemental');
 
-      addFooter(pdf.getNumberOfPages());
+      setFill(GREEN_LIGHT);
+      pdf.roundedRect(margin, y - 5, contentWidth, 24, 2, 2, 'F');
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      y += 1;
+      pdf.text('La solution biomasse permet une reduction significative des emissions', margin + 8, y);
+      y += 6;
+      pdf.text('de gaz a effet de serre par rapport aux solutions fossiles (fioul, gaz).', margin + 8, y);
+      y += 6;
+      setColor(GRAY);
+      pdf.setFontSize(8);
+      pdf.text('Donnees detaillees CO2 et SO2 disponibles dans l\'application.', margin + 8, y);
+
+      // ─── Add footers to all pages ───
+      const totalPages = pdf.getNumberOfPages();
+      for (let p = 2; p <= totalPages; p++) {
+        addFooterToPage(p);
+      }
 
       const fileName = parcFilter != null
         ? `rapport_${referenceAffaire}_parc${parcFilter}.pdf`
