@@ -38,8 +38,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="max-w-md w-full bg-white rounded-lg shadow p-8">
-        <h1 className="text-3xl font-bold mb-2 text-center text-blue-600">🌱 Biomasse</h1>
-        <p className="text-center text-sm text-gray-600 mb-6">Faisabilité technico-économique</p>
+        <div className="flex justify-center mb-4">
+          <img src="/logo-combiosol.jpg" alt="Combiosol" className="h-20 w-auto" />
+        </div>
+        <h1 className="text-2xl font-bold mb-1 text-center text-gray-900">Combiosol</h1>
+        <p className="text-center text-sm text-gray-600 mb-6">Faisabilité technico-économique biomasse</p>
 
         {error && <Alert type="error" className="mb-4">{error}</Alert>}
 
