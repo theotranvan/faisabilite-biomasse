@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import clsx from 'clsx';
@@ -17,7 +16,8 @@ export function Header() {
   const showBackButton = !['/dashboard', '/', '/accueil', '/affaires'].includes(pathname);
 
   const navLinks = [
-    { href: '/affaires', label: 'Accueil', match: (p: string) => p === '/' || p === '/affaires' },
+    { href: '/dashboard', label: 'Accueil', match: (p: string) => p === '/' || p === '/dashboard' },
+    { href: '/affaires', label: 'Mes affaires', match: (p: string) => p === '/affaires' },
     { href: '/affaires/new', label: 'Nouvelle étude', match: (p: string) => p === '/affaires/new' },
     ...(isAdminUser ? [
       { href: '/couts', label: 'BDD Coûts', match: (p: string) => p === '/couts' },
@@ -29,8 +29,8 @@ export function Header() {
     <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         <div className="flex items-center gap-10">
-          <Link href="/affaires" className="flex items-center gap-2 hover:opacity-80 transition">
-            <Image src="/logo-combiosol.jpg" alt="Combiosol" width={36} height={36} />
+          <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition">
+            <img src="/logo-combiosol.jpg" alt="Combiosol" className="h-9 w-9 object-contain" />
             <span className="font-bold text-gray-900 text-lg tracking-tight">Combiosol</span>
           </Link>
 
