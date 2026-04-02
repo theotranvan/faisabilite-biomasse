@@ -20,6 +20,25 @@ export default function AffairesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'recent' | 'ancien'>('recent');
   const [filterStatus, setFilterStatus] = useState<'tous' | 'BROUILLON' | 'EN_COURS' | 'TERMINE'>('tous');
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (id: string, nomClient: string) => {
+    if (!window.confirm(`Supprimer définitivement l'affaire "${nomClient}" ?\n\nToutes les données (bâtiments, parcs, chiffrages, isolation) seront supprimées.`)) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/affaires/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setAffaires(prev => prev.filter(a => a.id !== id));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erreur lors de la suppression');
+      }
+    } catch {
+      alert('Erreur réseau');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   useEffect(() => {
     const loadAffaires = async () => {
@@ -144,10 +163,17 @@ export default function AffairesPage() {
                           {status.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right flex items-center justify-end gap-3">
                         <Link href={`/affaires/${a.id}`} className="text-blue-600 hover:underline font-medium">
                           Ouvrir &rarr;
                         </Link>
+                        <button
+                          onClick={(e) => { e.preventDefault(); handleDelete(a.id, a.nomClient); }}
+                          disabled={deleting === a.id}
+                          className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          {deleting === a.id ? '...' : '🗑️'}
+                        </button>
                       </td>
                     </tr>
                   );

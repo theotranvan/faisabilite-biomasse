@@ -88,15 +88,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-// Delete an affaire (admin only)
+// Delete an affaire (owner or admin)
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    if (!(await isAdmin())) {
-      return NextResponse.json({ error: 'Seul un administrateur peut supprimer une affaire' }, { status: 403 });
-    }
+    const userId = await getSessionUserId();
+    const admin = await isAdmin();
 
-    // Verify the affaire exists
     const existingAffaire = await db.affaire.findUnique({
       where: { id },
     });
@@ -106,6 +104,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
         { error: 'Affaire not found' },
         { status: 404 }
       );
+    }
+
+    // Only owner or admin can delete
+    if (existingAffaire.userId !== userId && !admin) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
     await db.affaire.delete({
