@@ -139,28 +139,28 @@ export function IsolationBatimentForm({
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-2 py-2 text-left font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-left font-semibold text-gray-700 min-w-[220px] w-1/3">
                     Désignation
                   </th>
-                  <th className="px-2 py-2 text-left font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-left font-semibold text-gray-700 min-w-[70px]">
                     Unité
                   </th>
-                  <th className="px-2 py-2 text-right font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-right font-semibold text-gray-700 min-w-[80px]">
                     Quantité
                   </th>
-                  <th className="px-2 py-2 text-right font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-right font-semibold text-gray-700 min-w-[80px]">
                     PU (€)
                   </th>
-                  <th className="px-2 py-2 text-right font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-right font-semibold text-gray-700 min-w-[90px]">
                     Total (€)
                   </th>
-                  <th className="px-2 py-2 text-right font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-right font-semibold text-gray-700 min-w-[110px]">
                     Déjà réalisé (€)
                   </th>
-                  <th className="px-2 py-2 text-right font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-right font-semibold text-gray-700 min-w-[90px]">
                     Reste (€)
                   </th>
-                  <th className="px-2 py-2 text-center font-semibold text-gray-700">
+                  <th className="px-2 py-2 text-center font-semibold text-gray-700 min-w-[60px]">
                     Action
                   </th>
                 </tr>
@@ -190,8 +190,8 @@ export function IsolationBatimentForm({
                             onBlur={() =>
                               setTimeout(() => setShowSuggestions(null), 200)
                             }
-                            placeholder="Isolati..." 
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                            placeholder="Ex: Isolation des combles perdus" 
+                            className="w-full min-w-[200px] px-2 py-1 border border-gray-300 rounded text-sm"
                             list={`suggestions-${idx}`}
                           />
                           {showSuggestions === idx && ligne.designation.length > 0 && (
@@ -207,7 +207,7 @@ export function IsolationBatimentForm({
                                     handleDesignationChange(idx, p.designation);
                                     setShowSuggestions(null);
                                   }}
-                                  className="px-2 py-1 hover:bg-blue-100 cursor-pointer text-xs"
+                                  className="px-2 py-1 hover:bg-blue-100 cursor-pointer text-sm"
                                 >
                                   {p.designation}
                                 </div>
@@ -226,7 +226,7 @@ export function IsolationBatimentForm({
                             handleChange(idx, 'unite', e.target.value)
                           }
                           placeholder="m² / U / ml"
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         />
                       </td>
 
@@ -239,7 +239,7 @@ export function IsolationBatimentForm({
                             handleChange(idx, 'quantite', e.target.value)
                           }
                           placeholder="0"
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-xs text-right"
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right"
                           step="0.01"
                         />
                       </td>
@@ -253,7 +253,7 @@ export function IsolationBatimentForm({
                             handleChange(idx, 'prixUnitaire', e.target.value)
                           }
                           placeholder="0"
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-xs text-right"
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right"
                           step="0.01"
                         />
                       </td>
@@ -275,7 +275,7 @@ export function IsolationBatimentForm({
                             handleChange(idx, 'dejaRealise', e.target.value)
                           }
                           placeholder="0"
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-xs text-right"
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right"
                           step="0.01"
                         />
                       </td>

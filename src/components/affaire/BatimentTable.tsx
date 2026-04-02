@@ -259,12 +259,12 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                         <select
                           value={String(batiment.parc || 1)}
                           onChange={(e) => updateBatiment(batiment.id, 'parc', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="min-w-[80px] px-2 py-1 border border-gray-300 rounded text-sm"
                         >
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
+                          <option value="1">Parc 1</option>
+                          <option value="2">Parc 2</option>
+                          <option value="3">Parc 3</option>
+                          <option value="4">Parc 4</option>
                         </select>
                       </td>
                       <td className="px-3 py-2">
