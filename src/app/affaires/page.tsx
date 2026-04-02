@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Header from '@/components/shared/Header';
 import { LoadingScreen } from '@/components/ui/Loading';
@@ -14,6 +14,11 @@ interface Affaire {
   statut: string;
 }
 
+interface DeleteTarget {
+  id: string;
+  nomClient: string;
+}
+
 export default function AffairesPage() {
   const [affaires, setAffaires] = useState<Affaire[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,14 +26,32 @@ export default function AffairesPage() {
   const [sortOrder, setSortOrder] = useState<'recent' | 'ancien'>('recent');
   const [filterStatus, setFilterStatus] = useState<'tous' | 'BROUILLON' | 'EN_COURS' | 'TERMINE'>('tous');
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [deletedId, setDeletedId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string, nomClient: string) => {
-    if (!window.confirm(`Supprimer définitivement l'affaire "${nomClient}" ?\n\nToutes les données (bâtiments, parcs, chiffrages, isolation) seront supprimées.`)) return;
-    setDeleting(id);
+  const openDeleteModal = (id: string, nomClient: string) => {
+    setDeleteTarget({ id, nomClient });
+    requestAnimationFrame(() => setModalVisible(true));
+  };
+
+  const closeDeleteModal = useCallback(() => {
+    setModalVisible(false);
+    setTimeout(() => setDeleteTarget(null), 300);
+  }, []);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(deleteTarget.id);
+    closeDeleteModal();
     try {
-      const res = await fetch(`/api/affaires/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/affaires/${deleteTarget.id}`, { method: 'DELETE' });
       if (res.ok) {
-        setAffaires(prev => prev.filter(a => a.id !== id));
+        setDeletedId(deleteTarget.id);
+        setTimeout(() => {
+          setAffaires(prev => prev.filter(a => a.id !== deleteTarget.id));
+          setDeletedId(null);
+        }, 400);
       } else {
         const data = await res.json();
         alert(data.error || 'Erreur lors de la suppression');
@@ -153,8 +176,18 @@ export default function AffairesPage() {
               <tbody className="divide-y divide-gray-100">
                 {filteredAffaires.map((a) => {
                   const status = statusLabels[a.statut] || statusLabels.BROUILLON;
+                  const isBeingDeleted = deletedId === a.id;
                   return (
-                    <tr key={a.id} className="hover:bg-gray-50">
+                    <tr
+                      key={a.id}
+                      className="hover:bg-gray-50 transition-all duration-400"
+                      style={{
+                        opacity: isBeingDeleted ? 0 : 1,
+                        transform: isBeingDeleted ? 'translateX(40px)' : 'translateX(0)',
+                        maxHeight: isBeingDeleted ? '0px' : '80px',
+                        transition: 'opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease',
+                      }}
+                    >
                       <td className="px-4 py-3 font-medium text-gray-900">{a.nomClient}</td>
                       <td className="px-4 py-3 text-gray-600">{a.ville}</td>
                       <td className="px-4 py-3 text-gray-500">{new Date(a.createdAt).toLocaleDateString('fr-FR')}</td>
@@ -168,11 +201,17 @@ export default function AffairesPage() {
                           Ouvrir &rarr;
                         </Link>
                         <button
-                          onClick={(e) => { e.preventDefault(); handleDelete(a.id, a.nomClient); }}
+                          onClick={(e) => { e.preventDefault(); openDeleteModal(a.id, a.nomClient); }}
                           disabled={deleting === a.id}
-                          className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition disabled:opacity-50"
+                          className="text-red-400 hover:text-red-600 text-lg px-1 py-1 rounded-md hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
+                          title="Supprimer"
                         >
-                          {deleting === a.id ? '...' : '🗑️'}
+                          {deleting === a.id ? (
+                            <svg className="animate-spin h-4 w-4 text-red-400" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                          ) : '🗑️'}
                         </button>
                       </td>
                     </tr>
@@ -183,6 +222,77 @@ export default function AffairesPage() {
           </div>
         )}
       </main>
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={closeDeleteModal}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+            style={{ opacity: modalVisible ? 1 : 0 }}
+          />
+
+          {/* Modal */}
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transition-all duration-300"
+            style={{
+              opacity: modalVisible ? 1 : 0,
+              transform: modalVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(10px)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Red accent bar */}
+            <div className="h-1.5 bg-gradient-to-r from-red-500 to-red-600" />
+
+            <div className="p-6">
+              {/* Icon */}
+              <div className="mx-auto w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                Supprimer cette affaire ?
+              </h3>
+
+              {/* Client name */}
+              <p className="text-center mb-3">
+                <span className="inline-block px-3 py-1 bg-gray-100 rounded-lg font-medium text-gray-800">
+                  {deleteTarget.nomClient}
+                </span>
+              </p>
+
+              {/* Warning */}
+              <p className="text-sm text-gray-500 text-center mb-6">
+                Toutes les données associées seront définitivement supprimées
+                <br />
+                <span className="text-xs text-gray-400">(bâtiments, parcs, chiffrages, isolation)</span>
+              </p>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={closeDeleteModal}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
