@@ -27,6 +27,7 @@ interface ChiffragRefForm {
   maitriseOeuvre: number;
   fraisDivers: number;
   aleas: number;
+  montantP2?: number;
   emprunt_ref?: number;
 }
 
@@ -43,10 +44,12 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
       { id: '1', designation: 'Chaudière fioul', unite: 'unité', qte: 1, pu: 0 },
       { id: '2', designation: 'Réseau hydraulique', unite: 'm', qte: 0, pu: 0 },
     ],
-    bureauControle: 0.05,
+    // Taux par défaut de l'Excel (chiffrage_ref : 0 / 13 % / 2 % / 5 %)
+    bureauControle: 0,
     maitriseOeuvre: 0.13,
     fraisDivers: 0.02,
     aleas: 0.05,
+    montantP2: 750,
     emprunt_ref: 0,
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -329,18 +332,31 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
             </div>
           </div>
 
-          {/* Financement */}
+          {/* Exploitation & Financement */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Financement</h4>
-            <div className="max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Montant d'emprunt (€)</label>
-              <input
-                type="number"
-                value={formData.emprunt_ref || ''}
-                onChange={(e) => handleFeeChange('emprunt_ref', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                placeholder="0"
-              />
+            <h4 className="font-semibold text-gray-900 mb-4">Exploitation &amp; Financement</h4>
+            <div className="grid grid-cols-2 gap-4 max-w-2xl">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Montant P2 — entretien/maintenance (€/an)</label>
+                <input
+                  type="number"
+                  value={formData.montantP2 ?? 750}
+                  onChange={(e) => handleFeeChange('montantP2', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  placeholder="750"
+                />
+                <p className="text-xs text-gray-500 mt-1">Appliqué aux scénarios actuel et référence</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Montant d'emprunt (€)</label>
+                <input
+                  type="number"
+                  value={formData.emprunt_ref || ''}
+                  onChange={(e) => handleFeeChange('emprunt_ref', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  placeholder="0"
+                />
+              </div>
             </div>
           </div>
 

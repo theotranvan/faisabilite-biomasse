@@ -1,10 +1,19 @@
 'use client';
 
-const BIOMASSE_CHARS: Record<string, { pci: number; masseVol: number; tauxCendre: number }> = {
-  PLAQUETTE:  { pci: 3.8, masseVol: 225, tauxCendre: 0.01 },
-  GRANULES:   { pci: 4.6, masseVol: 650, tauxCendre: 0.005 },
-  MISCANTHUS: { pci: 4.2, masseVol: 120, tauxCendre: 0.03 },
-  BUCHES:     { pci: 4.0, masseVol: 420, tauxCendre: 0.01 },
+import {
+  calculPertesReseauParSection,
+  calculVolumeCendres,
+  calculConso10JoursFroids,
+  calculKmHaie,
+  calculSteresAn,
+} from '@/lib/calculs';
+
+// Caractéristiques combustible — feuille Excel "Car_biomasse" (taux en décimal)
+const BIOMASSE_CHARS: Record<string, { pci: number; masseVol: number; tauxHumidite: number; tauxCendre: number }> = {
+  PLAQUETTE:  { pci: 3.8, masseVol: 225, tauxHumidite: 0.25, tauxCendre: 0.01 },
+  GRANULES:   { pci: 4.6, masseVol: 650, tauxHumidite: 0.07, tauxCendre: 0.005 },
+  MISCANTHUS: { pci: 4.2, masseVol: 120, tauxHumidite: 0.10, tauxCendre: 0.03 },
+  BUCHES:     { pci: 4.0, masseVol: 420, tauxHumidite: 0.20, tauxCendre: 0.01 },
 };
 
 interface SchemaSynoptiqueProps {
@@ -51,28 +60,37 @@ export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
   const chars = BIOMASSE_CHARS[typeBiomasse] || BIOMASSE_CHARS.PLAQUETTE;
   const couverturePct = pourcentageCouvertureBois > 1 ? pourcentageCouvertureBois : pourcentageCouvertureBois * 100;
 
-  // Calculs
-  const consoSortieBois = consoBatimentsParc * (couverturePct / 100);
+  // Calculs — l'Excel ajoute les pertes réseau avant la répartition bois/appoint
+  const pertesReseau = calculPertesReseauParSection(longueurReseau, sectionReseau);
+  const consoTotale = consoBatimentsParc + pertesReseau;
+  const consoSortieBois = consoTotale * (couverturePct / 100);
   const rendBoisNorm = rendementChaudiereBois > 1 ? rendementChaudiereBois / 100 : rendementChaudiereBois;
   const consoEntreeBois = rendBoisNorm > 0 ? consoSortieBois / rendBoisNorm : 0;
-  const consoSortieAppoint = consoBatimentsParc * (1 - couverturePct / 100);
+  const consoSortieAppoint = consoTotale * (1 - couverturePct / 100);
   const rendApptNorm = rendementChaudiere2 > 1 ? rendementChaudiere2 / 100 : rendementChaudiere2;
   const consoEntreeAppoint = rendApptNorm > 0 ? consoSortieAppoint / rendApptNorm : 0;
 
   const consoAnnuelleTonnes = consoEntreeBois / (chars.pci * 1000);
   const consoAnnuelleM3 = chars.masseVol > 0 ? (consoAnnuelleTonnes * 1000) / chars.masseVol : 0;
-  const nbLivraisons = volumeCamion > 0 ? Math.ceil(consoAnnuelleM3 / volumeCamion) : 0;
+  const nbLivraisons = volumeCamion > 0 ? consoAnnuelleM3 / volumeCamion : 0;
 
-  const stockage10jT = (consoEntreeBois / 365 * 10) / (chars.pci * 1000);
+  // Conso 10 jours les plus froids = 11 % de l'annuel (constante Excel)
+  const stockage10jT = calculConso10JoursFroids(consoEntreeBois) / (chars.pci * 1000);
   const stockage10jM3 = chars.masseVol > 0 ? (stockage10jT * 1000) / chars.masseVol : 0;
 
-  const volumeCendresM3 = chars.masseVol > 0 ? (consoEntreeBois * chars.tauxCendre) / chars.masseVol : 0;
+  // Cendres = masse sèche × taux cendres / 600 kg/m³ (formule Excel)
+  const cendres = calculVolumeCendres(consoEntreeBois, chars.pci, chars.tauxHumidite, chars.tauxCendre);
+  const volumeCendresM3 = cendres.m3;
 
   const heuresPP = puissanceChaudiereBois > 0 ? consoSortieBois / puissanceChaudiereBois : 0;
 
+  // Valeurs saisies, sinon calculées comme dans l'Excel
+  const kmHaieAffiche = kmHaieAn > 0 ? kmHaieAn : calculKmHaie(consoAnnuelleM3);
+  const stereAffiche = stereAn > 0 ? stereAn : calculSteresAn(consoEntreeBois);
+
   const consoEntreeBoiskWh = consoEntreeBois / 1000;
   const consoSortieBoiskWh = consoSortieBois / 1000;
-  const consoReseauMWh = consoBatimentsParc / 1000;
+  const consoReseauMWh = consoTotale / 1000;
   const consoSortieAppointMWh = consoSortieAppoint / 1000;
   const consoEntreeAppointMWh = consoEntreeAppoint / 1000;
 
@@ -126,9 +144,9 @@ export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
           <text x={55} y={30} textAnchor="middle" fontSize={11} fill="white" fontWeight={700}>CAMION</text>
         </g>
         {/* Valeurs camion */}
-        <Label x={100} y={110} lines={[`${nbLivraisons} liv/an`, `${fmt(consoAnnuelleM3)} m3/an`]} />
-        {kmHaieAn > 0 && <Label x={100} y={240} lines={[`${fmt(kmHaieAn)} km haie/an`]} />}
-        {stereAn > 0 && typeBiomasse === 'BUCHES' && <Label x={100} y={270} lines={[`${fmt(stereAn)} stere/an`]} />}
+        <Label x={100} y={110} lines={[`${fmt(nbLivraisons)} liv/an`, `${fmt(consoAnnuelleM3)} m3/an`]} />
+        {kmHaieAffiche > 0 && <Label x={100} y={240} lines={[`${fmt(kmHaieAffiche, 2)} km haie/an`]} />}
+        {stereAffiche > 0 && typeBiomasse === 'BUCHES' && <Label x={100} y={270} lines={[`${fmt(stereAffiche, 0)} stere/an`]} />}
 
         {/* ===== Flèche Camion → Silo ===== */}
         <line x1={175} y1={165} x2={225} y2={165} stroke="#16a34a" strokeWidth={2.5} markerEnd="url(#arrowG)" />
@@ -179,7 +197,11 @@ export function SchemaSynoptiqueBiomasse(props: SchemaSynoptiqueProps) {
           <line x1={15} y1={0} x2={15} y2={50} stroke="#93c5fd" strokeWidth={1} />
           <line x1={0} y1={25} x2={30} y2={25} stroke="#93c5fd" strokeWidth={1} />
         </g>
-        <Label x={615} y={120} lines={[`Reseau: ${fmt(consoReseauMWh)} MWh/an`, longueurReseau ? `${fmt(longueurReseau, 0)} ml ${sectionReseau || ''}` : '']} />
+        <Label x={615} y={120} lines={[
+          `Reseau: ${fmt(consoReseauMWh)} MWh/an`,
+          longueurReseau ? `${fmt(longueurReseau, 0)} ml ${sectionReseau || ''}` : '',
+          pertesReseau > 0 ? `Pertes: ${fmt(pertesReseau / 1000)} MWh/an` : '',
+        ].filter(Boolean)} />
 
         {/* ===== Flèche Réseau → Chaudière appoint ===== */}
         <line x1={635} y1={165} x2={690} y2={165} stroke="#6b7280" strokeWidth={2} markerEnd="url(#arrowGray)" />

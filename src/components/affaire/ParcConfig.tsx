@@ -7,9 +7,16 @@ import {
   calculConsommationsSortieChaudiereBois,
   calculConsommationsEntreeChaudiereBois,
   calculConsommationsAppoint,
+  calculConso10JoursFroids,
+  calculVolumeAnnuelBois,
   calculStockage10jours,
   calculVolumeCendres,
   calculHeuresPP,
+  calculPertesReseauParSection,
+  calculNbLivraisons,
+  calculVolumeSiloRecommande,
+  calculKmHaie,
+  calculSteresAn,
 } from '@/lib/calculs';
 
 interface Parc {
@@ -49,13 +56,18 @@ const SECTIONS_RESEAU = [
   { value: 'DN32', label: 'DN32' },
   { value: 'DN40', label: 'DN40' },
   { value: 'DN50', label: 'DN50' },
+  { value: 'DN63', label: 'DN63' },
+  { value: 'DN75', label: 'DN75' },
+  { value: 'DN90', label: 'DN90' },
+  { value: 'DN110', label: 'DN110' },
 ];
 
-const BIOMASSE_CHARACTERISTICS: Record<string, { pci: number; masseVolumique: number; tauxCendre: number }> = {
-  PLAQUETTE: { pci: 3.8, masseVolumique: 225, tauxCendre: 0.01 },
-  GRANULES: { pci: 4.6, masseVolumique: 650, tauxCendre: 0.005 },
-  MISCANTHUS: { pci: 4.2, masseVolumique: 120, tauxCendre: 0.03 },
-  BUCHES: { pci: 4.0, masseVolumique: 420, tauxCendre: 0.01 },
+// Caractéristiques combustible — feuille Excel "Car_biomasse" (taux en décimal)
+const BIOMASSE_CHARACTERISTICS: Record<string, { pci: number; masseVolumique: number; tauxHumidite: number; tauxCendre: number }> = {
+  PLAQUETTE: { pci: 3.8, masseVolumique: 225, tauxHumidite: 0.25, tauxCendre: 0.01 },
+  GRANULES: { pci: 4.6, masseVolumique: 650, tauxHumidite: 0.07, tauxCendre: 0.005 },
+  MISCANTHUS: { pci: 4.2, masseVolumique: 120, tauxHumidite: 0.10, tauxCendre: 0.03 },
+  BUCHES: { pci: 4.0, masseVolumique: 420, tauxHumidite: 0.20, tauxCendre: 0.01 },
 };
 
 export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, onSave }: ParcConfigProps) {
@@ -285,22 +297,45 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
 
               if (!consoBatiments || !couverture || !rendBois) return null;
 
-              const consoSortieBois = calculConsommationsSortieChaudiereBois(consoBatiments, couverture);
+              // L'Excel ajoute les pertes du réseau de chaleur avant la répartition bois/appoint
+              const pertesReseau = calculPertesReseauParSection(parc.longueurReseau || 0, parc.sectionReseau);
+              const consoTotale = consoBatiments + pertesReseau;
+
+              const consoSortieBois = calculConsommationsSortieChaudiereBois(consoTotale, couverture);
               const consoEntreeBois = rendBois > 0 ? calculConsommationsEntreeChaudiereBois(consoSortieBois, rendBois) : 0;
-              const consoAppoint = rendAppoint > 0 ? calculConsommationsAppoint(consoBatiments, couverture, rendAppoint) : 0;
+              const consoAppoint = rendAppoint > 0 ? calculConsommationsAppoint(consoTotale, couverture, rendAppoint) : 0;
               const heuresPP = puissanceBois > 0 ? calculHeuresPP(consoSortieBois, puissanceBois) : 0;
 
+              const volumeAnnuel = characteristics
+                ? calculVolumeAnnuelBois(consoEntreeBois, characteristics.pci, characteristics.masseVolumique)
+                : null;
               const stockage = characteristics
-                ? calculStockage10jours((consoEntreeBois / 365) * 10, characteristics.pci, characteristics.masseVolumique)
+                ? calculStockage10jours(calculConso10JoursFroids(consoEntreeBois), characteristics.pci, characteristics.masseVolumique)
                 : null;
               const cendres = characteristics
-                ? calculVolumeCendres(consoEntreeBois, characteristics.tauxCendre, characteristics.masseVolumique)
+                ? calculVolumeCendres(consoEntreeBois, characteristics.pci, characteristics.tauxHumidite, characteristics.tauxCendre)
                 : null;
+              const nbLivraisons = volumeAnnuel ? calculNbLivraisons(volumeAnnuel.m3, parc.volumeCamion ?? 90) : 0;
+              const siloRecommande = stockage ? calculVolumeSiloRecommande(parc.volumeCamion ?? 90, stockage.m3) : 0;
+              const kmHaie = volumeAnnuel ? calculKmHaie(volumeAnnuel.m3) : 0;
+              const steres = calculSteresAn(consoEntreeBois);
 
               return (
                 <div className="mt-6 pt-6 border-t-2 border-green-300">
                   <h5 className="font-semibold text-green-800 mb-4">Résultats calculés</h5>
                   <div className="grid grid-cols-2 gap-4 text-sm">
+                    {pertesReseau > 0 && (
+                      <div className="bg-white p-3 rounded border border-red-200">
+                        <span className="text-gray-600">Pertes réseau de chaleur</span>
+                        <div className="font-bold text-red-700">{pertesReseau.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
+                      </div>
+                    )}
+                    {pertesReseau > 0 && (
+                      <div className="bg-white p-3 rounded border border-green-200">
+                        <span className="text-gray-600">Conso totale (bâtiments + pertes)</span>
+                        <div className="font-bold text-green-700">{consoTotale.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
+                      </div>
+                    )}
                     <div className="bg-white p-3 rounded border border-green-200">
                       <span className="text-gray-600">Conso sortie chaudière bois</span>
                       <div className="font-bold text-green-700">{consoSortieBois.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} kWh/an</div>
@@ -317,18 +352,40 @@ export function ParcConfig({ parcs: initialParcs, consoBatimentsParParc = {}, on
                       <span className="text-gray-600">Heures pleine puissance</span>
                       <div className="font-bold text-blue-700">{heuresPP.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} h</div>
                     </div>
+                    {volumeAnnuel && (
+                      <div className="bg-white p-3 rounded border border-green-200">
+                        <span className="text-gray-600">Volume annuel de bois</span>
+                        <div className="font-bold text-green-700">{volumeAnnuel.tonnes.toFixed(1)} t / {volumeAnnuel.m3.toFixed(1)} m³</div>
+                      </div>
+                    )}
                     {stockage && (
-                      <>
-                        <div className="bg-white p-3 rounded border border-yellow-200">
-                          <span className="text-gray-600">Stockage 10 jours</span>
-                          <div className="font-bold text-yellow-700">{stockage.tonnes.toFixed(1)} t / {stockage.m3.toFixed(1)} m³</div>
-                        </div>
-                      </>
+                      <div className="bg-white p-3 rounded border border-yellow-200">
+                        <span className="text-gray-600">Conso 10 jours les + froids (11 %)</span>
+                        <div className="font-bold text-yellow-700">{stockage.tonnes.toFixed(1)} t / {stockage.m3.toFixed(1)} m³</div>
+                      </div>
+                    )}
+                    {volumeAnnuel && (
+                      <div className="bg-white p-3 rounded border border-blue-200">
+                        <span className="text-gray-600">Nb livraisons / an</span>
+                        <div className="font-bold text-blue-700">{nbLivraisons.toFixed(1)}</div>
+                      </div>
+                    )}
+                    {stockage && (
+                      <div className="bg-white p-3 rounded border border-yellow-200">
+                        <span className="text-gray-600">Volume silo recommandé (× 1,5)</span>
+                        <div className="font-bold text-yellow-700">{siloRecommande.toFixed(0)} m³</div>
+                      </div>
                     )}
                     {cendres && (
                       <div className="bg-white p-3 rounded border border-gray-300">
                         <span className="text-gray-600">Volume de cendres</span>
                         <div className="font-bold text-gray-700">{cendres.m3.toFixed(2)} m³ / {cendres.kg.toFixed(0)} kg</div>
+                      </div>
+                    )}
+                    {volumeAnnuel && (
+                      <div className="bg-white p-3 rounded border border-gray-300">
+                        <span className="text-gray-600">Équivalent km haie / stères</span>
+                        <div className="font-bold text-gray-700">{kmHaie.toFixed(2)} km / {steres.toFixed(0)} stères</div>
                       </div>
                     )}
                   </div>

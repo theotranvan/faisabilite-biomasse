@@ -60,9 +60,9 @@ export function trierMonotone(monotoneData: MonotoneDataPoint[]): MonotoneDataPo
 }
 
 /**
- * Calculate part of heating at base capacity
- * partBasePuissance = percentage of hours at base power
- * partBaseEnergie = percentage of energy at base power
+ * Calculate part of heating at base capacity (formules Excel Monotone_2)
+ * partBasePuissance = puissance générateur / puissance max appelée (BA2 = AS3/AS2)
+ * partBaseEnergie = besoins couverts par le générateur / besoins totaux (BA3 = AW3/AV3)
  */
 export function calculPartBase(
   monotoneTriee: MonotoneDataPoint[],
@@ -72,8 +72,8 @@ export function calculPartBase(
     return { partBasePuissance: 0, partBaseEnergie: 0 };
   }
 
-  const heuresBase = monotoneTriee.filter(p => p.puissance <= puissanceGenerateur).length;
-  const partBasePuissance = (heuresBase / monotoneTriee.length) * 100;
+  const puissanceMax = Math.max(...monotoneTriee.map(p => p.puissance));
+  const partBasePuissance = puissanceMax > 0 ? (puissanceGenerateur / puissanceMax) * 100 : 0;
 
   // Calculate energy at base
   let energieBase = 0;

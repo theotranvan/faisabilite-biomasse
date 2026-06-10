@@ -14,7 +14,9 @@ import {
   calculConsommationsEntreeChaudiereBois,
   calculConsommationsSortieChaudiereBois,
   calculConsommationsAppoint,
+  calculPertesReseauParSection,
   calculEtiquetteEnergetique,
+  calculEtiquetteGlobaleProjet,
   getEtiquetteCouleur,
 } from '@/lib/calculs';
 import type { Batiment } from '@/lib/calculs';
@@ -95,6 +97,7 @@ interface ParcResult {
   coutAppoint: number;
   coutElecSupp: number;
   p2Bio: number;
+  p2Ref: number;
   consoEntreeBois: number;
   consoEntreeAppoint: number;
   co2Initial: number;
@@ -124,6 +127,11 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
   const [selectedParc, setSelectedParc] = useState<string>('consolide');
   const [projections, setProjections] = useState<any[]>([]);
   const [monotoneChartData, setMonotoneChartData] = useState<any[]>([]);
+  const [monotoneStats, setMonotoneStats] = useState<{ puissanceMax: number; partBasePuissance: number; partBaseEnergie: number } | null>(null);
+  const [etiquettesGlobales, setEtiquettesGlobales] = useState<{
+    avant: { etiquette: string; consoParM2: number };
+    ref: { etiquette: string; consoParM2: number };
+  } | null>(null);
   const [villeMonotone, setVilleMonotone] = useState('Bourges');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,8 +182,10 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           const batsInParc = calculsBatiments.filter(b => b.parc === parcNum);
           const puissance = calculPuissanceChauffageParc(batsInParc, parcNum);
           const conso = calculConsoSortieParcChaudieresRef(batsInParc, parcNum, DJU, tempInt, tempExt);
-          const coutActuel = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelEI || 0), 0);
-          const coutRef = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelRef || 0), 0);
+          // P2 (entretien/maintenance) — l'Excel l'applique aux 3 scénarios (750 € actuel/réf, 1200 € bio)
+          const p2Ref = chiffrageRef?.montantP2 ?? 750;
+          const coutActuel = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelEI || 0), 0) + p2Ref;
+          const coutRef = batsInParc.reduce((s, b) => s + (b.calculs?.coutAnnuelRef || 0), 0) + p2Ref;
 
           // Investment ref — compute from flat DB chiffrage object
           let investHT = 0;
@@ -203,10 +213,12 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           const rendementBois = parcConfig?.rendementChaudiereBois || 85;
           const rendementAppoint = parcConfig?.rendementChaudiere2 || 90;
 
-          // Biomass consumption
-          const consoSortieChaudiereBois = calculConsommationsSortieChaudiereBois(conso, pourcentageBois);
+          // Biomass consumption — pertes réseau ajoutées avant répartition (comme l'Excel)
+          const pertesReseau = calculPertesReseauParSection(parcConfig?.longueurReseau || 0, parcConfig?.sectionReseau);
+          const consoAvecPertes = conso + pertesReseau;
+          const consoSortieChaudiereBois = calculConsommationsSortieChaudiereBois(consoAvecPertes, pourcentageBois);
           const consoEntreeBois = calculConsommationsEntreeChaudiereBois(consoSortieChaudiereBois, rendementBois);
-          const consoEntreeAppoint = calculConsommationsAppoint(conso, pourcentageBois, rendementAppoint);
+          const consoEntreeAppoint = calculConsommationsAppoint(consoAvecPertes, pourcentageBois, rendementAppoint);
 
           // Tarifs
           const tarifBois = affaire.tarifBoisExploitation || 0.05316;
@@ -271,12 +283,14 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             return {
               numero: b.numero,
               designation: b.designation,
+              typeBatiment: b.typeBatiment,
               surfaceChauffee: surface,
               coutAnnuelEI: b.calculs?.coutAnnuelEI || 0,
               coutAnnuelRef: b.calculs?.coutAnnuelRef || 0,
               consoSortie: b.calculs?.consoSortieChaudieresRef || 0,
               consoKWhepEI,
               consoRefCalculees: b.calculs?.consoRefCalculees || 0,
+              consoRefPCS: b.calculs?.consoRefPCS || 0,
               deperditionsKW: b.etatInitial.deperditions_kW,
               deperditionsRefKW: b.etatReference?.deperditions_kW || b.etatInitial.deperditions_kW,
               dpe,
@@ -300,6 +314,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             coutAppoint,
             coutElecSupp,
             p2Bio,
+            p2Ref,
             consoEntreeBois,
             consoEntreeAppoint,
             co2Initial,
@@ -318,7 +333,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           parcNum: 'consolide',
           puissance: 0, conso: 0, coutActuel: 0, coutRef: 0, coutBiomasse: 0,
           annuiteRef: 0, annuiteBiomasse: 0, investHT: 0, investBioHT: 0,
-          subventionsBio: 0, coutBois: 0, coutAppoint: 0, coutElecSupp: 0, p2Bio: 0,
+          subventionsBio: 0, coutBois: 0, coutAppoint: 0, coutElecSupp: 0, p2Bio: 0, p2Ref: 0,
           consoEntreeBois: 0, consoEntreeAppoint: 0,
           co2Initial: 0, co2Ref: 0, co2Bio: 0, so2Initial: 0, so2Ref: 0, so2Bio: 0,
           batiments: [],
@@ -339,6 +354,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           consolide.coutAppoint += r.coutAppoint;
           consolide.coutElecSupp += r.coutElecSupp;
           consolide.p2Bio += r.p2Bio;
+          consolide.p2Ref += r.p2Ref;
           consolide.consoEntreeBois += r.consoEntreeBois;
           consolide.consoEntreeAppoint += r.consoEntreeAppoint;
           consolide.co2Initial += r.co2Initial;
@@ -354,15 +370,34 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
         // Use consolidated for bilan 20 ans and projections
         const sel = consolide;
 
-        // Bilan 20 ans
+        // Bilan 20 ans — comme dans l'Excel, le coût annuel de départ est le coût GLOBAL
+        // (exploitation + annuité d'emprunt) ; l'annuité est ensuite retranchée une fois
+        // l'emprunt soldé (année dureeEmprunt + 1)
         const bilan20ans = calculBilan20Ans(
-          sel.coutActuel, sel.coutRef, sel.coutBiomasse,
+          sel.coutActuel,
+          sel.coutRef + sel.annuiteRef,
+          sel.coutBiomasse + sel.annuiteBiomasse,
           tauxAugFossile, tauxAugBiomasse,
           sel.annuiteRef, sel.annuiteBiomasse, dureeEmprunt
         );
 
         setAllResults(results);
         setSelectedParc(parcs.length === 1 ? `parc${parcs[0]}` : 'consolide');
+
+        // Étiquette globale du projet (feuille Excel "Etiquette" : seuils pondérés
+        // par part de consommation ; avant = kWhep, référence = kWh PCS théorique)
+        setEtiquettesGlobales({
+          avant: calculEtiquetteGlobaleProjet(consolide.batiments.map(b => ({
+            typeBatiment: (b as any).typeBatiment,
+            surfaceChauffee: b.surfaceChauffee,
+            consoKwhep: b.consoKWhepEI,
+          }))),
+          ref: calculEtiquetteGlobaleProjet(consolide.batiments.map(b => ({
+            typeBatiment: (b as any).typeBatiment,
+            surfaceChauffee: b.surfaceChauffee,
+            consoKwhep: (b as any).consoRefPCS || 0,
+          }))),
+        });
 
         setProjections(
           bilan20ans.map((year: any) => ({
@@ -396,6 +431,23 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
                     generateur: puissanceGenBase,
                   }));
                 setMonotoneChartData(points);
+
+                // Part base (formules Excel Monotone_2) : puissance = Pgén/Pmax,
+                // énergie = besoins couverts par le générateur / besoins totaux
+                if (points.length > 0 && puissanceGenBase > 0) {
+                  const puissanceMax = points[0].puissance;
+                  let besoinsTotaux = 0;
+                  let besoinsBase = 0;
+                  for (const pt of points) {
+                    besoinsTotaux += pt.puissance;
+                    besoinsBase += Math.min(pt.puissance, puissanceGenBase);
+                  }
+                  setMonotoneStats({
+                    puissanceMax,
+                    partBasePuissance: puissanceMax > 0 ? (puissanceGenBase / puissanceMax) * 100 : 0,
+                    partBaseEnergie: besoinsTotaux > 0 ? (besoinsBase / besoinsTotaux) * 100 : 0,
+                  });
+                }
               }
             }
           }
@@ -547,6 +599,35 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               ))}
             </tbody>
           </table>
+
+          {/* Étiquette globale du projet (seuils pondérés par part de consommation, comme l'Excel) */}
+          {etiquettesGlobales && etiquettesGlobales.avant.etiquette !== '-' && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Étiquette globale du projet</h4>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-600">Situation actuelle :</span>
+                  <span
+                    className="inline-block w-10 h-10 rounded text-white font-bold text-xl leading-10 text-center"
+                    style={{ backgroundColor: getEtiquetteCouleur(etiquettesGlobales.avant.etiquette) }}
+                  >
+                    {etiquettesGlobales.avant.etiquette}
+                  </span>
+                  <span className="text-xs text-gray-500">{Math.round(etiquettesGlobales.avant.consoParM2)} kWhep/m²/an</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-600">Situation de référence :</span>
+                  <span
+                    className="inline-block w-10 h-10 rounded text-white font-bold text-xl leading-10 text-center"
+                    style={{ backgroundColor: getEtiquetteCouleur(etiquettesGlobales.ref.etiquette) }}
+                  >
+                    {etiquettesGlobales.ref.etiquette}
+                  </span>
+                  <span className="text-xs text-gray-500">{Math.round(etiquettesGlobales.ref.consoParM2)} kWh/m²/an</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -568,8 +649,8 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             <tbody>
               <tr className="border-b">
                 <td className="py-2 px-3">Combustible</td>
-                <td className="text-right px-3 bg-gray-50">{formatEur(sel.coutActuel)}</td>
-                <td className="text-right px-3 bg-blue-50">{formatEur(sel.coutRef)}</td>
+                <td className="text-right px-3 bg-gray-50">{formatEur(sel.coutActuel - sel.p2Ref)}</td>
+                <td className="text-right px-3 bg-blue-50">{formatEur(sel.coutRef - sel.p2Ref)}</td>
                 <td className="text-right px-3 bg-green-50">{formatEur(sel.coutBois + sel.coutAppoint)}</td>
               </tr>
               <tr className="border-b">
@@ -580,14 +661,14 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               </tr>
               <tr className="border-b font-semibold">
                 <td className="py-2 px-3">Montant P1 (combustible)</td>
-                <td className="text-right px-3 bg-gray-50">{formatEur(sel.coutActuel)}</td>
-                <td className="text-right px-3 bg-blue-50">{formatEur(sel.coutRef)}</td>
+                <td className="text-right px-3 bg-gray-50">{formatEur(sel.coutActuel - sel.p2Ref)}</td>
+                <td className="text-right px-3 bg-blue-50">{formatEur(sel.coutRef - sel.p2Ref)}</td>
                 <td className="text-right px-3 bg-green-50">{formatEur(p1Biomasse)}</td>
               </tr>
               <tr className="border-b">
                 <td className="py-2 px-3">Montant P2 (entretien)</td>
-                <td className="text-right px-3 bg-gray-50">-</td>
-                <td className="text-right px-3 bg-blue-50">-</td>
+                <td className="text-right px-3 bg-gray-50">{formatEur(sel.p2Ref)}</td>
+                <td className="text-right px-3 bg-blue-50">{formatEur(sel.p2Ref)}</td>
                 <td className="text-right px-3 bg-green-50">{formatEur(sel.p2Bio)}</td>
               </tr>
               <tr className="border-b-2 font-bold">
@@ -867,6 +948,23 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
                 <Line type="monotone" dataKey="generateur" stroke="#10b981" name="Générateur base" dot={false} strokeWidth={2} strokeDasharray="8 4" />
               </LineChart>
             </ResponsiveContainer>
+
+            {monotoneStats && (
+              <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+                <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                  <span className="text-gray-600">Puissance max appelée</span>
+                  <div className="font-bold text-gray-800">{monotoneStats.puissanceMax.toFixed(1)} kW</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                  <span className="text-gray-600">Part base — puissance</span>
+                  <div className="font-bold text-gray-800">{monotoneStats.partBasePuissance.toFixed(1)} %</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded border border-green-200">
+                  <span className="text-gray-600">Part base — énergie (= % couverture bois suggéré)</span>
+                  <div className="font-bold text-green-700">{monotoneStats.partBaseEnergie.toFixed(1)} %</div>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
       )}

@@ -28,9 +28,13 @@ import {
   calculConsommationsSortieChaudiereBois,
   calculConsommationsEntreeChaudiereBois,
   calculConsommationsAppoint,
+  calculConso10JoursFroids,
   calculStockage10jours,
   calculVolumeCendres,
   calculHeuresPP,
+  calculPertesReseau,
+  calculPertesReseauParSection,
+  calculVolumeSiloRecommande,
   calculInvestissementHTRef,
   calculInvestissementTTCRef,
   calculAnnuiteRef,
@@ -300,8 +304,8 @@ function testSynopticSchemaZeroConso() {
   assert(stock.tonnes === 0, `Stock tonnes = 0 quand conso = 0`);
   assert(stock.m3 === 0, `Stock m3 = 0 quand conso = 0`);
 
-  // Cendres with 0
-  const cendres = calculVolumeCendres(0, 0.01, 225);
+  // Cendres with 0 (conso, pci, tauxHumidite, tauxCendre)
+  const cendres = calculVolumeCendres(0, 3.8, 0.25, 0.01);
   assert(cendres.m3 === 0, `Cendres m3 = 0 quand conso = 0`);
 }
 
@@ -439,17 +443,35 @@ function testStockageCendres() {
   console.log('\n### REG-11: Stockage 10 jours & cendres');
 
   // Plaquette: PCI 3.8 MWh/t, masse vol 225 kg/m³
-  const conso10j = 50000 / 365 * 10; // ≈ 1370 kWh
+  // Excel : conso 10 jours les + froids = 11 % de l'annuel
+  const conso10j = calculConso10JoursFroids(50000); // = 5500 kWh
+  assert(approx(conso10j, 5500), `Conso 10 jours = 11 % de l'annuel (got ${fmt(conso10j)})`);
   const stock = calculStockage10jours(conso10j, 3.8, 225);
 
   assert(stock.tonnes > 0, `Stock tonnes > 0 (got ${fmt(stock.tonnes)})`);
+  assert(approx(stock.tonnes, 5500 / 3800), `Stock tonnes = conso/PCI (got ${fmt(stock.tonnes)})`);
   assert(stock.m3 > 0, `Stock m3 > 0 (got ${fmt(stock.m3)})`);
   assert(stock.m3 > stock.tonnes, `Stock m3 > tonnes (bois est léger, got m3=${fmt(stock.m3)}, t=${fmt(stock.tonnes)})`);
 
-  // Cendres
-  const cendres = calculVolumeCendres(50000, 0.01, 225);
-  assert(cendres.m3 > 0, `Cendres m3 > 0 (got ${fmt(cendres.m3)})`);
+  // Cendres — formule Excel : masse sèche × taux cendres / 600
+  // 50 000 kWh / 3.8 MWh/t = 13.158 t bois ; sec = ×(1-0.25) = 9.868 t ;
+  // cendres = 9868 kg × 1 % = 98.68 kg ; volume = 98.68/600 = 0.1645 m³
+  const cendres = calculVolumeCendres(50000, 3.8, 0.25, 0.01);
+  assert(approx(cendres.kg, 98.68, 0.01), `Cendres kg = masse sèche × taux (got ${fmt(cendres.kg)})`);
+  assert(approx(cendres.m3, 0.1645, 0.01), `Cendres m3 = kg/600 (got ${fmt(cendres.m3)})`);
   assert(cendres.m3 < 100, `Cendres m3 reasonable (< 100, got ${fmt(cendres.m3)})`);
+
+  // Pertes réseau — Excel : 3450 h × kW/ml × ml
+  const pertes = calculPertesReseau(500, 0.012); // DN50, 500 ml
+  assert(approx(pertes, 500 * 0.012 * 3450), `Pertes réseau = 3450 × kW (got ${fmt(pertes)} kWh/an)`);
+  const pertesSection = calculPertesReseauParSection(500, 'DN50');
+  assert(approx(pertesSection, pertes), `Pertes par section DN50 identiques (got ${fmt(pertesSection)})`);
+
+  // Volume silo recommandé — Excel : max(camion, 10 j) × 1,5
+  const silo = calculVolumeSiloRecommande(90, 30);
+  assert(approx(silo, 135), `Silo = max(90, 30) × 1.5 = 135 (got ${fmt(silo)})`);
+  const silo2 = calculVolumeSiloRecommande(40, 80);
+  assert(approx(silo2, 120), `Silo = max(40, 80) × 1.5 = 120 (got ${fmt(silo2)})`);
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -16,6 +16,7 @@ export {
   calculsBatimentReference,
   calculsBatimentComplet,
   calculEtiquetteEnergetique,
+  calculEtiquetteGlobaleProjet,
   getEtiquetteCouleur,
 } from '../../../lib/calculs/batiment';
 
@@ -29,10 +30,22 @@ export {
   calculConsommationsSortieChaudiereBois,
   calculConsommationsEntreeChaudiereBois,
   calculConsommationsAppoint,
+  calculConso10JoursFroids,
+  calculVolumeAnnuelBois,
   calculStockage10jours,
   calculVolumeCendres,
   calculHeuresPP,
   calculPertesReseau,
+  calculPertesReseauParSection,
+  calculConsoTotaleAvecPertes,
+  calculNbLivraisons,
+  calculVolumeSiloRecommande,
+  calculKmHaie,
+  calculSteresAn,
+  PERTES_RESEAU_KW_PER_ML,
+  HEURES_RESEAU_AN,
+  PART_CONSO_10_JOURS_FROIDS,
+  MASSE_VOLUMIQUE_CENDRES,
 } from '../../../lib/calculs/parc';
 
 export {

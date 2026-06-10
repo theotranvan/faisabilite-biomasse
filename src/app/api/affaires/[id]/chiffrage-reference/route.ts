@@ -82,6 +82,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (rest.tauxFraisDivers !== undefined) data.tauxFraisDivers = rest.tauxFraisDivers;
     if (rest.aleas !== undefined) data.tauxAleas = rest.aleas;
     if (rest.tauxAleas !== undefined) data.tauxAleas = rest.tauxAleas;
+    // P2 entretien/maintenance (actuel + référence)
+    if (rest.montantP2 !== undefined) data.montantP2 = parseFloat(rest.montantP2) || 0;
+    if (rest.p2 !== undefined) data.montantP2 = parseFloat(rest.p2) || 0;
     // Emprunt
     if (emprunt_ref !== undefined) data.empruntRef = parseFloat(emprunt_ref) || 0;
 
