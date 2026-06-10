@@ -79,24 +79,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
       const results = [];
       for (const batiment of items) {
-        if (!batiment.id || batiment.id.startsWith('new-')) {
-          // Nouveau bâtiment (no id or temp id)
-          const normalized = normalizeBatiment(batiment);
-          const created = await db.batiment.create({
-            data: {
-              affaireId: id,
-              ...normalized,
-            }
-          });
-          results.push(created);
-        } else {
-          // Mise à jour
-          const normalized = normalizeBatiment(batiment);
+        const normalized = normalizeBatiment(batiment);
+        if (batiment.id && !batiment.id.startsWith('new-')) {
+          // Update by primary key
           const updated = await db.batiment.update({
             where: { id: batiment.id },
             data: normalized
           });
           results.push(updated);
+        } else {
+          // Upsert by (affaireId, numero) — handles wizard retries without unique constraint errors
+          const upserted = await db.batiment.upsert({
+            where: { affaireId_numero: { affaireId: id, numero: normalized.numero } },
+            update: normalized,
+            create: { affaireId: id, ...normalized },
+          });
+          results.push(upserted);
         }
       }
       return NextResponse.json(results);

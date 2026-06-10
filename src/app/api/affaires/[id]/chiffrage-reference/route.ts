@@ -89,8 +89,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // P2 entretien/maintenance (actuel + référence)
     if (rest.montantP2 !== undefined) data.montantP2 = parseFloat(rest.montantP2) || 0;
     if (rest.p2 !== undefined) data.montantP2 = parseFloat(rest.p2) || 0;
-    // Emprunt
+    // Emprunt (le wizard envoie `emprunt`, le formulaire plein envoie `emprunt_ref`)
     if (emprunt_ref !== undefined) data.empruntRef = parseFloat(emprunt_ref) || 0;
+    else if (emprunt !== undefined) data.empruntRef = parseFloat(emprunt) || 0;
 
     // Vérifier que l'affaire existe (shared workspace — all users can edit)
     if (!(await canAccessAffaire(id))) {

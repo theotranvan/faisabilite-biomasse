@@ -347,7 +347,8 @@ export default function NewAffairePage() {
       });
 
       if (!batimentsRes.ok) {
-        setError('Erreur lors de la sauvegarde des bâtiments');
+        const errData = await batimentsRes.json().catch(() => ({}));
+        setError(`Erreur bâtiments : ${errData.error || batimentsRes.status}`);
         setIsLoading(false);
         return;
       }
@@ -360,7 +361,8 @@ export default function NewAffairePage() {
       });
 
       if (!chiffrageRes.ok) {
-        setError('Erreur lors de la sauvegarde du chiffrage');
+        const errData = await chiffrageRes.json().catch(() => ({}));
+        setError(`Erreur chiffrage : ${errData.error || chiffrageRes.status}`);
         setIsLoading(false);
         return;
       }
