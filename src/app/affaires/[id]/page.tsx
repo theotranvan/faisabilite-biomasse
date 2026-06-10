@@ -19,7 +19,12 @@ import { ValidationModule } from '@/components/affaire/ValidationModule';
 import { PDFExportButton } from '@/components/affaire/PDFExportButton';
 import { AffaireActions } from '@/components/affaire/AffaireActions';
 
-import { calculConsoSortieParcChaudieresRef } from '@/lib/calculs';
+import {
+  calculConsoSortieParcChaudieresRef,
+  calculPertesReseauParSection,
+  calculConso10JoursFroids,
+  calculVolumeSiloRecommande,
+} from '@/lib/calculs';
 import { DEPARTEMENTS, DEPT_TO_VILLE_MONOTONE } from '@/lib/enums';
 
 export const dynamic = 'force-dynamic';
@@ -667,17 +672,22 @@ export default function AffaireDetailPage() {
                             };
                             const c = chars[parc.typeBiomasse || 'PLAQUETTE'] || chars.PLAQUETTE;
                             const consoBat = consoBatimentsParParc[parc.numero] || 0;
+                            // Pertes réseau ajoutées avant répartition (comme l'Excel)
+                            const pertes = calculPertesReseauParSection(parc.longueurReseau || 0, parc.sectionReseau);
+                            const consoTotaleParc = consoBat + pertes;
                             const couv = (parc.pourcentageCouvertureBois || 0);
-                            const consoSortie = consoBat * (couv / 100);
+                            const consoSortie = consoTotaleParc * (couv / 100);
                             const rendBoisNorm = (parc.rendementChaudiereBois || 0) > 1 ? (parc.rendementChaudiereBois || 1) / 100 : (parc.rendementChaudiereBois || 1);
                             const consoEntree = rendBoisNorm > 0 ? consoSortie / rendBoisNorm : 0;
                             const consoT = consoEntree / (c.pci * 1000);
                             const consoM3 = c.masseVol > 0 ? (consoT * 1000) / c.masseVol : 0;
-                            const stock10T = (consoEntree / 365 * 10) / (c.pci * 1000);
+                            // Conso 10 jours les plus froids = 11 % de l'annuel (constante Excel)
+                            const stock10T = calculConso10JoursFroids(consoEntree) / (c.pci * 1000);
                             const stock10M3 = c.masseVol > 0 ? (stock10T * 1000) / c.masseVol : 0;
                             const volSilo = (parc as any).volumeSilo || 0;
                             const volCamion = (parc as any).volumeCamion || 90;
-                            const nbLiv = volCamion > 0 ? Math.ceil(consoM3 / volCamion) : 0;
+                            const nbLiv = volCamion > 0 ? consoM3 / volCamion : 0;
+                            const siloRecommande = calculVolumeSiloRecommande(volCamion, stock10M3);
                             const autonomie = consoM3 > 0 ? Math.round(volSilo / consoM3 * 365) : 0;
 
                             return (
@@ -720,7 +730,11 @@ export default function AffaireDetailPage() {
                                   </div>
                                   <div className="bg-white p-3 rounded border">
                                     <span className="text-gray-500">Livraisons/an</span>
-                                    <div className="font-bold text-green-700">{nbLiv}</div>
+                                    <div className="font-bold text-green-700">{nbLiv.toFixed(1)}</div>
+                                  </div>
+                                  <div className="bg-white p-3 rounded border">
+                                    <span className="text-gray-500">Silo recommandé (max camion / 10 j × 1,5)</span>
+                                    <div className="font-bold text-yellow-700">{siloRecommande.toFixed(0)} m³</div>
                                   </div>
                                   {volSilo > 0 && (
                                     <div className="bg-white p-3 rounded border">

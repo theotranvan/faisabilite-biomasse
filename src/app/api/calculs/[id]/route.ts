@@ -11,6 +11,7 @@ import {
   calculConsommationsEntreeChaudiereBois,
   calculConsommationsSortieChaudiereBois,
   calculConsommationsAppoint,
+  calculPertesReseauParSection,
   calculEtiquetteEnergetique,
 } from '@/lib/calculs';
 import type { Batiment, EtatEnergie } from '@/lib/calculs';
@@ -152,22 +153,26 @@ export async function GET(
       const puissance = calculPuissanceChauffageParc(batimentsCalc, parcNum);
       const conso = calculConsoSortieParcChaudieresRef(batimentsCalc, parcNum, DJU, tempInt, tempExt);
 
-      // Costs
-      const coutActuel = batimentsResults
-        .filter((b: any) => b.parc === parcNum)
-        .reduce((s: any, b: any) => s + b.cout_annuel, 0);
-      const coutRef = batimentsResults
-        .filter((b: any) => b.parc === parcNum)
-        .reduce((s: any, b: any) => s + b.cout_annuel_ref, 0);
-
       // Chiffrage reference
       const parcConfig = affaire.parcs.find((p: any) => p.numero === parcNum);
       const chiffrageRef = parcConfig?.chiffrageRef;
       const chiffrageBio = parcConfig?.chiffrageBio;
 
+      // Costs — P2 (entretien/maintenance) appliqué aux scénarios actuel et référence,
+      // comme dans l'Excel ("solution biomasse" D14/E14 = 750 € par défaut)
+      const p2Ref = (chiffrageRef as any)?.montantP2 ?? 750;
+      const coutActuel = batimentsResults
+        .filter((b: any) => b.parc === parcNum)
+        .reduce((s: any, b: any) => s + b.cout_annuel, 0) + p2Ref;
+      const coutRef = batimentsResults
+        .filter((b: any) => b.parc === parcNum)
+        .reduce((s: any, b: any) => s + b.cout_annuel_ref, 0) + p2Ref;
+
       let investHT = 0;
       let investTTC = 0;
       let annuiteRefParc = 0;
+      let sousTotalChaufferieRef = 0;
+      let fraisAnnexesRef = 0;
 
       if (chiffrageRef) {
         let rawLignes: any[] = [];
@@ -187,7 +192,9 @@ export async function GET(
           fraisDivers: chiffrageRef.tauxFraisDivers,
           aleas: chiffrageRef.tauxAleas,
         };
+        sousTotalChaufferieRef = lignesChaufferie.reduce((s: number, l: any) => s + l.qte * l.pu, 0);
         investHT = calculInvestissementHTRef(lignesChaufferie, fraisAnnexes);
+        fraisAnnexesRef = investHT - sousTotalChaufferieRef;
         investTTC = calculInvestissementTTCRef(investHT);
         annuiteRefParc = calculAnnuiteRef(investHT, chiffrageRef.empruntRef || 0, dureeEmprunt);
       }
@@ -197,9 +204,15 @@ export async function GET(
       const rendementBois = parcConfig?.rendementChaudiereBois || 85;
       const rendementAppoint = parcConfig?.rendementChaudiere2 || 90;
 
-      const consoSortieChaudiereBois = calculConsommationsSortieChaudiereBois(conso, pourcentageBois);
+      // Pertes réseau ajoutées avant répartition bois/appoint (comme l'Excel)
+      const pertesReseau = calculPertesReseauParSection(
+        parcConfig?.longueurReseau || 0,
+        parcConfig?.sectionReseau
+      );
+      const consoAvecPertes = conso + pertesReseau;
+      const consoSortieChaudiereBois = calculConsommationsSortieChaudiereBois(consoAvecPertes, pourcentageBois);
       const consoEntreeBois = calculConsommationsEntreeChaudiereBois(consoSortieChaudiereBois, rendementBois);
-      const consoEntreeAppoint = calculConsommationsAppoint(conso, pourcentageBois, rendementAppoint);
+      const consoEntreeAppoint = calculConsommationsAppoint(consoAvecPertes, pourcentageBois, rendementAppoint);
 
       const aff = affaire as any;
       const tarifBois = aff.tarifBoisExploitation || 0.05316;
@@ -247,6 +260,8 @@ export async function GET(
         parc: parcNum,
         puissance_kW: puissance,
         conso_kWh: conso,
+        pertes_reseau_kWh: pertesReseau,
+        conso_avec_pertes_kWh: consoAvecPertes,
         cout_actuel: coutActuel,
         cout_total: coutRef,
         cout_biomasse: coutBiomasse,
@@ -256,8 +271,8 @@ export async function GET(
 
       chiffrageResults.push({
         parc: parcNum,
-        sous_total_chaufferie: investHT,
-        frais_annexes: investHT > 0 ? investTTC - investHT * 1.0 : 0,
+        sous_total_chaufferie: sousTotalChaufferieRef,
+        frais_annexes: fraisAnnexesRef,
         investissement_ht: investHT,
         tva: investTTC - investHT,
         investissement_ttc: investTTC,

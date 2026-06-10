@@ -106,6 +106,41 @@ export function calculAnnuiteRef(
 // ============ BIOMASS CALCULATION FUNCTIONS ============
 
 /**
+ * Pertes réseau par section (kW/ml) — table Excel "Utile" (Reseau_Ch)
+ */
+export const PERTES_RESEAU_KW_PER_ML: Record<string, number> = {
+  DN25: 0.007,
+  DN32: 0.009,
+  DN40: 0.010,
+  DN50: 0.012,
+  DN63: 0.017,
+  DN75: 0.020,
+  DN90: 0.026,
+  DN110: 0.035,
+};
+
+/**
+ * Heures équivalentes de fonctionnement du réseau retenues par l'Excel
+ * (VBA UserForm_saisie_biomasse : pertes = 3450 × kW/ml × ml)
+ */
+export const HEURES_RESEAU_AN = 3450;
+
+/**
+ * Part de la consommation annuelle représentée par les 10 jours les plus froids
+ * (VBA : conso 10 jours = 11 % du volume annuel)
+ */
+export const PART_CONSO_10_JOURS_FROIDS = 0.11;
+
+/** Masse volumique des cendres retenue par l'Excel (kg/m³) */
+export const MASSE_VOLUMIQUE_CENDRES = 600;
+
+/** 1 km de haie ≈ 93 m³ de plaquettes (constante Excel) */
+export const M3_PLAQUETTES_PAR_KM_HAIE = 93;
+
+/** 1 stère ≈ 1600 kWh (constante Excel, corrigée en kWh) */
+export const KWH_PAR_STERE = 1600;
+
+/**
  * Calculate boiler outlet consumption for biomass
  */
 export function calculConsommationsSortieChaudiereBois(
@@ -139,6 +174,28 @@ export function calculConsommationsAppoint(
 }
 
 /**
+ * Consommation des 10 jours les plus froids = 11 % de la consommation annuelle
+ * (formule Excel : TextBox24 = volume annuel × 0,11)
+ */
+export function calculConso10JoursFroids(consommationAnnuelleKwh: number): number {
+  return consommationAnnuelleKwh * PART_CONSO_10_JOURS_FROIDS;
+}
+
+/**
+ * Volume annuel de bois (tonnes et m³) à partir de l'énergie entrée chaudière
+ * pci en MWh/t, masse volumique en kg/m³
+ */
+export function calculVolumeAnnuelBois(
+  consommationsEntreeChaudiereBoisKwh: number,
+  pci: number,
+  masseVolumique: number
+): { tonnes: number; m3: number } {
+  const tonnes = consommationsEntreeChaudiereBoisKwh / (pci * 1000);
+  const m3 = masseVolumique > 0 ? (tonnes * 1000) / masseVolumique : 0;
+  return { tonnes, m3 };
+}
+
+/**
  * Calculate 10-day storage requirements
  */
 export function calculStockage10jours(
@@ -146,21 +203,26 @@ export function calculStockage10jours(
   pci: number,
   masseVolumique: number
 ): { tonnes: number; m3: number } {
-  const tonnes = consommation10joursKwh / (pci * 1000);
-  const m3 = (tonnes * 1000) / masseVolumique;
-  return { tonnes, m3 };
+  return calculVolumeAnnuelBois(consommation10joursKwh, pci, masseVolumique);
 }
 
 /**
- * Calculate ash volume
+ * Volume de cendres — formule Excel (VBA UserForm_saisie_biomasse) :
+ * cendres (kg) = masse sèche de bois (kg) × taux de cendres
+ *              = (conso entrée / PCI) × (1 − taux humidité) × 1000 × taux cendres
+ * cendres (m³) = kg / 600 (masse volumique des cendres)
+ *
+ * tauxHumidite et tauxCendre en décimal (0.25 = 25 %)
  */
 export function calculVolumeCendres(
-  consommationsEntreeChaudiereBois: number,
-  tauxCendre: number,
-  masseVolumique: number
+  consommationsEntreeChaudiereBoisKwh: number,
+  pci: number,
+  tauxHumidite: number,
+  tauxCendre: number
 ): { m3: number; kg: number } {
-  const m3 = (consommationsEntreeChaudiereBois * tauxCendre) / masseVolumique;
-  const kg = m3 * masseVolumique;
+  const tonnesBois = consommationsEntreeChaudiereBoisKwh / (pci * 1000);
+  const kg = tonnesBois * (1 - tauxHumidite) * 1000 * tauxCendre;
+  const m3 = kg / MASSE_VOLUMIQUE_CENDRES;
   return { m3, kg };
 }
 
@@ -175,13 +237,74 @@ export function calculHeuresPP(
 }
 
 /**
- * Calculate network losses
+ * Pertes annuelles du réseau de chaleur (kWh/an) — formule Excel :
+ * pertes = 3450 h × (kW/ml × longueur)
  */
 export function calculPertesReseau(
   longueurReseau: number,
   pertesKwPerMl: number
 ): number {
-  return longueurReseau * pertesKwPerMl;
+  return longueurReseau * pertesKwPerMl * HEURES_RESEAU_AN;
+}
+
+/**
+ * Pertes annuelles du réseau (kWh/an) à partir de la section (DN25…DN110)
+ */
+export function calculPertesReseauParSection(
+  longueurReseau: number,
+  section: string | null | undefined
+): number {
+  if (!longueurReseau || !section) return 0;
+  const kwPerMl = PERTES_RESEAU_KW_PER_ML[section] || 0;
+  return calculPertesReseau(longueurReseau, kwPerMl);
+}
+
+/**
+ * Consommation totale à produire = consommations bâtiments + pertes réseau
+ * (l'Excel additionne les pertes avant de répartir bois/appoint)
+ */
+export function calculConsoTotaleAvecPertes(
+  consommationsBatimentsParc: number,
+  longueurReseau?: number | null,
+  section?: string | null
+): number {
+  return consommationsBatimentsParc + calculPertesReseauParSection(longueurReseau || 0, section);
+}
+
+/**
+ * Nombre de livraisons par an = volume annuel (m³) / volume camion (m³)
+ */
+export function calculNbLivraisons(volumeAnnuelM3: number, volumeCamion: number): number {
+  if (!volumeCamion) return 0;
+  return volumeAnnuelM3 / volumeCamion;
+}
+
+/**
+ * Volume de silo recommandé — formule Excel :
+ * max(volume camion, conso 10 jours en m³) × (1 + 20 % + 30 %)
+ */
+export function calculVolumeSiloRecommande(
+  volumeCamion: number,
+  conso10joursM3: number,
+  margeManutention = 0.2,
+  margeSecurite = 0.3
+): number {
+  return Math.max(volumeCamion || 0, conso10joursM3 || 0) * (1 + margeManutention + margeSecurite);
+}
+
+/**
+ * Km de haie équivalents par an = volume annuel (m³) / 93
+ */
+export function calculKmHaie(volumeAnnuelM3: number): number {
+  return volumeAnnuelM3 / M3_PLAQUETTES_PAR_KM_HAIE;
+}
+
+/**
+ * Stères par an = consommation entrée chaudière (kWh) / 1600
+ * (l'Excel divisait des MWh par 1600 — erreur d'unité corrigée ici)
+ */
+export function calculSteresAn(consommationsEntreeChaudiereBoisKwh: number): number {
+  return consommationsEntreeChaudiereBoisKwh / KWH_PAR_STERE;
 }
 
 /**

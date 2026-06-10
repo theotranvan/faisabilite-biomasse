@@ -237,3 +237,43 @@ export function getEtiquetteCouleur(letter: string): string {
   };
   return colors[letter] || '#6b7280';
 }
+
+/**
+ * Étiquette globale du projet (feuille Excel "Etiquette", K26..V26) :
+ * les seuils du projet sont la moyenne des seuils de chaque type de bâtiment,
+ * pondérée par la part de consommation de chaque type ; l'étiquette est ensuite
+ * déterminée en comparant la consommation globale (kWhep/m² toutes surfaces)
+ * à ces seuils pondérés.
+ */
+export function calculEtiquetteGlobaleProjet(
+  batiments: Array<{ typeBatiment?: string; surfaceChauffee: number; consoKwhep: number }>
+): { etiquette: string; consoParM2: number; seuils: number[] } {
+  const surfaceTotale = batiments.reduce((s, b) => s + (b.surfaceChauffee || 0), 0);
+  const consoTotale = batiments.reduce((s, b) => s + (b.consoKwhep || 0), 0);
+
+  if (surfaceTotale <= 0 || consoTotale <= 0) {
+    return { etiquette: '-', consoParM2: 0, seuils: [] };
+  }
+
+  // Part de consommation par type de bâtiment (pondération Excel E25:E28)
+  const consoParType: Record<string, number> = {};
+  for (const b of batiments) {
+    const type = DPE_THRESHOLDS[b.typeBatiment || ''] ? (b.typeBatiment as string) : 'LOGEMENTS';
+    consoParType[type] = (consoParType[type] || 0) + (b.consoKwhep || 0);
+  }
+
+  // Seuils pondérés (6 bornes A..F)
+  const seuils = [0, 1, 2, 3, 4, 5].map(i =>
+    Object.entries(consoParType).reduce(
+      (sum, [type, conso]) => sum + (conso / consoTotale) * DPE_THRESHOLDS[type][i],
+      0
+    )
+  );
+
+  const consoParM2 = consoTotale / surfaceTotale;
+  const grades = ['A', 'B', 'C', 'D', 'E', 'F'];
+  for (let i = 0; i < grades.length; i++) {
+    if (consoParM2 <= seuils[i]) return { etiquette: grades[i], consoParM2, seuils };
+  }
+  return { etiquette: 'G', consoParM2, seuils };
+}

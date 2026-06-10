@@ -236,7 +236,11 @@ model ChiffragReference {
   tauxMaitriseOeuvre    Float    @default(0.13)
   tauxFraisDivers       Float    @default(0.02)
   tauxAleas             Float    @default(0.05)
-  
+
+  // Exploitation — P2 entretien/maintenance appliqué aux scénarios actuel et
+  // référence (Excel "solution biomasse" D14/E14 = 150 × 5 = 750 €)
+  montantP2             Float    @default(750)
+
   // Emprunt (coût total du crédit, saisi manuellement comme dans l'Excel)
   empruntRef            Float    @default(0)
   
