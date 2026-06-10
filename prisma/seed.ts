@@ -270,9 +270,20 @@ async function main() {
   await prisma.pertesReseau.createMany({ data: pertesReseauData, skipDuplicates: true });
   console.log('✓ Pertes Réseau (insert si absent)');
 
-  // Seed Météo Moyenne (clé unique: departement)
-  await prisma.meteoMoyenne.createMany({ data: meteoMoyenneData, skipDuplicates: true });
-  console.log('✓ Météo Moyenne (insert si absent)');
+  // Seed Météo Moyenne (clé unique: departement) — UPSERT, pas skipDuplicates :
+  // ce sont des données normatives (DJU SDES/Météo France extraites de l'Excel,
+  // feuille Meteo col. Moyenne + Text Base), pas des données client. Un re-seed
+  // doit corriger les anciennes valeurs approximatives restées en base.
+  // Sans risque pour les affaires existantes : chaque affaire fige son djuRetenu
+  // et sa tempExtBase à la création.
+  for (const m of meteoMoyenneData) {
+    await prisma.meteoMoyenne.upsert({
+      where: { departement: m.departement },
+      update: { code: m.code, djuMoyenne: m.djuMoyenne, tempExtBase: m.tempExtBase },
+      create: m,
+    });
+  }
+  console.log('✓ Météo Moyenne (upsert — valeurs alignées sur l\'Excel)');
 
   // Seed MeteoMonotone (8760 hours × 11 cities)
   const monotoneCsvPath = path.join(__dirname, 'data', 'meteo_monotone_toutes_villes.csv');
