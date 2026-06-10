@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getSessionUserId } from '@/lib/db';
+import { db } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const parcNum = req.nextUrl.searchParams.get('parc');
     
     if (parcNum) {
@@ -89,7 +93,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (emprunt_ref !== undefined) data.empruntRef = parseFloat(emprunt_ref) || 0;
 
     // Vérifier que l'affaire existe (shared workspace — all users can edit)
-    await getSessionUserId(); // ensure authenticated
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const affaire = await db.affaire.findUnique({
       where: { id }
     });

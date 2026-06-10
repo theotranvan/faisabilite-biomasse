@@ -45,13 +45,21 @@ export function calculConsoSortieParcChaudieresRef(
       const rr = etatRef.rendementRegulation > 1 ? etatRef.rendementRegulation / 100 : etatRef.rendementRegulation;
       
       const rendementMoyenRef = rp * rd * re * rr;
-      
+
+      // Garde division par zéro (cohérent avec calculConsoRefCalculees) :
+      // ΔT nul (Tint = Text) ou rendement moyen nul → contribution nulle plutôt
+      // qu'Infinity/NaN qui se propagerait dans les coûts et le bilan.
+      const deltaT = tempInt - tempExt;
+      if (deltaT <= 0 || rendementMoyenRef <= 0) {
+        return sum;
+      }
+
       // Calculate consumption leaving boiler
-      const consoRefCalculees = 
+      const consoRefCalculees =
         (etatRef.deperditions_kW * 1000 * DJU * 24) /
-        ((tempInt - tempExt) * rendementMoyenRef * 1000) *
+        (deltaT * rendementMoyenRef * 1000) *
         (b.etatInitial.coefIntermittence || 1);
-      
+
       const consoSortie = consoRefCalculees * rp; // rendement production en décimal
       return sum + consoSortie;
     }, 0);

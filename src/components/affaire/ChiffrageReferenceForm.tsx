@@ -57,7 +57,12 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
   const [bddCouts, setBddCouts] = useState<BddCout[]>([]);
 
   useEffect(() => {
-    fetch('/api/costs').then(r => r.json()).then(setBddCouts).catch(() => {});
+    // Autocomplete des coûts (non bloquant : la saisie manuelle reste possible).
+    // On trace l'échec au lieu de l'avaler silencieusement.
+    fetch('/api/costs')
+      .then(r => r.json())
+      .then(setBddCouts)
+      .catch((e) => console.warn('Chargement BDD coûts (autocomplete) indisponible:', e));
   }, []);
 
   const handleLineChange = (idx: number, field: string, value: any) => {

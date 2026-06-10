@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, getSessionUserId } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 
 export async function POST(req: NextRequest) {
   try {
     const { affaireId } = await req.json();
 
-    // Fetch source affaire
+    // Fetch source affaire — accès limité au périmètre de l'utilisateur
+    if (!(await canAccessAffaire(affaireId))) {
+      return NextResponse.json({ error: 'Affaire not found' }, { status: 404 });
+    }
     const sourceAffaire = await db.affaire.findFirst({
       where: { id: affaireId }
     });

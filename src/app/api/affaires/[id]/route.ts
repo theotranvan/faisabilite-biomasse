@@ -1,11 +1,14 @@
 import { db, isAdmin, getSessionUserId } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Get a single affaire
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await getSessionUserId();
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire not found' }, { status: 404 });
+    }
     const affaire = await db.affaire.findUnique({
       where: { id },
       include: {
@@ -35,7 +38,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await getSessionUserId();
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire not found' }, { status: 404 });
+    }
     const existingAffaire = await db.affaire.findUnique({
       where: { id },
     });

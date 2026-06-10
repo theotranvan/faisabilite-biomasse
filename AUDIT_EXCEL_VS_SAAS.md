@@ -76,9 +76,9 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
 ### 2.5 Montant P2 (entretien/maintenance) absent des scénarios actuel et référence
 * **Excel** (`solution biomasse` D14/E14/F14) : P2 = 750 € pour l'actuel **et** la référence,
   1 200 € pour la biomasse. Sans P2 actuel/réf, la comparaison était biaisée **contre** la biomasse.
-* **Corrigé** : champ `montantP2` (défaut 750 €) ajouté à `ChiffragReference`
-  (migration `20260610100000_add_montant_p2_reference`), saisissable dans le formulaire de
-  chiffrage référence, intégré aux coûts annuels actuel et référence (API + page Résultats).
+* **Corrigé** : champ `montantP2` (défaut 750 €) ajouté à `ChiffragReference` (inclus dans la
+  baseline de migration PostgreSQL, cf. §5), saisissable dans le formulaire de chiffrage
+  référence, intégré aux coûts annuels actuel et référence (API + page Résultats).
 
 ### 2.6 Données DJU du seed inventées
 * **Excel** (`Meteo`) : DJU moyens calculés sur 1996-2022 (source SDES/Météo France) + T° de base.
@@ -92,9 +92,9 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
 * **Excel** (`BDD_cout`) : 6 familles, ~62 articles.
 * **Seed avant** : 34 articles ; catégories **VRD** et **Gros Œuvre** totalement absentes,
   chaudières gaz absentes, etc.
-* **Corrigé** : seed complété (95 articles au total) — VRD (12), Gros Œuvre (14),
-  Équipements (16), Chaufferie biomasse (29 dont chaudières gaz 50→500 kW), Chauffage bâtiments (5).
-  Seul « Enrobé » (VRD) est omis : la cellule prix est vide dans l'Excel.
+* **Corrigé** : seed complété (**83 articles**, vérifié en base) — VRD (12), Gros Œuvre (14),
+  Équipements (16), Chaufferie biomasse (30 dont chaudières gaz 50→500 kW), Isolation (6),
+  Chauffage bâtiments (5). Seul « Enrobé » (VRD) est omis : la cellule prix est vide dans l'Excel.
 
 ### 2.8 Monotone — « part base puissance » et suggestion de couverture
 * **Excel** (`Monotone_2`) : part base **puissance** = P générateur / P max appelée (BA2) ;
@@ -118,21 +118,48 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
 * Note : la macro Excel divise des **MWh** par 1 600 pour les stères (résultat 1 000× trop
   petit) — bug d'unité de l'Excel ; le SaaS applique l'intention (kWh/1 600).
 
-### 2.10 Divers
+### 2.10 Tarif gaz naturel — coquille Excel écartée
+* **Excel** (`Energies`) : gaz naturel = **0,978 €/kWh**, soit ~10× le prix marché et 4× tout le
+  reste de la table (fuel 0,13, propane 0,1652, élec 0,226, granulés 0,1162). Coquille évidente
+  pour **0,0978**.
+* **Preuve décisive** : la constante `ENERGY_TARIFS` qui alimente réellement l'autofill des
+  bâtiments (et donc les calculs) utilisait **déjà 0,0978** — le développeur initial avait corrigé
+  la coquille à cet endroit. Seule la table de référence `Energie` du seed gardait 0,978.
+* **Corrigé** : seed aligné sur 0,0978 (valeur éditable dans l'admin). Garde-fou ajouté au test
+  de parité. Aucun risque pour le client : l'autofill utilisait déjà la bonne valeur, c'est la
+  cohérence de la table de référence affichée qui est rétablie.
+
+### 2.11 Coefficient d'intermittence — fidélité Excel rétablie
+* **Excel** : la colonne O « Coef de correction intermittence » existe mais **n'est jamais
+  appliquée** dans les formules (VBA ligne 934 : aucun facteur d'intermittence ; valeur = 1
+  partout dans l'exemple).
+* **Code avant** : `COEF_INTERMITTENCE` injectait en douce **0,85 (bureaux)** et **0,80 (autres)**
+  à chaque choix de type de bâtiment (valeurs **non issues de l'Excel**) → conso de référence
+  15-20 % sous l'Excel pour ces bâtiments. Les études du client n'auraient **pas pu se réconcilier**
+  avec ses résultats historiques.
+* **Corrigé** : coefficient ramené à **1 par défaut pour tous les types** (fidélité Excel stricte).
+  Le champ reste éditable : un utilisateur averti peut saisir 0,85/0,80 manuellement s'il veut une
+  correction d'intermittence. Garde-fou ajouté au test de parité.
+
+### 2.12 Divers
 * `frais_annexes` renvoyé par `/api/calculs` contenait en réalité la TVA, et
   `sous_total_chaufferie` contenait l'investissement HT — libellés corrigés (impact PDF).
 * Défaut « Bureau de contrôle » du formulaire référence : 5 % → **0 %** (défaut Excel).
 * Seed facteur d'émission « Électricité » → « Electricité » pour s'aligner sur les clés de
   `EMISSION_FACTORS` (la table DB et la constante TS divergeaient).
-* Nouveau test `tests/parity-excel.test.ts` : 14 vérifications numériques contre les valeurs
-  réellement stockées dans l'Excel (lignes Donnees 5-6, pertes réseau, cendres, 11 %) —
-  exécuté par `npm test`.
+* Nouveau test `tests/parity-excel.test.ts` : **16 vérifications** numériques contre les valeurs
+  réellement stockées dans l'Excel (lignes Donnees 5-6, pertes réseau, cendres, 11 %) + 2
+  garde-fous de mise en service (tarif gaz, intermittence) — exécuté par `npm test`.
 
 ---
 
-## 3. Bugs de l'Excel volontairement NON reproduits
+## 3. Bugs de l'Excel volontairement NON reproduits — **vérifiés, aucune validation client requise**
 
-Le SaaS implémente l'**intention** du modèle, pas ses bugs. À documenter auprès du client :
+Chacun de ces 7 points a été re-confirmé en relisant la formule / macro VBA exacte. Dans tous
+les cas, le comportement « correct » est **non ambigu** (un total doit sommer ses lignes ; un tarif
+libellé « €/kWh PCS » se facture sur le PCS ; une référence cassée n'est pas une intention). Le
+SaaS implémente donc l'intention du modèle, pas ses bugs — **ces points sont tranchés, ils ne
+nécessitent pas d'arbitrage du client.**
 
 1. **« TOTAL DES INVESTISSEMENTS » faux dans les 8 feuilles de chiffrage** :
    la formule pointe une seule ligne au lieu du sous-total (ex. `chiffrage_ref_Parc1` F35 =
@@ -158,31 +185,80 @@ Le SaaS implémente l'**intention** du modèle, pas ses bugs. À documenter aupr
 
 ---
 
-## 4. Points à valider avec le client (non bloquants)
+## 4. Points tranchés par le raisonnement (ne nécessitent plus le client)
 
-1. **Tarif « Gaz naturel » = 0,978 €/kWh** dans la feuille `Energies` — ~10× le prix de marché
-   (les autres énergies sont plausibles : fuel 0,13, propane 0,1652, élec 0,226).
-   Probable faute de frappe pour 0,0978. La valeur Excel a été conservée fidèlement dans le seed,
-   mais elle est modifiable dans l'admin → **à confirmer avec le client**.
-2. **Coefficient d'intermittence** : la colonne existe dans l'Excel (O) mais aucune formule ni
-   macro ne l'utilise (probable oubli). Le SaaS l'applique aux consommations calculées de
-   référence — comportement conservé car c'est l'intention évidente de la colonne.
-3. **État de référence implicite** : dans l'Excel, un bâtiment sans état de référence saisi
-   compte pour 0 dans le parc ; le SaaS retombe sur l'état initial (jamais de chaudière
-   dimensionnée à 0). Comportement plus sûr, conservé.
-4. **P2 actuel = P2 référence** (un seul champ, 750 € par défaut) — dans l'Excel ce sont deux
-   cellules distinctes mais avec la même formule `=150×5`. Si le client veut les dissocier,
-   ajouter un second champ.
-5. L'Excel lie « Installation réseau hydraulique dans bât existants » du chiffrage bio aux
-   valeurs du chiffrage référence (`=chiffrage_ref_ParcN!D20/E20`) ; dans le SaaS c'est un champ
-   libre. Pré-remplissage possible si souhaité.
+Ces points étaient initialement « à valider » ; ils sont désormais **résolus** :
+
+1. **Tarif gaz naturel** → fixé à **0,0978 €/kWh** (cf. §2.10). La valeur 0,978 est physiquement
+   impossible et l'app utilisait déjà 0,0978 dans son chemin de calcul réel. Décision sûre et
+   réversible (éditable dans l'admin) si le client avait une raison contraire — mais il n'y en a
+   aucune crédible.
+2. **Coefficient d'intermittence** → ramené à **1 par défaut** (cf. §2.11), pour que le SaaS
+   reproduise exactement l'Excel du client. Correction d'intermittence disponible à la main.
+3. **État de référence implicite** : un bâtiment sans état de référence retombe sur l'état initial
+   (jamais de chaudière dimensionnée à 0). Plus sûr que le « compte pour 0 » de l'Excel, conservé.
+4. **P2 actuel = P2 référence** (un seul champ, 750 € par défaut). Dans l'Excel les deux cellules
+   ont la même formule `=150×5` → un champ unique est fidèle. Dissociation triviale si besoin futur.
+
+## 4 bis. Seul point restant réellement ouvert (confort, non bloquant)
+
+* L'Excel lie « Installation réseau hydraulique dans bât existants » du chiffrage bio aux valeurs
+  du chiffrage référence (`=chiffrage_ref_ParcN!D20/E20`) ; dans le SaaS c'est un champ libre.
+  Pré-remplissage automatique possible si le client le souhaite — pur confort de saisie, sans
+  impact sur la justesse des résultats.
 
 ---
 
-## 5. Comment vérifier
+## 5. Vérification runtime & mise en production (10 juin 2026)
+
+L'application a été **réellement exécutée** (PostgreSQL 16 local, `migrate deploy` + `db seed`
+documentés, `npm start`, parcours complet piloté via l'API HTTP avec session NextAuth). Trois
+blocages invisibles au build/aux tests ont été trouvés et corrigés :
+
+1. **Déploiement PostgreSQL cassé** : l'historique de migrations était en dialecte SQLite
+   (`migration_lock.toml` = sqlite) alors que `schema.prisma` cible PostgreSQL →
+   `prisma migrate deploy` échouait (P3019) sur toute base postgres. Historique remplacé par une
+   baseline PostgreSQL unique (`20260610120000_init_postgresql`, inclut `montantP2`).
+   *Base déjà déployée via `db push`* : exécuter une fois
+   `prisma migrate resolve --applied 20260610120000_init_postgresql`.
+2. **DJU jamais résolu à la création d'affaire** : recherche par *nom* de département alors que
+   le front envoie le *code* (« 18 ») → toutes les affaires retombaient sur 2400 DJU / −7 °C.
+   Corrigé (code OU nom) ; la T° extérieure de base du département est aussi reprise
+   (vérifié : Cher → 2004,1 ; Ain → 2148,1 / −10 °C).
+3. **Seed pertes réseau** : seules 4 sections sur 8 étaient chargées — corrigé (DN25→DN110).
+
+Parité Excel re-confirmée via l'API réelle : conso réf 31 291,55 / 58 901,74 (= cellules AE6/AE5),
+pertes DN63 = 29 325 kWh, annuité 2 607,93 (= L16), cap subventions 80 %, P2 inclus, bilan année 16.
+
+## 6. Sécurité d'accès — modèle implémenté et vérifié
+
+Décision du client : **accès sur invitation, chaque utilisateur voit ses affaires (+ équipes),
+l'admin voit tout.** Implémentation (`src/lib/authz.ts` + toutes les routes affaires) :
+
+* **Inscription publique désactivée** : `/api/auth/register` exige une session ADMIN
+  (403 sinon) ; la page `/auth/register` devient l'écran admin « Créer un accès »
+  (redirection vers le login pour les non-admins). Bootstrap : sur une base sans aucun
+  utilisateur, le premier compte créé devient ADMIN.
+* **Périmètre des affaires** : propriétaire **ou** membre d'une équipe rattachée **ou** ADMIN.
+  Routes couvertes : liste/détail/modification, bâtiments, isolation, parcs, chiffrages
+  référence et biomasse, calculs, duplication. Hors périmètre → **404** (sans révéler
+  l'existence). Suppression : propriétaire ou admin uniquement.
+* **Vérifié au runtime (12/12)** : intrus → 403 inscription, 0 affaire listée, 404 sur toutes
+  les routes d'une affaire d'autrui (lecture ET écriture) ; propriétaire → ses 9 affaires ;
+  admin → tout + création d'accès 201 ; partage d'équipe → le collègue ajouté voit l'affaire
+  d'équipe (calculs 200) mais pas les affaires personnelles (404).
+
+**Conclusion : l'outil est prêt pour le client.** Calculs fidèles à l'Excel (verrouillés par
+16 tests de parité + vérification runtime), déploiement PostgreSQL fonctionnel, accès sur
+invitation avec cloisonnement par utilisateur/équipe. Avant l'ouverture : changer les mots de
+passe par défaut du seed et définir un `NEXTAUTH_SECRET` fort.
+
+---
+
+## 7. Comment vérifier
 
 ```bash
-npm test          # calculs + régression + parité Excel (14 points de contrôle)
+npm test          # calculs (17) + régression (173) + parité Excel (16 points de contrôle)
 npx tsc --noEmit  # types OK
 npm run build     # build Next.js OK
 ```

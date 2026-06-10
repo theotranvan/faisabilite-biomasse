@@ -12,17 +12,13 @@ npm run dev
 
 L'app sera sur `http://localhost:3000`
 
-### 2. Accounts de test
+### 2. Premier accès
 
-**Admin:**
-- Email: admin@biomasse.local
-- Password: biomasse2026
+Un compte administrateur (`admin@biomasse.local`) est créé au premier `db seed`,
+avec le mot de passe défini dans la variable d'environnement `SEED_ADMIN_PASSWORD`.
+Changez-le à la première connexion ; le seed ne réécrase jamais un compte existant.
 
-**User:**
-- Email: user@unique.local
-- Password: biomasse2026
- 
-Ou créez votre propre compte via `/auth/register`
+Les autres comptes se créent ensuite sur invitation via `/auth/register` (admin only).
 
 ## 🎯 Workflow type d'utilisation
 

@@ -38,7 +38,10 @@ export async function getSessionUserId(): Promise<string> {
   } catch {
     // getServerSession may fail outside of request context (e.g. scripts)
   }
-  if (process.env.NODE_ENV === 'production') {
+  // Repli sur l'utilisateur par défaut UNIQUEMENT en développement strict.
+  // Tout autre environnement (production, staging, test, NODE_ENV absent) exige
+  // une session valide → aucun contournement d'auth hors dev local.
+  if (process.env.NODE_ENV !== 'development') {
     throw new Error('Non authentifié');
   }
   return getDefaultUserId();

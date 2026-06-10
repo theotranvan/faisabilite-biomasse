@@ -4,6 +4,7 @@
  */
 import { calculsBatimentComplet } from '../lib/calculs/batiment';
 import { calculConso10JoursFroids, calculVolumeCendres, calculPertesReseau } from '../lib/calculs/parc';
+import { ENERGY_TARIFS, COEF_INTERMITTENCE } from '../src/lib/enums';
 import type { Batiment } from '../lib/calculs/types';
 
 let pass = 0, fail = 0;
@@ -11,6 +12,10 @@ function check(label: string, actual: number, expected: number, tolPct = 0.001) 
   const ok = Math.abs(actual - expected) <= Math.abs(expected) * tolPct + 1e-9;
   console.log(`${ok ? '✓' : '✗'} ${label}: ${actual.toFixed(2)} (Excel: ${expected})`);
   ok ? pass++ : fail++;
+}
+function assertTrue(label: string, cond: boolean) {
+  console.log(`${cond ? '✓' : '✗'} ${label}`);
+  cond ? pass++ : fail++;
 }
 
 // Bâtiment 1 (Donnees ligne 6) : déperd. ref 10 kW, Gaz naturel, rendements ref 0.8/0.9/0.9/0.9
@@ -61,6 +66,14 @@ check('Conso 10 jours froids (11 %)', calculConso10JoursFroids(100000), 11000);
 const cend = calculVolumeCendres(100000, 3.8, 0.25, 0.01);
 check('Cendres kg (masse sèche × taux)', cend.kg, 197.37, 0.001);
 check('Cendres m³ (kg/600)', cend.m3, 0.32895, 0.001);
+
+// Garde-fous de mise en service (décisions d'audit verrouillées)
+// 1. Tarif gaz naturel cohérent (coquille Excel 0,978 écartée)
+assertTrue('Tarif gaz naturel autofill ≈ 0,0978 (pas 0,978)',
+  Math.abs(ENERGY_TARIFS.GAZ_NATUREL.tarification - 0.0978) < 1e-9);
+// 2. Intermittence : défaut 1 pour TOUS les types (l'Excel ne l'applique jamais)
+assertTrue('Coef intermittence = 1 par défaut pour tous les types (fidélité Excel)',
+  Object.values(COEF_INTERMITTENCE).every(v => v === 1.0));
 
 console.log(`\n${fail === 0 ? '✓ PARITÉ EXCEL CONFIRMÉE' : '✗ ÉCHECS'} — ${pass}/${pass + fail}`);
 process.exit(fail === 0 ? 0 : 1);
