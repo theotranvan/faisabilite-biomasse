@@ -4,6 +4,16 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Page de création d'accès — réservée à l'admin (inscription sur invitation).
+  // L'API /api/auth/register applique le même contrôle côté serveur.
+  if (pathname === '/auth/register') {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (token?.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/auth/login', req.url));
+    }
+    return NextResponse.next();
+  }
+
   // Public routes — always allow
   if (
     pathname === '/' ||

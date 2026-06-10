@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getSessionUserId } from '@/lib/db';
+import { db } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
-    await getSessionUserId();
-    const { batimentId } = await params;
+    const { id, batimentId } = await params;
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const travauxIsolation = await db.travauxIsolation.findUnique({
       where: { batimentId },
       include: { lignes: true },
@@ -24,8 +27,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string; batimentId: string }> }
 ) {
   try {
-    await getSessionUserId();
     const { id, batimentId } = await params;
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const data = await req.json();
     const lignes = data.lignes || [];
 

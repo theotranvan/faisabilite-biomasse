@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getSessionUserId } from '@/lib/db';
+import { db } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -74,7 +75,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (emprunt_biomasse !== undefined) data.empruntBio = parseFloat(emprunt_biomasse) || 0;
 
     // Vérifier que l'affaire existe (shared workspace — all users can edit)
-    await getSessionUserId(); // ensure authenticated
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const affaire = await db.affaire.findUnique({
       where: { id }
     });

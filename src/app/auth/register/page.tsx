@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui/Form';
 import { Alert } from '@/components/ui/Layout';
 
+// Page admin « Créer un accès » : l'inscription publique est désactivée,
+// seul un administrateur connecté peut créer des comptes (middleware + API).
 export default function RegisterPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -18,6 +18,7 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -29,6 +30,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     // Validation
     if (!formData.nom || !formData.prenom || !formData.email || !formData.password) {
@@ -67,7 +69,9 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push('/auth/login?registered=true');
+      // L'admin reste connecté : confirmation sur place + formulaire réinitialisé
+      setSuccess(`Accès créé pour ${formData.email}`);
+      setFormData({ nom: '', prenom: '', email: '', password: '', confirmPassword: '', entreprise: '' });
     } catch (err) {
       setError('Une erreur est survenue');
     } finally {
@@ -79,9 +83,10 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="max-w-md w-full bg-white rounded-lg shadow p-8">
         <h1 className="text-3xl font-bold mb-2 text-center text-blue-600">🌱 Biomasse</h1>
-        <p className="text-center text-sm text-gray-600 mb-6">Créer un compte</p>
+        <p className="text-center text-sm text-gray-600 mb-6">Créer un accès (réservé à l'administrateur)</p>
 
         {error && <Alert type="error" className="mb-4">{error}</Alert>}
+        {success && <Alert type="success" className="mb-4">{success}</Alert>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

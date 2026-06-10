@@ -1,13 +1,16 @@
 import { db, getSessionUserId } from '@/lib/db';
+import { getSessionScope, affaireWhereForScope } from '@/lib/authz';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAffaireReference } from '@/lib/utils';
 
-// Get all affaires (shared workspace — all users see all affaires)
+// Get affaires — chaque utilisateur voit les siennes + celles de ses équipes,
+// l'admin voit tout
 export async function GET(_req: NextRequest) {
   try {
-    await getSessionUserId(); // ensure authenticated
+    const scope = await getSessionScope();
 
     const affaires = await db.affaire.findMany({
+      where: affaireWhereForScope(scope),
       include: {
         batiments: true,
         parcs: true,

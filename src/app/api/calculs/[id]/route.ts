@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getSessionUserId } from '@/lib/db';
+import { db } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 import {
   calculsBatimentComplet,
   calculPuissanceChauffageParc,
@@ -76,7 +77,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  await getSessionUserId();
+  if (!(await canAccessAffaire(id))) {
+    return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+  }
   const affaireId = id;
 
   try {

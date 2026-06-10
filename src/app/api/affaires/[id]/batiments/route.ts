@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, getSessionUserId } from '@/lib/db';
+import { db } from '@/lib/db';
+import { canAccessAffaire } from '@/lib/authz';
 
 // Normalize batiment data from form to match schema (whitelist valid fields only)
 function normalizeBatiment(b: any) {
@@ -35,7 +36,9 @@ function normalizeBatiment(b: any) {
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await getSessionUserId();
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const batiments = await db.batiment.findMany({
       where: { affaireId: id }
     });
@@ -50,7 +53,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await getSessionUserId();
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
     const data = await req.json();
 
     // Support { batiments: [...] } wrapper format
@@ -115,8 +120,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await params;
-    await getSessionUserId();
+    const { id } = await params;
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
 
     const data = await req.json();
     if (!data.id) {
@@ -136,9 +143,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(req: NextRequest, _context: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await getSessionUserId();
+    const { id } = await params;
+    if (!(await canAccessAffaire(id))) {
+      return NextResponse.json({ error: 'Affaire non trouvée' }, { status: 404 });
+    }
 
     const { batimentId } = await req.json();
 

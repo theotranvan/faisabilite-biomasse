@@ -1,10 +1,26 @@
-import { db } from '@/lib/db';
+import { db, isAdmin } from '@/lib/db';
 import { hash } from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Création de compte — accès sur invitation uniquement :
+ * seul un ADMIN connecté peut créer des accès.
+ * Exception bootstrap : si la base ne contient encore AUCUN utilisateur
+ * (déploiement neuf sans seed), le premier compte créé devient ADMIN.
+ */
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, nom, prenom, entreprise } = await req.json();
+    const userCount = await db.user.count();
+    const bootstrap = userCount === 0;
+
+    if (!bootstrap && !(await isAdmin())) {
+      return NextResponse.json(
+        { error: 'Création de compte réservée à l\'administrateur (accès sur invitation)' },
+        { status: 403 }
+      );
+    }
+
+    const { email, password, nom, prenom, entreprise, role } = await req.json();
 
     // Validation
     if (!email || !password || !nom || !prenom) {
@@ -29,6 +45,9 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 10);
 
+    // Bootstrap → ADMIN ; sinon l'admin choisit le rôle (USER par défaut)
+    const newRole = bootstrap ? 'ADMIN' : (role === 'ADMIN' ? 'ADMIN' : 'USER');
+
     // Create user
     const user = await db.user.create({
       data: {
@@ -37,7 +56,7 @@ export async function POST(req: NextRequest) {
         nom,
         prenom,
         entreprise: entreprise || null,
-        role: 'USER',
+        role: newRole,
       },
     });
 
@@ -48,6 +67,7 @@ export async function POST(req: NextRequest) {
           email: user.email,
           nom: user.nom,
           prenom: user.prenom,
+          role: user.role,
         },
       },
       { status: 201 }

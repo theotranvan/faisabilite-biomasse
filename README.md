@@ -19,9 +19,14 @@ npx prisma db seed
 npm run dev
 ```
 
-## Comptes par défaut
+## Comptes par défaut (seed — à changer avant mise en production)
 - Admin : admin@biomasse.local / biomasse2026
 - User : user@unique.local / biomasse2026
+
+## Accès sur invitation
+L'inscription publique est désactivée : seul un administrateur connecté peut créer
+des comptes (page « Créer un accès » : `/auth/register`). Chaque utilisateur ne voit
+que ses propres affaires et celles de ses équipes ; un administrateur voit tout.
 
 ## Tests
 ```bash

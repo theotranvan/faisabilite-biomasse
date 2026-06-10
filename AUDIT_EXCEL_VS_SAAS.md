@@ -76,9 +76,9 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
 ### 2.5 Montant P2 (entretien/maintenance) absent des scénarios actuel et référence
 * **Excel** (`solution biomasse` D14/E14/F14) : P2 = 750 € pour l'actuel **et** la référence,
   1 200 € pour la biomasse. Sans P2 actuel/réf, la comparaison était biaisée **contre** la biomasse.
-* **Corrigé** : champ `montantP2` (défaut 750 €) ajouté à `ChiffragReference`
-  (migration `20260610100000_add_montant_p2_reference`), saisissable dans le formulaire de
-  chiffrage référence, intégré aux coûts annuels actuel et référence (API + page Résultats).
+* **Corrigé** : champ `montantP2` (défaut 750 €) ajouté à `ChiffragReference` (inclus dans la
+  baseline de migration PostgreSQL, cf. §5), saisissable dans le formulaire de chiffrage
+  référence, intégré aux coûts annuels actuel et référence (API + page Résultats).
 
 ### 2.6 Données DJU du seed inventées
 * **Excel** (`Meteo`) : DJU moyens calculés sur 1996-2022 (source SDES/Météo France) + T° de base.
@@ -92,9 +92,9 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
 * **Excel** (`BDD_cout`) : 6 familles, ~62 articles.
 * **Seed avant** : 34 articles ; catégories **VRD** et **Gros Œuvre** totalement absentes,
   chaudières gaz absentes, etc.
-* **Corrigé** : seed complété (95 articles au total) — VRD (12), Gros Œuvre (14),
-  Équipements (16), Chaufferie biomasse (29 dont chaudières gaz 50→500 kW), Chauffage bâtiments (5).
-  Seul « Enrobé » (VRD) est omis : la cellule prix est vide dans l'Excel.
+* **Corrigé** : seed complété (**83 articles**, vérifié en base) — VRD (12), Gros Œuvre (14),
+  Équipements (16), Chaufferie biomasse (30 dont chaudières gaz 50→500 kW), Isolation (6),
+  Chauffage bâtiments (5). Seul « Enrobé » (VRD) est omis : la cellule prix est vide dans l'Excel.
 
 ### 2.8 Monotone — « part base puissance » et suggestion de couverture
 * **Excel** (`Monotone_2`) : part base **puissance** = P générateur / P max appelée (BA2) ;
@@ -207,12 +207,55 @@ Ces points étaient initialement « à valider » ; ils sont désormais **résol
   Pré-remplissage automatique possible si le client le souhaite — pur confort de saisie, sans
   impact sur la justesse des résultats.
 
-**Conclusion : l'outil est prêt pour le client.** Tous les écarts de calcul et de données sont
-résolus et verrouillés par 16 tests de parité ; le seul reste est une commodité de saisie optionnelle.
+---
+
+## 5. Vérification runtime & mise en production (10 juin 2026)
+
+L'application a été **réellement exécutée** (PostgreSQL 16 local, `migrate deploy` + `db seed`
+documentés, `npm start`, parcours complet piloté via l'API HTTP avec session NextAuth). Trois
+blocages invisibles au build/aux tests ont été trouvés et corrigés :
+
+1. **Déploiement PostgreSQL cassé** : l'historique de migrations était en dialecte SQLite
+   (`migration_lock.toml` = sqlite) alors que `schema.prisma` cible PostgreSQL →
+   `prisma migrate deploy` échouait (P3019) sur toute base postgres. Historique remplacé par une
+   baseline PostgreSQL unique (`20260610120000_init_postgresql`, inclut `montantP2`).
+   *Base déjà déployée via `db push`* : exécuter une fois
+   `prisma migrate resolve --applied 20260610120000_init_postgresql`.
+2. **DJU jamais résolu à la création d'affaire** : recherche par *nom* de département alors que
+   le front envoie le *code* (« 18 ») → toutes les affaires retombaient sur 2400 DJU / −7 °C.
+   Corrigé (code OU nom) ; la T° extérieure de base du département est aussi reprise
+   (vérifié : Cher → 2004,1 ; Ain → 2148,1 / −10 °C).
+3. **Seed pertes réseau** : seules 4 sections sur 8 étaient chargées — corrigé (DN25→DN110).
+
+Parité Excel re-confirmée via l'API réelle : conso réf 31 291,55 / 58 901,74 (= cellules AE6/AE5),
+pertes DN63 = 29 325 kWh, annuité 2 607,93 (= L16), cap subventions 80 %, P2 inclus, bilan année 16.
+
+## 6. Sécurité d'accès — modèle implémenté et vérifié
+
+Décision du client : **accès sur invitation, chaque utilisateur voit ses affaires (+ équipes),
+l'admin voit tout.** Implémentation (`src/lib/authz.ts` + toutes les routes affaires) :
+
+* **Inscription publique désactivée** : `/api/auth/register` exige une session ADMIN
+  (403 sinon) ; la page `/auth/register` devient l'écran admin « Créer un accès »
+  (redirection vers le login pour les non-admins). Bootstrap : sur une base sans aucun
+  utilisateur, le premier compte créé devient ADMIN.
+* **Périmètre des affaires** : propriétaire **ou** membre d'une équipe rattachée **ou** ADMIN.
+  Routes couvertes : liste/détail/modification, bâtiments, isolation, parcs, chiffrages
+  référence et biomasse, calculs, duplication. Hors périmètre → **404** (sans révéler
+  l'existence). Suppression : propriétaire ou admin uniquement.
+* **Vérifié au runtime (12/12)** : intrus → 403 inscription, 0 affaire listée, 404 sur toutes
+  les routes d'une affaire d'autrui (lecture ET écriture) ; propriétaire → ses 9 affaires ;
+  admin → tout + création d'accès 201 ; partage d'équipe → le collègue ajouté voit l'affaire
+  d'équipe (calculs 200) mais pas les affaires personnelles (404).
+
+**Conclusion : l'outil est prêt pour le client.** Calculs fidèles à l'Excel (verrouillés par
+16 tests de parité + vérification runtime), déploiement PostgreSQL fonctionnel, accès sur
+invitation avec cloisonnement par utilisateur/équipe. Avant l'ouverture : changer les mots de
+passe par défaut du seed et définir un `NEXTAUTH_SECRET` fort.
 
 ---
 
-## 5. Comment vérifier
+## 7. Comment vérifier
 
 ```bash
 npm test          # calculs (17) + régression (173) + parité Excel (16 points de contrôle)
