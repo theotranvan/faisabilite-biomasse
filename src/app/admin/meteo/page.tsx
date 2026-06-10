@@ -11,6 +11,24 @@ export default function AdminMeteoPage() {
   const [monotoneStatus, setMonotoneStatus] = useState('');
   const [isLoadingDju, setIsLoadingDju] = useState(false);
   const [isLoadingMonotone, setIsLoadingMonotone] = useState(false);
+  const [resetStatus, setResetStatus] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDJU = async () => {
+    if (!confirm('Remettre les 96 DJU aux valeurs officielles de l\'Excel (SDES/Météo France) ?')) return;
+    setIsResetting(true);
+    setResetStatus('');
+    try {
+      const res = await fetch('/api/admin/meteo/reset-dju', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) setResetStatus(`✓ ${data.message}`);
+      else setResetStatus(`Erreur : ${data.error}`);
+    } catch {
+      setResetStatus('Erreur réseau');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/admin/meteo/villes')
@@ -75,6 +93,27 @@ export default function AdminMeteoPage() {
       <Header />
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         <h1 className="text-2xl font-bold text-gray-900">Administration Météo</h1>
+
+        {/* Reset DJU depuis l'Excel */}
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold text-gray-900">Réinitialiser les DJU (valeurs Excel officielles)</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Remet les 96 départements aux valeurs SDES/Météo France extraites de l'Excel source (1996–2022).
+              À utiliser si des DJU approximatifs se sont glissés en base (ex. Nièvre 2400 → 2162.4).
+            </p>
+          </CardHeader>
+          <div className="p-6">
+            <Button onClick={handleResetDJU} disabled={isResetting} variant="primary">
+              {isResetting ? 'Mise à jour en cours...' : 'Réinitialiser les 96 DJU'}
+            </Button>
+            {resetStatus && (
+              <p className={`mt-3 text-sm ${resetStatus.startsWith('✓') ? 'text-green-600' : 'text-red-600'}`}>
+                {resetStatus}
+              </p>
+            )}
+          </div>
+        </Card>
 
         {/* DJU Import */}
         <Card>
