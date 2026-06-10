@@ -14,7 +14,10 @@ const energiesData = [
   { nom: 'Bois soufflerie', abonnement: 0, tarification: 0.053 },
   { nom: 'Électricité', abonnement: 0, tarification: 0.226 },
   { nom: 'Fuel', abonnement: 0, tarification: 0.13 },
-  { nom: 'Gaz naturel', abonnement: 0, tarification: 0.978 },
+  // NB : la feuille Excel "Energies" indique 0,978 pour le gaz naturel — coquille
+  // évidente (≈10× le prix marché). La constante ENERGY_TARIFS de l'app utilise déjà
+  // 0,0978 ; on aligne la table de référence sur cette valeur physiquement correcte.
+  { nom: 'Gaz naturel', abonnement: 0, tarification: 0.0978 },
   { nom: 'Gaz propane', abonnement: 0, tarification: 0.1652 },
 ];
 

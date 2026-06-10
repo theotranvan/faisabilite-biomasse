@@ -180,13 +180,23 @@ export const ENERGY_TARIFS: Record<string, { tarification: number; abonnement: n
 };
 
 /**
- * Building type → coefficient d'intermittence (from Excel Utile sheet)
+ * Coefficient d'intermittence par type de bâtiment.
+ *
+ * IMPORTANT — fidélité Excel : le classeur client possède une colonne
+ * « Coef de correction intermittence » mais ne l'applique JAMAIS dans ses
+ * formules de consommation (valeur toujours = 1). On garde donc 1 par défaut
+ * pour tous les types, afin que les résultats du SaaS se réconcilient à
+ * l'identique avec les études Excel déjà produites par le client.
+ *
+ * Pour appliquer une correction d'intermittence (p. ex. bureaux 0,85,
+ * occupation discontinue 0,80), saisir le coefficient manuellement sur le
+ * bâtiment — le champ reste éditable et le calcul en tient compte.
  */
 export const COEF_INTERMITTENCE: Record<string, number> = {
   LOGEMENTS: 1.0,
-  BUREAUX: 0.85,
+  BUREAUX: 1.0,
   OCCUPATION_CONTINUE: 1.0,
-  AUTRES: 0.80,
+  AUTRES: 1.0,
 };
 
 /**
