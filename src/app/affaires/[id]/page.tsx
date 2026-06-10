@@ -67,6 +67,12 @@ export default function AffaireDetailPage() {
   const { fetchBatiments, saveBatiments, fetchParcs, saveParcs, fetchChiffrageReference, saveChiffrageReference, fetchChiffrageBiomasse, saveChiffrageBiomasse, fetchIsolation, duplicateAffaire } = useAffaires();
   
   const [activeTab, setActiveTab] = useState('info');
+
+  // Onglet initial via ?tab= (ex: redirection du formulaire de création)
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab && TABS.some(t => t.id === tab)) setActiveTab(tab);
+  }, []);
   const [parcSubTab, setParcSubTab] = useState<'chaufferie' | 'silo'>('chaufferie');
   const [affaire, setAffaire] = useState<Affaire | null>(null);
   const [isLoading, setIsLoading] = useState(true);
