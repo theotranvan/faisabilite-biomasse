@@ -242,53 +242,37 @@ const meteoMoyenneData = [
 ];
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Seeding database (non destructif)...');
 
-  // Clear existing data
-  await prisma.user.deleteMany({});
-  await prisma.bddCout.deleteMany({});
-  await prisma.pertesReseau.deleteMany({});
-  await prisma.facteurEmission.deleteMany({});
-  await prisma.caracteristiqueBiomasse.deleteMany({});
-  await prisma.energie.deleteMany({});
-  await prisma.meteoMoyenne.deleteMany({});
-  await prisma.meteoMonotone.deleteMany({});
+  // IMPORTANT : seed idempotent et NON destructif.
+  // Aucun deleteMany — on n'insère que ce qui manque (skipDuplicates sur les
+  // clés uniques). Les données du client (mot de passe, prix édités dans la BDD
+  // coûts, tarifs, etc.) ne sont JAMAIS écrasées ni supprimées par un re-seed.
 
-  // Seed Énergies
-  for (const energie of energiesData) {
-    await prisma.energie.create({ data: energie });
-  }
-  console.log('✓ Énergies seeded');
+  // Seed Énergies (clé unique: nom)
+  await prisma.energie.createMany({ data: energiesData, skipDuplicates: true });
+  console.log('✓ Énergies (insert si absent)');
 
-  // Seed Caractéristiques Biomasse
-  for (const carac of caracteristiquesData) {
-    await prisma.caracteristiqueBiomasse.create({ data: carac });
-  }
-  console.log('✓ Caractéristiques Biomasse seeded');
+  // Seed Caractéristiques Biomasse (clé unique: type)
+  await prisma.caracteristiqueBiomasse.createMany({ data: caracteristiquesData, skipDuplicates: true });
+  console.log('✓ Caractéristiques Biomasse (insert si absent)');
 
-  // Seed Facteurs d'Émission
-  for (const facteur of facteursEmissionData) {
-    await prisma.facteurEmission.create({ data: facteur });
-  }
-  console.log('✓ Facteurs d\'Émission seeded');
+  // Seed Facteurs d'Émission (clé unique: combustible)
+  await prisma.facteurEmission.createMany({ data: facteursEmissionData, skipDuplicates: true });
+  console.log('✓ Facteurs d\'Émission (insert si absent)');
 
-  // Seed BDD Coûts
-  for (const cout of bddCoutsData) {
-    await prisma.bddCout.create({ data: cout });
-  }
-  console.log('✓ BDD Coûts seeded');
+  // Seed BDD Coûts (clé unique: [categorie, designation]) — préserve les prix
+  // édités et les articles ajoutés par le client, complète seulement les manquants
+  await prisma.bddCout.createMany({ data: bddCoutsData, skipDuplicates: true });
+  console.log('✓ BDD Coûts (insert si absent — édits client préservés)');
 
-  // Seed Pertes Réseau
-  for (const perte of pertesReseauData) {
-    await prisma.pertesReseau.create({ data: perte });
-  }
-  console.log('✓ Pertes Réseau seeded');
+  // Seed Pertes Réseau (clé unique: section)
+  await prisma.pertesReseau.createMany({ data: pertesReseauData, skipDuplicates: true });
+  console.log('✓ Pertes Réseau (insert si absent)');
 
-  // Seed Météo Moyenne
-  for (const meteo of meteoMoyenneData) {
-    await prisma.meteoMoyenne.create({ data: meteo });
-  }
-  console.log('✓ Météo Moyenne seeded');
+  // Seed Météo Moyenne (clé unique: departement)
+  await prisma.meteoMoyenne.createMany({ data: meteoMoyenneData, skipDuplicates: true });
+  console.log('✓ Météo Moyenne (insert si absent)');
 
   // Seed MeteoMonotone (8760 hours × 11 cities)
   const monotoneCsvPath = path.join(__dirname, 'data', 'meteo_monotone_toutes_villes.csv');
@@ -310,47 +294,56 @@ async function main() {
           };
         });
 
-      await prisma.meteoMonotone.createMany({ data: records });
+      await prisma.meteoMonotone.createMany({ data: records, skipDuplicates: true });
     }
-    console.log('✓ MeteoMonotone seeded (8760 × 11 villes)');
+    console.log('✓ MeteoMonotone (insert si absent — 8760 × 11 villes)');
   } else {
     console.log('⚠ MeteoMonotone CSV not found at prisma/data/meteo_monotone_toutes_villes.csv — skipping');
   }
 
-  // Create Default User for mono-client app
-  // First delete if exists
-  await prisma.user.deleteMany({
-    where: { email: { in: ['user@unique.local', 'admin@biomasse.local'] } }
-  });
-
-  // Generate proper bcrypt hash at runtime
+  // Compte administrateur de premier accès.
+  // Créé UNIQUEMENT s'il n'existe pas encore : un re-seed ne réécrase jamais le
+  // mot de passe choisi par le client. Mot de passe initial = variable d'env
+  // SEED_ADMIN_PASSWORD ; à défaut, un mot de passe aléatoire est généré et
+  // affiché une seule fois (aucun mot de passe en dur dans le code).
   const bcrypt = await import('bcryptjs');
   const hashFn = bcrypt.hash || bcrypt.default?.hash;
-  const hashedPassword = await hashFn('biomasse2026', 10);
 
-  await prisma.user.create({
-    data: {
-      email: 'user@unique.local',
-      password: hashedPassword,
-      nom: 'Utilisateur',
-      prenom: 'Unique',
-      entreprise: 'Application',
-      role: 'USER',
-    },
-  });
+  const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@biomasse.local';
+  const { randomBytes } = await import('crypto');
+  const generated = !process.env.SEED_ADMIN_PASSWORD;
+  const initialPassword = process.env.SEED_ADMIN_PASSWORD || randomBytes(12).toString('base64url');
+  const hashedPassword = await hashFn(initialPassword, 10);
 
-  await prisma.user.create({
-    data: {
-      email: 'admin@biomasse.local',
-      password: hashedPassword,
-      nom: 'Administrateur',
-      prenom: 'Système',
-      entreprise: 'Application',
-      role: 'ADMIN',
-    },
-  });
-  console.log('✓ Default users created (user@unique.local / admin@biomasse.local — mot de passe: biomasse2026)');
+  // create-if-absent : ne réécrase jamais un compte existant (mdp client conservé)
+  async function ensureUser(email: string, role: 'ADMIN' | 'USER', nom: string, prenom: string) {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      console.log(`✓ Compte déjà présent (${email}) — mot de passe conservé`);
+      return false;
+    }
+    await prisma.user.create({
+      data: { email, password: hashedPassword, nom, prenom, entreprise: 'Application', role },
+    });
+    console.log(`✓ Compte créé : ${email} (${role})`);
+    return true;
+  }
 
+  const adminCreated = await ensureUser(ADMIN_EMAIL, 'ADMIN', 'Administrateur', 'Système');
+  // Compte technique utilisé comme repli en développement (getDefaultUserId)
+  await ensureUser('user@unique.local', 'USER', 'Utilisateur', 'Unique');
+
+  if (adminCreated) {
+    if (generated) {
+      console.log('────────────────────────────────────────────────────────');
+      console.log('  MOT DE PASSE INITIAL GÉNÉRÉ (affiché une seule fois) :');
+      console.log(`  ${initialPassword}`);
+      console.log('  → connectez-vous puis changez-le immédiatement.');
+      console.log('────────────────────────────────────────────────────────');
+    } else {
+      console.log('  (mot de passe initial défini via SEED_ADMIN_PASSWORD — changez-le à la 1re connexion)');
+    }
+  }
 
   console.log('✓ Database seeding completed!');
 }

@@ -19,9 +19,12 @@ npx prisma db seed
 npm run dev
 ```
 
-## Comptes par défaut (seed — à changer avant mise en production)
-- Admin : admin@biomasse.local / biomasse2026
-- User : user@unique.local / biomasse2026
+## Premier accès (administrateur)
+Au tout premier `db seed` sur une base vierge, un compte administrateur est créé
+(`admin@biomasse.local`). **Le mot de passe initial est fixé via la variable
+d'environnement `SEED_ADMIN_PASSWORD`** ; définissez-la avant de seeder, puis
+changez le mot de passe à la première connexion. Le seed ne réécrase jamais un
+compte existant (le mot de passe choisi par le client est conservé).
 
 ## Accès sur invitation
 L'inscription publique est désactivée : seul un administrateur connecté peut créer
