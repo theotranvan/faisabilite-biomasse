@@ -129,11 +129,16 @@ const bddCoutsData = [
   { categorie: 'CHAUFFAGE_BATIMENTS', designation: 'Placard d\'habillage', unite: 'U', prixUnitaire: 1500 },
 ];
 
+// Pertes réseau — table Excel "Utile" (8 sections), alignée sur PERTES_RESEAU_KW_PER_ML
 const pertesReseauData = [
   { section: 'DN25', pertesKwPerMl: 0.007 },
   { section: 'DN32', pertesKwPerMl: 0.009 },
   { section: 'DN40', pertesKwPerMl: 0.010 },
   { section: 'DN50', pertesKwPerMl: 0.012 },
+  { section: 'DN63', pertesKwPerMl: 0.017 },
+  { section: 'DN75', pertesKwPerMl: 0.020 },
+  { section: 'DN90', pertesKwPerMl: 0.026 },
+  { section: 'DN110', pertesKwPerMl: 0.035 },
 ];
 
 // DJU moyens 1996-2022 et températures extérieures de base — feuille Excel "Meteo" (source SDES / Météo France)

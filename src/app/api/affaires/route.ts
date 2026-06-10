@@ -45,12 +45,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get DJU for department from database
+    // Get DJU for department from database — le front envoie le CODE ('18'),
+    // la table stocke aussi le nom : chercher sur les deux (comme /api/meteo)
     const meteo = await db.meteoMoyenne.findFirst({
-      where: { departement: data.departement },
+      where: {
+        OR: [{ code: data.departement }, { departement: data.departement }],
+      },
     });
 
-    const djuRetenu = meteo?.djuMoyenne || 2400; // Default to 2400 if not found
+    const djuRetenu = data.djuRetenu || meteo?.djuMoyenne || 2400; // Default to 2400 if not found
+    // T° extérieure de base du département (feuille Excel Meteo, col. "Text Base")
+    const tempExtBase = data.tempExtBase ?? meteo?.tempExtBase ?? -7;
 
     // Generate reference
     const referenceAffaire = generateAffaireReference();
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest) {
         latitude: data.latitude || null,
         longitude: data.longitude || null,
         notes: data.notes || null,
-        tempExtBase: data.tempExtBase || -7,
+        tempExtBase,
         tempIntBase: data.tempIntBase || 19,
         djuRetenu,
         augmentationFossile: data.augmentationFossile || 0.04,
