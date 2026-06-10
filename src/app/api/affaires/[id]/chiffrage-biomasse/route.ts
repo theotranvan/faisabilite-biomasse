@@ -90,7 +90,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     if (!parc) {
       parc = await db.parc.create({
-        data: { affaireId: id, numero: 1 }
+        data: { affaireId: id, numero: parcNum }
       });
     }
 
