@@ -108,6 +108,7 @@ export function calculAnnuiteRef(
   dureeEmprunt: number
 ): number {
   const montantTotal = investissementHT + (emprunt || 0);
+  if (!dureeEmprunt || dureeEmprunt <= 0) return montantTotal; // garde : durée nulle → pas de division
   return montantTotal / dureeEmprunt;
 }
 
@@ -165,6 +166,7 @@ export function calculConsommationsEntreeChaudiereBois(
   consommationsSortieChaudiereBois: number,
   rendementChaudiereBois: number
 ): number {
+  if (!rendementChaudiereBois || rendementChaudiereBois <= 0) return 0; // garde : rendement nul
   return consommationsSortieChaudiereBois / (rendementChaudiereBois / 100);
 }
 
@@ -178,6 +180,7 @@ export function calculConsommationsAppoint(
 ): number {
   const sortie =
     (consommationsBatimentsParc * (100 - pourcentageCouvertureBois)) / 100;
+  if (!rendementChaudiere2 || rendementChaudiere2 <= 0) return 0; // garde : rendement appoint nul
   return sortie / (rendementChaudiere2 / 100);
 }
 
@@ -241,6 +244,7 @@ export function calculHeuresPP(
   consommationsSortieChaudiereBois: number,
   puissanceChaudiereBois: number
 ): number {
+  if (!puissanceChaudiereBois || puissanceChaudiereBois <= 0) return 0; // garde : puissance nulle
   return consommationsSortieChaudiereBois / puissanceChaudiereBois;
 }
 

@@ -93,6 +93,8 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
       rendementEmission: 98,
       rendementRegulation: 97,
       coefIntermittence: 1,
+      consommationsCalculees: 0,
+      consommationsReelles: 0,
       typeEnergie: 'GAZ_NATUREL',
       tarification: 0.08,
       abonnement: 150,
@@ -104,7 +106,10 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
     setBatiments(batiments.map(b => {
       if (b.id !== id) return b;
       const parsedValue = field.includes('rendement') || field === 'coefIntermittence' || field === 'tarification'
-        ? parseFloat(value) : isNaN(value) ? value : parseFloat(value);
+        ? parseFloat(value)
+        : field.includes('consommations')
+        ? (parseFloat(value) || 0)
+        : isNaN(value) ? value : parseFloat(value);
       const updated = { ...b, [field]: parsedValue };
 
       // Auto-fill tarif + abonnement when typeEnergie changes
@@ -149,8 +154,22 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
     setSuccessMsg('');
     setIsSaving(true);
     try {
-      await onSave(batiments);
-      initialBatimentsRef.current = JSON.stringify(batiments);
+      // Normalise les consommations : si l'utilisateur n'a rempli qu'un seul
+      // champ, on aligne l'autre (le coût utilise « calculée », le DPE/énergie
+      // primaire utilise « réelle » sinon « calculée »). Ainsi saisir l'un OU
+      // l'autre suffit à obtenir un coût actuel et un DPE corrects.
+      const normalises = batiments.map(b => {
+        const calc = b.consommationsCalculees || 0;
+        const reel = b.consommationsReelles || 0;
+        return {
+          ...b,
+          consommationsCalculees: calc || reel,
+          consommationsReelles: reel || calc,
+        };
+      });
+      setBatiments(normalises);
+      await onSave(normalises);
+      initialBatimentsRef.current = JSON.stringify(normalises);
       setSuccessMsg('Bâtiments enregistrés avec succès');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err: any) {
@@ -377,6 +396,29 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                           onChange={(e) => updateBatiment(batiment.id, 'abonnement', e.target.value)}
                           className="w-full px-2 py-1 border border-gray-300 rounded" />
                       </div>
+                    </div>
+
+                    {/* Consommation actuelle — indispensable au calcul du coût actuel et du DPE */}
+                    <div className="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">⚡ Consommation annuelle actuelle</label>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <label className="block text-gray-600 mb-1">Conso réelle (kWh/an) — relevé factures</label>
+                          <input type="number" min="0" step="100" value={batiment.consommationsReelles ?? 0}
+                            onChange={(e) => updateBatiment(batiment.id, 'consommationsReelles', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
+                        </div>
+                        <div>
+                          <label className="block text-gray-600 mb-1">Conso calculée (kWh/an) — estimation</label>
+                          <input type="number" min="0" step="100" value={batiment.consommationsCalculees ?? 0}
+                            onChange={(e) => updateBatiment(batiment.id, 'consommationsCalculees', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2 italic">
+                        💡 Saisissez au moins l&apos;un des deux (idéalement la conso réelle des factures). Sans cette valeur,
+                        le coût de la situation actuelle et l&apos;étiquette DPE ne peuvent pas être calculés.
+                      </p>
                     </div>
                   </div>
                 ))}

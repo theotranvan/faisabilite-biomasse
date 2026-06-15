@@ -40,36 +40,50 @@ interface ChiffrageBiomAsseFormsProps {
   onSave: (data: ChiffrageBiomAsseForms) => Promise<void>;
 }
 
-export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBiomAsseFormsProps) {
-  const [formData, setFormData] = useState<Partial<ChiffrageBiomAsseForms>>(data || {
+// Normalise un enregistrement BDD (noms de schéma : charpenteCouverture,
+// hydrauliqueChaufferie, tauxSubventionCotEnr, empruntBio…) OU déjà au format
+// formulaire vers le format attendu par le formulaire. Indispensable pour que les
+// données se rechargent après sauvegarde / changement de parc.
+function toFormBio(affaireId: string, data?: Partial<ChiffrageBiomAsseForms> | any): Partial<ChiffrageBiomAsseForms> {
+  const defaults: Partial<ChiffrageBiomAsseForms> = {
     affaireId,
-    // Chaufferie biomasse postes
-    vrd: 0,
-    grosOeuvre: 0,
-    charpente: 0,
-    processBois: 0,
-    chaudierAppoint: 0,
-    hydraulique: 0,
-    reseauChaleur: 0,
-    sousStation: 0,
-    installationReseauBat: 0,
-    autreTravaux: 0,
-    // Frais annexes
-    bureauControle: 0.03,
-    maitriseOeuvre: 0.09,
-    fraisDivers: 0.02,
-    aleas: 0.05,
-    // Subventions (en %)
-    cotEnr: 45,
-    aideDepartementale: 20,
-    detrDsil: 50,
-    subventionComplementaire: 25,
-    // Exploitation
-    p2: 0,
-    consoElecSupplement: 0,
-    // Emprunt
-    emprunt_biomasse: 0,
-  });
+    vrd: 0, grosOeuvre: 0, charpente: 0, processBois: 0, chaudierAppoint: 0,
+    hydraulique: 0, reseauChaleur: 0, sousStation: 0, installationReseauBat: 0, autreTravaux: 0,
+    bureauControle: 0.03, maitriseOeuvre: 0.09, fraisDivers: 0.02, aleas: 0.05,
+    cotEnr: 45, aideDepartementale: 20, detrDsil: 50, subventionComplementaire: 25,
+    p2: 0, consoElecSupplement: 0, emprunt_biomasse: 0,
+  };
+  if (!data) return defaults;
+  const pick = (form: any, schema: any, def: any) => form ?? schema ?? def;
+  return {
+    ...defaults,
+    affaireId: data.affaireId ?? affaireId,
+    vrd: data.vrd ?? defaults.vrd,
+    grosOeuvre: data.grosOeuvre ?? defaults.grosOeuvre,
+    charpente: pick(data.charpente, data.charpenteCouverture, defaults.charpente),
+    processBois: data.processBois ?? defaults.processBois,
+    chaudierAppoint: pick(data.chaudierAppoint, data.chaudiereAppoint, defaults.chaudierAppoint),
+    hydraulique: pick(data.hydraulique, data.hydrauliqueChaufferie, defaults.hydraulique),
+    reseauChaleur: pick(data.reseauChaleur, data.reseauChaleurQte, defaults.reseauChaleur),
+    sousStation: data.sousStation ?? defaults.sousStation,
+    installationReseauBat: pick(data.installationReseauBat, data.installationReseau, defaults.installationReseauBat),
+    autreTravaux: pick(data.autreTravaux, data.autresTravaux, defaults.autreTravaux),
+    bureauControle: pick(data.bureauControle, data.tauxBureauControle, defaults.bureauControle),
+    maitriseOeuvre: pick(data.maitriseOeuvre, data.tauxMaitriseOeuvre, defaults.maitriseOeuvre),
+    fraisDivers: pick(data.fraisDivers, data.tauxFraisDivers, defaults.fraisDivers),
+    aleas: pick(data.aleas, data.tauxAleas, defaults.aleas),
+    cotEnr: pick(data.cotEnr, data.tauxSubventionCotEnr, defaults.cotEnr),
+    aideDepartementale: pick(data.aideDepartementale, data.tauxAideDepartementale, defaults.aideDepartementale),
+    detrDsil: pick(data.detrDsil, data.tauxDetrDsil, defaults.detrDsil),
+    subventionComplementaire: data.subventionComplementaire ?? defaults.subventionComplementaire,
+    p2: pick(data.p2, data.montantP2, defaults.p2),
+    consoElecSupplement: pick(data.consoElecSupplement, data.consoElecSupplementaire, defaults.consoElecSupplement),
+    emprunt_biomasse: pick(data.emprunt_biomasse, data.empruntBio, defaults.emprunt_biomasse),
+  };
+}
+
+export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBiomAsseFormsProps) {
+  const [formData, setFormData] = useState<Partial<ChiffrageBiomAsseForms>>(() => toFormBio(affaireId, data));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 

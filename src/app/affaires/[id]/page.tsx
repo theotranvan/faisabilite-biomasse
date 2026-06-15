@@ -808,6 +808,7 @@ export default function AffaireDetailPage() {
                 </span>
               </div>
               <ChiffrageReferenceForm
+                key={`ref-${selectedChiffrageParc}`}
                 affaireId={affaire.id}
                 data={chiffrageRef[selectedChiffrageParc] || null}
                 onSave={async (data) => {
@@ -816,6 +817,7 @@ export default function AffaireDetailPage() {
                 }}
               />
               <ChiffrageBiomasseForms
+                key={`bio-${selectedChiffrageParc}`}
                 affaireId={affaire.id}
                 data={chiffrageBio[selectedChiffrageParc] || null}
                 onSave={async (data) => {

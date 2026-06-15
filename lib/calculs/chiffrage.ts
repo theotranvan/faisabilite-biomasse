@@ -82,6 +82,7 @@ export function calculAnnuite(
   dureeEmprunt: number
 ): number {
   const montantTotal = investissementHT + (emprunt || 0);
+  if (!dureeEmprunt || dureeEmprunt <= 0) return montantTotal; // garde : durée nulle → pas de division
   return montantTotal / dureeEmprunt;
 }
 

@@ -22,8 +22,8 @@ export function calculRendementMoyen(etat: EtatEnergie): number {
  * SINON → consoReelles (ou consoCalculees si pas de réelles)
  */
 export function calculConsoKWhep(etat: EtatEnergie): number {
-  const conso = etat.consommationsReelles || etat.consommationsCalculees;
-  
+  const conso = etat.consommationsReelles || etat.consommationsCalculees || 0;
+
   if (etat.typeEnergie === 'Electricité' || etat.typeEnergie === 'Electricity') {
     return conso * 2.3;
   }
@@ -36,11 +36,12 @@ export function calculConsoKWhep(etat: EtatEnergie): number {
  * SINON → consoCalculees
  */
 export function calculConsoPCS(etat: EtatEnergie): number {
-  if (etat.typeEnergie === 'Gaz naturel' || etat.typeEnergie === 'Gaz propane' || 
+  const conso = etat.consommationsCalculees || 0;
+  if (etat.typeEnergie === 'Gaz naturel' || etat.typeEnergie === 'Gaz propane' ||
       etat.typeEnergie === 'Natural gas' || etat.typeEnergie === 'Propane') {
-    return etat.consommationsCalculees * 1.1;
+    return conso * 1.1;
   }
-  return etat.consommationsCalculees;
+  return conso;
 }
 
 /**
@@ -217,6 +218,9 @@ const DPE_THRESHOLDS: Record<string, number[]> = {
  * Uses building-type-specific thresholds per Excel formula
  */
 export function calculEtiquetteEnergetique(consommationKwhepPerM2: number, typeBatiment?: string): string {
+  // Pas de consommation saisie (ou surface nulle) → pas d'étiquette plutôt qu'un
+  // « A » trompeur : on ne classe pas un bâtiment dont on ignore la consommation.
+  if (!Number.isFinite(consommationKwhepPerM2) || consommationKwhepPerM2 <= 0) return '—';
   const thresholds = DPE_THRESHOLDS[typeBatiment || 'LOGEMENTS'] || DPE_THRESHOLDS.LOGEMENTS;
   const grades = ['A', 'B', 'C', 'D', 'E', 'F'];
   for (let i = 0; i < grades.length; i++) {

@@ -37,8 +37,12 @@ interface ChiffrageReferenceFProps {
   onSave: (data: ChiffragRefForm) => Promise<void>;
 }
 
-export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageReferenceFProps) {
-  const [formData, setFormData] = useState<Partial<ChiffragRefForm>>(data || {
+// Normalise un enregistrement venant de la BDD (noms de schéma : lignesChaufferie,
+// tauxBureauControle, empruntRef…) OU déjà au format formulaire vers le format
+// attendu par le formulaire. Indispensable pour que les données se rechargent
+// après sauvegarde / changement de parc (sinon le formulaire revient vide).
+function toFormRef(affaireId: string, data?: Partial<ChiffragRefForm> | any): Partial<ChiffragRefForm> {
+  const defaults: Partial<ChiffragRefForm> = {
     affaireId,
     travauxChaufferie: [
       { id: '1', designation: 'Chaudière fioul', unite: 'unité', qte: 1, pu: 0 },
@@ -51,7 +55,29 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
     aleas: 0.05,
     montantP2: 750,
     emprunt_ref: 0,
-  });
+  };
+  if (!data) return defaults;
+  let lignes = data.travauxChaufferie;
+  if (!lignes && typeof data.lignesChaufferie === 'string') {
+    try { lignes = JSON.parse(data.lignesChaufferie); } catch { lignes = undefined; }
+  } else if (!lignes && Array.isArray(data.lignesChaufferie)) {
+    lignes = data.lignesChaufferie;
+  }
+  return {
+    ...defaults,
+    affaireId: data.affaireId ?? affaireId,
+    ...(Array.isArray(lignes) && lignes.length ? { travauxChaufferie: lignes } : {}),
+    bureauControle: data.bureauControle ?? data.tauxBureauControle ?? defaults.bureauControle,
+    maitriseOeuvre: data.maitriseOeuvre ?? data.tauxMaitriseOeuvre ?? defaults.maitriseOeuvre,
+    fraisDivers: data.fraisDivers ?? data.tauxFraisDivers ?? defaults.fraisDivers,
+    aleas: data.aleas ?? data.tauxAleas ?? defaults.aleas,
+    montantP2: data.montantP2 ?? defaults.montantP2,
+    emprunt_ref: data.emprunt_ref ?? data.empruntRef ?? defaults.emprunt_ref,
+  };
+}
+
+export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageReferenceFProps) {
+  const [formData, setFormData] = useState<Partial<ChiffragRefForm>>(() => toFormRef(affaireId, data));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [bddCouts, setBddCouts] = useState<BddCout[]>([]);

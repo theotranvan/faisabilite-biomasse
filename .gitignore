@@ -39,3 +39,4 @@ prisma/prisma/
 *.swp
 *.swo
 *~
+tsconfig.tsbuildinfo

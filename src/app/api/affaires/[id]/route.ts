@@ -69,7 +69,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         augmentationFossile: data.augmentationFossile,
         augmentationBiomasse: data.augmentationBiomasse,
         tauxEmprunt: data.tauxEmprunt,
-        dureeEmprunt: data.dureeEmprunt,
+        // Garde : une durée d'emprunt nulle/négative casserait les annuités (÷0). On retombe sur 15 ans.
+        dureeEmprunt: data.dureeEmprunt != null ? (parseFloat(data.dureeEmprunt) > 0 ? parseFloat(data.dureeEmprunt) : 15) : undefined,
         statut: data.statut,
         villeMonotone: data.villeMonotone,
         tarifFuelExploitation: data.tarifFuelExploitation != null ? parseFloat(data.tarifFuelExploitation) : undefined,

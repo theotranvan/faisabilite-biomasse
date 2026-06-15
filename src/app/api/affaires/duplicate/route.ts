@@ -159,6 +159,7 @@ export async function POST(req: NextRequest) {
             tauxMaitriseOeuvre: sourceChiffragRef.tauxMaitriseOeuvre,
             tauxFraisDivers: sourceChiffragRef.tauxFraisDivers,
             tauxAleas: sourceChiffragRef.tauxAleas,
+            montantP2: sourceChiffragRef.montantP2,
             empruntRef: sourceChiffragRef.empruntRef,
           }
         });
