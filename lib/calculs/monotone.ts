@@ -152,7 +152,8 @@ export function calculMonotoneComplet(
     deperditionsParDegre,
     monotonePoints,
     monotoneTriee,
-    puissanceMax: Math.max(...monotonePoints.map(p => p.puissance)) / 1000, // Convert W to kW
+    // Garde : Math.max() sur tableau vide renvoie -Infinity (ville sans données monotone)
+    puissanceMax: monotonePoints.length ? Math.max(...monotonePoints.map(p => p.puissance)) / 1000 : 0, // Convert W to kW
     partBasePuissance,
     partBaseEnergie,
     besoinsGenerateurBase: besoinsGenerateurBase / 1000, // Convert Wh to kWh

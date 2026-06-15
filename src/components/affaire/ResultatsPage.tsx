@@ -485,6 +485,11 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
   const gainExploitation = coutGlobalRef - coutGlobalBio;
   const surcout = (sel.investBioHT - sel.subventionsBio) - sel.investHT;
   const tempsRetour = gainExploitation > 0 ? surcout / gainExploitation : 0;
+  // Libellé : « immédiat » quand le projet biomasse coûte déjà moins cher à
+  // l'investissement (surcoût ≤ 0) tout en générant un gain d'exploitation.
+  const tempsRetourLabel = (gainExploitation > 0 && surcout <= 0)
+    ? 'immédiat'
+    : tempsRetour > 0 ? `${tempsRetour.toFixed(1)} ans` : '—';
   const economies20ans = projections.reduce((s, y) => s + y.economie, 0);
 
   // Pie chart data
@@ -539,7 +544,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
         <Card className="p-4">
           <div className="text-sm text-gray-600">Temps de retour</div>
           <div className="text-2xl font-bold text-blue-600 mt-1">
-            {tempsRetour > 0 ? tempsRetour.toFixed(1) : '—'} ans
+            {tempsRetourLabel}
           </div>
         </Card>
         <Card className="p-4">
@@ -715,7 +720,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               <tr className="bg-yellow-50 font-bold">
                 <td className="py-2 px-3">Temps de retour</td>
                 <td colSpan={2}></td>
-                <td className="text-right px-3">{tempsRetour > 0 ? `${tempsRetour.toFixed(1)} ans` : '—'}</td>
+                <td className="text-right px-3">{tempsRetourLabel}</td>
               </tr>
             </tbody>
           </table>
@@ -1004,7 +1009,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               <tr className="bg-blue-50">
                 <td className="py-2 font-semibold text-gray-900">Temps de retour sur investissement</td>
                 <td className="py-2 font-bold text-right text-blue-600">
-                  {tempsRetour > 0 ? `${tempsRetour.toFixed(1)} ans` : '—'}
+                  {tempsRetourLabel}
                 </td>
               </tr>
             </tbody>

@@ -14,8 +14,9 @@ interface ValidationProps {
   data?: {
     batiments?: any[];
     parcs?: any[];
-    chiffrageRef?: any;
-    chiffrageBio?: any;
+    // Chiffrages par numéro de parc (validation multi-parc)
+    chiffrageRefByParc?: Record<number, any>;
+    chiffrageBioByParc?: Record<number, any>;
   };
 }
 
@@ -65,27 +66,37 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
       });
     }
 
-    // Validation des chiffrages
-    if (!data?.chiffrageRef) {
-      warnings.push('Chiffrage scénario de référence non complet');
-    }
+    // Validation des chiffrages — pour CHAQUE parc (pas seulement le parc 1)
+    const refMap = data?.chiffrageRefByParc || {};
+    const bioMap = data?.chiffrageBioByParc || {};
+    const isFilled = (o: any) => o && Object.keys(o).length > 0;
+    const parcNums = (data?.parcs && data.parcs.length > 0)
+      ? data.parcs.map((p: any) => p.numero)
+      : [1];
 
-    if (!data?.chiffrageBio) {
-      warnings.push('Chiffrage scénario biomasse non complet');
-    } else {
-      const totalInvestment =
-        (data.chiffrageBio.vrd || 0) +
-        (data.chiffrageBio.grosOeuvre || 0) +
-        (data.chiffrageBio.charpenteCouverture || 0) +
-        (data.chiffrageBio.processBois || 0) +
-        (data.chiffrageBio.chaudiereAppoint || 0) +
-        (data.chiffrageBio.hydrauliqueChaufferie || 0) +
-        (data.chiffrageBio.sousStation || 0) +
-        (data.chiffrageBio.installationReseau || 0) +
-        (data.chiffrageBio.autresTravaux || 0);
+    for (const num of parcNums) {
+      if (!isFilled(refMap[num])) {
+        warnings.push(`Parc ${num} : chiffrage de référence non complet`);
+      }
+      const bio = bioMap[num];
+      if (!isFilled(bio)) {
+        warnings.push(`Parc ${num} : chiffrage biomasse non complet`);
+      } else {
+        // Tolère les deux jeux de noms (schéma BDD ET formulaire)
+        const totalInvestment =
+          (bio.vrd || 0) +
+          (bio.grosOeuvre || 0) +
+          (bio.charpenteCouverture || bio.charpente || 0) +
+          (bio.processBois || 0) +
+          (bio.chaudiereAppoint || bio.chaudierAppoint || 0) +
+          (bio.hydrauliqueChaufferie || bio.hydraulique || 0) +
+          (bio.sousStation || 0) +
+          (bio.installationReseau || bio.installationReseauBat || 0) +
+          (bio.autresTravaux || bio.autreTravaux || 0);
 
-      if (totalInvestment <= 0) {
-        errors.push('Investissement total doit être positif');
+        if (totalInvestment <= 0) {
+          errors.push(`Parc ${num} : l'investissement biomasse doit être positif`);
+        }
       }
     }
 
@@ -96,12 +107,21 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
     });
   };
 
+  const refMapPct = data?.chiffrageRefByParc || {};
+  const bioMapPct = data?.chiffrageBioByParc || {};
+  const filledPct = (o: any) => o && Object.keys(o).length > 0;
+  const parcNumsPct = (data?.parcs && data.parcs.length > 0)
+    ? data.parcs.map((p: any) => p.numero)
+    : [1];
+  const allRefDone = parcNumsPct.length > 0 && parcNumsPct.every((n: number) => filledPct(refMapPct[n]));
+  const allBioDone = parcNumsPct.length > 0 && parcNumsPct.every((n: number) => filledPct(bioMapPct[n]));
+
   const completionPercentage = Math.round(
     (
       ((data?.batiments?.length || 0) > 0 ? 25 : 0) +
       ((data?.parcs?.length || 0) > 0 ? 25 : 0) +
-      (data?.chiffrageRef ? 25 : 0) +
-      (data?.chiffrageBio ? 25 : 0)
+      (allRefDone ? 25 : 0) +
+      (allBioDone ? 25 : 0)
     ) as number
   );
 
@@ -199,20 +219,20 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={!!data?.chiffrageRef}
+              checked={allRefDone}
               disabled
               className="w-5 h-5 rounded"
             />
-            <span className="text-gray-800">Chiffrage référence complété</span>
+            <span className="text-gray-800">Chiffrage référence complété (tous les parcs)</span>
           </div>
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={!!data?.chiffrageBio}
+              checked={allBioDone}
               disabled
               className="w-5 h-5 rounded"
             />
-            <span className="text-gray-800">Chiffrage biomasse complété</span>
+            <span className="text-gray-800">Chiffrage biomasse complété (tous les parcs)</span>
           </div>
         </div>
       </Card>

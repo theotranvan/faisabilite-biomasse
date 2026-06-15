@@ -40,6 +40,12 @@ interface Affaire {
   longitude: number | null;
   notes: string | null;
   statut: string;
+  djuRetenu?: number;
+  tempIntBase?: number;
+  tempExtBase?: number;
+  dureeEmprunt?: number;
+  augmentationFossile?: number;
+  augmentationBiomasse?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -387,6 +393,70 @@ export default function AffaireDetailPage() {
                     rows={4}
                   />
 
+                  {/* Paramètres climatiques & financiers (éditables après création) */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">🌡️ Paramètres climatiques & financiers</h3>
+                    <p className="text-xs text-gray-500 mb-4">
+                      DJU et température extérieure se préremplissent selon le département.
+                      Ajustez-les ici si vous disposez de valeurs locales plus précises.
+                    </p>
+                    <div className="grid grid-cols-4 gap-4">
+                      <Input
+                        label="DJU retenu"
+                        type="number"
+                        name="djuRetenu"
+                        step="1"
+                        value={editData.djuRetenu ?? ''}
+                        onChange={handleEditChange}
+                      />
+                      <Input
+                        label="Temp. int. base (°C)"
+                        type="number"
+                        name="tempIntBase"
+                        step="0.1"
+                        value={editData.tempIntBase ?? ''}
+                        onChange={handleEditChange}
+                      />
+                      <Input
+                        label="Temp. ext. base (°C)"
+                        type="number"
+                        name="tempExtBase"
+                        step="0.1"
+                        value={editData.tempExtBase ?? ''}
+                        onChange={handleEditChange}
+                      />
+                      <Input
+                        label="Durée emprunt (ans)"
+                        type="number"
+                        name="dureeEmprunt"
+                        step="1"
+                        min="1"
+                        value={editData.dureeEmprunt ?? ''}
+                        onChange={handleEditChange}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-6 mt-4">
+                      <Input
+                        label="Augmentation énergie fossile (%/an)"
+                        type="number"
+                        step="0.1"
+                        value={((editData.augmentationFossile ?? 0) * 100).toFixed(1)}
+                        onChange={(e) =>
+                          setEditData(prev => ({ ...prev, augmentationFossile: (parseFloat(e.target.value) || 0) / 100 }))
+                        }
+                      />
+                      <Input
+                        label="Augmentation biomasse (%/an)"
+                        type="number"
+                        step="0.1"
+                        value={((editData.augmentationBiomasse ?? 0) * 100).toFixed(1)}
+                        onChange={(e) =>
+                          setEditData(prev => ({ ...prev, augmentationBiomasse: (parseFloat(e.target.value) || 0) / 100 }))
+                        }
+                      />
+                    </div>
+                  </div>
+
                   {/* Ville monotone et tarifs exploitation */}
                   <div className="border-t border-gray-200 pt-6">
                     <h3 className="text-sm font-semibold text-gray-700 mb-4">Paramètres monotone & tarifs</h3>
@@ -459,6 +529,29 @@ export default function AffaireDetailPage() {
                       <p className="text-gray-900 mt-1">{affaire.notes}</p>
                     </div>
                   )}
+
+                  {/* Paramètres climatiques & financiers (lecture) */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Paramètres climatiques & financiers</h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">DJU retenu</label>
+                        <p className="text-gray-900 mt-1">{affaire.djuRetenu ?? 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Temp. int. base</label>
+                        <p className="text-gray-900 mt-1">{affaire.tempIntBase ?? 'N/A'} °C</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Temp. ext. base</label>
+                        <p className="text-gray-900 mt-1">{affaire.tempExtBase ?? 'N/A'} °C</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Durée emprunt</label>
+                        <p className="text-gray-900 mt-1">{affaire.dureeEmprunt ?? 'N/A'} ans</p>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Ville monotone et tarifs (lecture) */}
                   <div className="border-t border-gray-200 pt-4">
@@ -839,7 +932,7 @@ export default function AffaireDetailPage() {
 
           {activeTab === 'validation' && (
             <ValidationModule
-              data={{ batiments, parcs, chiffrageRef: chiffrageRef[parcs[0]?.numero || 1] || null, chiffrageBio: chiffrageBio[parcs[0]?.numero || 1] || null }}
+              data={{ batiments, parcs, chiffrageRefByParc: chiffrageRef, chiffrageBioByParc: chiffrageBio }}
             />
           )}
 

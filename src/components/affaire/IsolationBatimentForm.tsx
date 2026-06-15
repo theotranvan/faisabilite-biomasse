@@ -96,10 +96,17 @@ export function IsolationBatimentForm({
     setIsSaving(true);
 
     try {
-      // Valider que au moins une ligne soit complète
-      const validated = lignes.filter(
-        (l) => l.designation && l.quantite > 0 && l.prixUnitaire > 0
+      // Une ligne est complète si désignation + quantité + prix unitaire sont renseignés
+      const estComplete = (l: any) => l.designation && l.quantite > 0 && l.prixUnitaire > 0;
+      const validated = lignes.filter(estComplete);
+
+      // Prévenir si des lignes partiellement remplies vont être ignorées
+      const incompletes = lignes.filter(
+        (l) => !estComplete(l) && (l.designation || l.quantite > 0 || l.prixUnitaire > 0)
       );
+      if (incompletes.length > 0) {
+        setError(`${incompletes.length} ligne(s) incomplète(s) ignorée(s) : renseignez désignation, quantité ET prix unitaire pour qu'elles soient enregistrées.`);
+      }
 
       if (onSave) {
         await onSave(validated);
