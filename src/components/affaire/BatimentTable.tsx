@@ -398,25 +398,27 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                       </div>
                     </div>
 
-                    {/* Consommation actuelle — indispensable au calcul du coût actuel et du DPE */}
+                    {/* Consommation actuelle — indispensable au calcul du coût actuel et du DPE.
+                        Un seul champ : il alimente à la fois la conso « calculée » (→ coût) et
+                        « réelle » (→ DPE/énergie primaire) du modèle Excel, garantissant des
+                        résultats cohérents (impossible d'avoir coût et DPE sur deux bases différentes). */}
                     <div className="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
                       <label className="block text-sm font-medium text-gray-700 mb-2">⚡ Consommation annuelle actuelle</label>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <label className="block text-gray-600 mb-1">Conso réelle (kWh/an) — relevé factures</label>
-                          <input type="number" min="0" step="100" value={batiment.consommationsReelles ?? 0}
-                            onChange={(e) => updateBatiment(batiment.id, 'consommationsReelles', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
-                        </div>
-                        <div>
-                          <label className="block text-gray-600 mb-1">Conso calculée (kWh/an) — estimation</label>
-                          <input type="number" min="0" step="100" value={batiment.consommationsCalculees ?? 0}
-                            onChange={(e) => updateBatiment(batiment.id, 'consommationsCalculees', e.target.value)}
+                          <label className="block text-gray-600 mb-1">Consommation (kWh/an) — relevé sur factures</label>
+                          <input type="number" min="0" step="100"
+                            value={batiment.consommationsReelles ?? batiment.consommationsCalculees ?? 0}
+                            onChange={(e) => {
+                              const v = parseFloat(e.target.value) || 0;
+                              setBatiments(prev => prev.map(b => b.id === batiment.id
+                                ? { ...b, consommationsReelles: v, consommationsCalculees: v } : b));
+                            }}
                             className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
                         </div>
                       </div>
                       <p className="text-xs text-gray-500 mt-2 italic">
-                        💡 Saisissez au moins l&apos;un des deux (idéalement la conso réelle des factures). Sans cette valeur,
+                        💡 Consommation totale de chauffage du bâtiment (relevé sur factures). Sans cette valeur,
                         le coût de la situation actuelle et l&apos;étiquette DPE ne peuvent pas être calculés.
                       </p>
                     </div>
