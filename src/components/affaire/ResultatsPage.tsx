@@ -482,7 +482,11 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
   const chargeMOBio = sel.investBioHT - sel.subventionsBio;
   const coutGlobalRef = sel.coutRef + sel.annuiteRef;
   const coutGlobalBio = sel.coutBiomasse + sel.annuiteBiomasse;
-  const gainExploitation = coutGlobalRef - coutGlobalBio;
+  // Gain d'exploitation = économie sur les coûts d'exploitation (P1 combustible +
+  // P2 entretien), HORS annuité d'emprunt. On EXCLUT l'annuité car elle rembourse
+  // précisément l'investissement qu'on divise pour le temps de retour : l'inclure
+  // double-compterait le financement et gonflait le payback (ex. 96 ans au lieu de ~13).
+  const gainExploitation = totalExploitRef - totalExploitBio;
   const surcout = (sel.investBioHT - sel.subventionsBio) - sel.investHT;
   const tempsRetour = gainExploitation > 0 ? surcout / gainExploitation : 0;
   // Libellé : « immédiat » quand le projet biomasse coûte déjà moins cher à
