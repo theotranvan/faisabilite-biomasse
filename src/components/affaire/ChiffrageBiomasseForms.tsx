@@ -94,6 +94,13 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
     }));
   };
 
+  // Frais annexes en % : saisis en chiffre plein (ex. 13) mais stockés en
+  // décimal (0.13) — calcul inchangé. (Les subventions sont déjà en chiffre plein.)
+  const pctDisplay = (d?: number) => (!d ? '' : String(Math.round(d * 10000) / 100));
+  const handlePctChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: (parseFloat(value) || 0) / 100 }));
+  };
+
   const handleSave = async () => {
     setError('');
     setIsSaving(true);
@@ -197,20 +204,20 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
             <h4 className="font-semibold text-gray-900 mb-4">2. Frais Annexes (%)</h4>
             <div className="grid grid-cols-4 gap-4">
               {[
-                { key: 'bureauControle', label: 'Bureau de Contrôle' },
-                { key: 'maitriseOeuvre', label: 'Maîtrise d\'œuvre' },
-                { key: 'fraisDivers', label: 'Frais Divers' },
-                { key: 'aleas', label: 'Aléas' },
+                { key: 'bureauControle', label: 'Bureau de Contrôle', ph: '3' },
+                { key: 'maitriseOeuvre', label: 'Maîtrise d\'œuvre', ph: '9' },
+                { key: 'fraisDivers', label: 'Frais Divers', ph: '2' },
+                { key: 'aleas', label: 'Aléas', ph: '5' },
               ].map(item => (
                 <div key={item.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{item.label}</label>
                   <input
                     type="number"
-                    step="0.01"
-                    value={formData[item.key as keyof typeof formData] || ''}
-                    onChange={(e) => handleChange(item.key, e.target.value)}
+                    step="0.1"
+                    value={pctDisplay(formData[item.key as keyof typeof formData] as number | undefined)}
+                    onChange={(e) => handlePctChange(item.key, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                    placeholder="0"
+                    placeholder={item.ph}
                   />
                 </div>
               ))}

@@ -122,6 +122,13 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
     }));
   };
 
+  // Taux en % : saisis en chiffre plein (ex. 13 pour 13 %) mais stockés en
+  // décimal (0.13) — le calcul reste inchangé.
+  const pctDisplay = (d?: number) => (!d ? '' : String(Math.round(d * 10000) / 100));
+  const handlePctChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: (parseFloat(value) || 0) / 100 }));
+  };
+
   const addLine = () => {
     const ids = (formData.travauxChaufferie || []).map(l => parseInt(l.id)).filter(n => !isNaN(n));
     const newId = (ids.length > 0 ? Math.max(...ids) : 0) + 1;
@@ -293,44 +300,44 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bureau de Contrôle</label>
                 <input
                   type="number"
-                  step="0.01"
-                  value={formData.bureauControle || ''}
-                  onChange={(e) => handleFeeChange('bureauControle', e.target.value)}
+                  step="0.1"
+                  value={pctDisplay(formData.bureauControle)}
+                  onChange={(e) => handlePctChange('bureauControle', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                  placeholder="0.05"
+                  placeholder="5"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Maîtrise d'œuvre</label>
                 <input
                   type="number"
-                  step="0.01"
-                  value={formData.maitriseOeuvre || ''}
-                  onChange={(e) => handleFeeChange('maitriseOeuvre', e.target.value)}
+                  step="0.1"
+                  value={pctDisplay(formData.maitriseOeuvre)}
+                  onChange={(e) => handlePctChange('maitriseOeuvre', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                  placeholder="0.13"
+                  placeholder="13"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Frais Divers</label>
                 <input
                   type="number"
-                  step="0.01"
-                  value={formData.fraisDivers || ''}
-                  onChange={(e) => handleFeeChange('fraisDivers', e.target.value)}
+                  step="0.1"
+                  value={pctDisplay(formData.fraisDivers)}
+                  onChange={(e) => handlePctChange('fraisDivers', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                  placeholder="0.02"
+                  placeholder="2"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Aléas</label>
                 <input
                   type="number"
-                  step="0.01"
-                  value={formData.aleas || ''}
-                  onChange={(e) => handleFeeChange('aleas', e.target.value)}
+                  step="0.1"
+                  value={pctDisplay(formData.aleas)}
+                  onChange={(e) => handlePctChange('aleas', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                  placeholder="0.05"
+                  placeholder="5"
                 />
               </div>
             </div>
