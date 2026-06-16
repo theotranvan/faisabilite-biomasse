@@ -35,6 +35,28 @@ interface PDFExportProps {
   activeParcsNums: number[];
 }
 
+// Logo Combiosol chargé une fois et mis en cache (data URL pour jsPDF.addImage)
+let _logoCache: string | null = null;
+async function loadLogoDataUrl(): Promise<string | null> {
+  if (_logoCache) return _logoCache;
+  try {
+    const res = await fetch('/logo-combiosol.jpg');
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result as string);
+      fr.onerror = reject;
+      fr.readAsDataURL(blob);
+    });
+    _logoCache = dataUrl;
+    return dataUrl;
+  } catch {
+    return null;
+  }
+}
+
+
 export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville, activeParcsNums }: PDFExportProps) {
   const [isGeneratingLabel, setIsGeneratingLabel] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
@@ -64,9 +86,15 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       const pageWidth = pdf.internal.pageSize.getWidth();
       let y = 20;
 
+      // Bandeau d'accent orange + logo Combiosol en haut à gauche
+      pdf.setFillColor(243, 146, 0);
+      pdf.rect(0, 0, pageWidth, 3, 'F');
+      const logoLabel = await loadLogoDataUrl();
+      if (logoLabel) pdf.addImage(logoLabel, 'JPEG', 18, 8, 16, 16);
+
       // Title
       pdf.setFontSize(20);
-      pdf.setTextColor(0, 102, 204);
+      pdf.setTextColor(86, 156, 45);
       pdf.text('Etiquettes Energetiques DPE', pageWidth / 2, y, { align: 'center' });
       y += 10;
       pdf.setFontSize(11);
@@ -96,7 +124,7 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
 
         // Building header
         pdf.setFontSize(14);
-        pdf.setTextColor(0, 102, 204);
+        pdf.setTextColor(86, 156, 45);
         pdf.text(`Batiment ${bat.numero} : ${bat.designation} (${bat.surface_chauffee} m${String.fromCharCode(178)})`, 20, y);
         y += 10;
 
@@ -204,11 +232,14 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       let y = 20;
       let currentPage = 1;
 
-      // ─── Color palette ───
-      const BLUE = [22, 78, 159] as const;
-      const BLUE_LIGHT = [235, 242, 255] as const;
-      const GREEN_DARK = [16, 124, 65] as const;
-      const GREEN_LIGHT = [232, 248, 239] as const;
+      // ─── Charte graphique Combiosol (vert + orange) ───
+      // BLUE/BLUE_LIGHT conservent leur nom mais portent désormais le vert Combiosol
+      // (couleur principale des bandeaux, titres et accents).
+      const BLUE = [86, 156, 45] as const;        // vert Combiosol (#569C2D)
+      const BLUE_LIGHT = [236, 245, 226] as const; // vert très clair (fonds)
+      const ORANGE = [243, 146, 0] as const;       // orange/or Combiosol (#F39200)
+      const GREEN_DARK = [60, 110, 38] as const;   // vert foncé (titres)
+      const GREEN_LIGHT = [236, 245, 226] as const;
       const GRAY = [100, 110, 120] as const;
       const GRAY_LIGHT = [245, 247, 250] as const;
       const RED = [200, 40, 40] as const;
@@ -315,13 +346,22 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       // ═════════════════════════════════════════
       // PAGE DE GARDE
       // ═════════════════════════════════════════
-      // Blue header block
+      // Bandeau d'en-tête vert Combiosol
       setFill(BLUE);
       pdf.rect(0, 0, pageWidth, 95, 'F');
 
+      // Logo Combiosol dans un cartouche blanc en haut à droite
+      const logoCover = await loadLogoDataUrl();
+      if (logoCover) {
+        const lw = 28, lh = 28, lx = pageWidth - margin - lw, ly = 14;
+        pdf.setFillColor(255, 255, 255);
+        pdf.roundedRect(lx - 3, ly - 3, lw + 6, lh + 6, 3, 3, 'F');
+        pdf.addImage(logoCover, 'JPEG', lx, ly, lw, lh);
+      }
+
       // Small brand line
       pdf.setFontSize(10);
-      pdf.setTextColor(180, 200, 240);
+      pdf.setTextColor(225, 240, 210);
       pdf.setFont('helvetica', 'normal');
       pdf.text('COMBIOSOL', margin, 22);
 
@@ -335,17 +375,17 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       // Subtitle badge
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(200, 220, 255);
+      pdf.setTextColor(232, 244, 220);
       const coverRef = parcFilter != null ? `${referenceAffaire} - Parc ${parcFilter}` : referenceAffaire;
       pdf.text(coverRef, margin, 78);
 
       // Date badge right side
       pdf.setFontSize(9);
-      pdf.setTextColor(180, 200, 240);
-      pdf.text(new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }), pageWidth - margin, 78, { align: 'right' });
+      pdf.setTextColor(225, 240, 210);
+      pdf.text(new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }), pageWidth - margin, 88, { align: 'right' });
 
-      // Accent line below header
-      pdf.setFillColor(46, 184, 92);
+      // Ligne d'accent orange Combiosol sous le bandeau
+      setFill(ORANGE);
       pdf.rect(0, 95, pageWidth, 2.5, 'F');
 
       // Client info section

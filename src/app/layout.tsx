@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 
+// Le favicon est fourni par la convention de fichier Next.js : src/app/icon.jpg
 export const metadata: Metadata = {
-  title: 'Faisabilité Biomasse',
+  title: 'Combiosol — Faisabilité Biomasse',
   description: 'Application de faisabilité technico-économique pour projets de chauffage biomasse',
 };
 
