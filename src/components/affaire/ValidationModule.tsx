@@ -143,14 +143,18 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
         </div>
       </Card>
 
-      {/* Validation Status */}
-      {validationResult.isValid ? (
-        <Alert type="success">
-          ✅ Le projet est valide et prêt pour l'analyse
-        </Alert>
-      ) : (
+      {/* Validation Status — 3 états : erreurs / valide avec réserves / pleinement valide */}
+      {!validationResult.isValid ? (
         <Alert type="error">
           ❌ Le projet contient des erreurs. Veuillez les corriger avant d'exporter.
+        </Alert>
+      ) : validationResult.warnings.length > 0 ? (
+        <Alert type="warning">
+          ✅ Le projet est analysable — quelques points optionnels restent à compléter (voir avertissements ci-dessous).
+        </Alert>
+      ) : (
+        <Alert type="success">
+          ✅ Le projet est complet et prêt pour l'analyse
         </Alert>
       )}
 
