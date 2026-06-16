@@ -27,6 +27,24 @@ export function CostsDatabaseManager() {
     montantUnitaire: 0,
     unite: 'FORFAIT',
   });
+  const [syncStatus, setSyncStatus] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (!confirm('Réinjecter tous les postes de coûts de l\'Excel ? Les prix que vous avez personnalisés ne seront pas modifiés ; seuls les postes manquants seront ajoutés.')) return;
+    setIsSyncing(true);
+    setSyncStatus('');
+    try {
+      const res = await fetch('/api/admin/costs/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) { setSyncStatus(`✓ ${data.message}`); await fetchCosts(); }
+      else setSyncStatus(`Erreur : ${data.error}`);
+    } catch {
+      setSyncStatus('Erreur réseau');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     fetchCosts();
@@ -96,6 +114,25 @@ export function CostsDatabaseManager() {
 
   return (
     <div className="space-y-6">
+      {/* Synchronisation de la base de coûts depuis l'Excel */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-lg font-semibold text-gray-900">Synchroniser la base de coûts (Excel)</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Ajoute tous les postes de référence de l&apos;Excel qui manquent dans la base
+            (chaudières gaz/bois, réseaux, génie civil…). Vos prix personnalisés sont conservés.
+          </p>
+        </CardHeader>
+        <div className="p-6">
+          <Button onClick={handleSync} disabled={isSyncing} variant="primary">
+            {isSyncing ? 'Synchronisation…' : 'Synchroniser les postes manquants'}
+          </Button>
+          {syncStatus && (
+            <p className={`mt-3 text-sm ${syncStatus.startsWith('✓') ? 'text-green-600' : 'text-red-600'}`}>{syncStatus}</p>
+          )}
+        </div>
+      </Card>
+
       <Card>
         <CardHeader>
           <h2 className="text-lg font-semibold text-gray-900">Ajouter un coût de référence</h2>
