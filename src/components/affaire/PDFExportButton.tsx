@@ -541,14 +541,20 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
 
         // Cost comparison box
         if (parc) {
-          checkPage(30);
+          checkPage(38);
           setFill(GREEN_LIGHT);
-          pdf.roundedRect(margin, y - 5, contentWidth, 28, 2, 2, 'F');
+          pdf.roundedRect(margin, y - 5, contentWidth, 35, 2, 2, 'F');
           y += 1;
           addRow('Cout exploitation reference', fmtEur(parc.cout_total || 0) + '/an');
           addRow('Cout exploitation biomasse', fmtEur(parc.cout_biomasse || 0) + '/an');
           const eco = (parc.cout_total || 0) - (parc.cout_biomasse || 0);
           addRow('Economie annuelle', fmtEur(eco) + '/an', { bold: true, color: eco >= 0 ? GREEN_DARK : RED });
+          // Temps de retour = surcout net d'investissement / economie d'exploitation
+          // (meme formule que l'ecran : on exclut l'annuite qui rembourse l'investissement).
+          const surcoutInvest = ((chiff?.investissement_bio_ht || 0) - (chiff?.subventions_bio || 0)) - (chiff?.investissement_ht || 0);
+          const tr = eco > 0 ? surcoutInvest / eco : 0;
+          const trLabel = (eco > 0 && surcoutInvest <= 0) ? 'immediat' : (tr > 0 ? `${tr.toFixed(1)} ans` : 'N/A');
+          addRow('Temps de retour', trLabel, { bold: true, color: BLUE });
           y += 5;
         }
       };

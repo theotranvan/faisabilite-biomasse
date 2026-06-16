@@ -379,7 +379,7 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
                 <p className="text-xs text-gray-500 mt-1">Appliqué aux scénarios actuel et référence</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Montant d'emprunt (€)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Coût total du crédit / intérêts (€)</label>
                 <input
                   type="number"
                   value={formData.emprunt_ref || ''}
@@ -387,6 +387,7 @@ export function ChiffrageReferenceForm({ affaireId, data, onSave }: ChiffrageRef
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                   placeholder="0"
                 />
+                <p className="text-xs text-gray-500 mt-1">Intérêts/frais du crédit, ajoutés au capital net pour l&apos;annuité (≠ capital emprunté). Laisser 0 si non financé.</p>
               </div>
             </div>
           </div>

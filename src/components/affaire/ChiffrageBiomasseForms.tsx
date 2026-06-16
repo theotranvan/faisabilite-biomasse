@@ -348,7 +348,7 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">5. Financement</h4>
             <div className="max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Montant d'emprunt (€)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Coût total du crédit / intérêts (€)</label>
               <input
                 type="number"
                 value={formData.emprunt_biomasse || ''}
@@ -356,6 +356,7 @@ export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBio
                 className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                 placeholder="0"
               />
+              <p className="text-xs text-gray-500 mt-1">Intérêts/frais du crédit, ajoutés au capital net (reste à charge) pour calculer l&apos;annuité — ce n&apos;est PAS le capital emprunté. Laisser 0 si non financé.</p>
             </div>
           </div>
 
