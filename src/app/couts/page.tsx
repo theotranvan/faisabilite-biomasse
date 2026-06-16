@@ -50,6 +50,24 @@ export default function CoutsPage() {
     unite: '',
     prixUnitaire: '',
   });
+  const [syncStatus, setSyncStatus] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (!confirm('Réinjecter tous les postes de coûts de l\'Excel ? Vos prix personnalisés ne seront pas modifiés ; seuls les postes manquants seront ajoutés.')) return;
+    setIsSyncing(true);
+    setSyncStatus('');
+    try {
+      const res = await fetch('/api/admin/costs/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) { setSyncStatus(`✓ ${data.message}`); await tryLoadCouts(); }
+      else setSyncStatus(`Erreur : ${data.error}`);
+    } catch {
+      setSyncStatus('Erreur réseau');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     tryLoadCouts();
@@ -173,12 +191,20 @@ export default function CoutsPage() {
         <div className="mb-8 flex justify-between items-start">
           <h1 className="text-3xl font-bold text-gray-900">Gestion des Coûts</h1>
           {!isAdding && (
-            <Button variant="primary" onClick={() => setIsAdding(true)}>
-              + Ajouter un coût
-            </Button>
+            <div className="flex gap-3 items-center">
+              <Button variant="secondary" onClick={handleSync} disabled={isSyncing}>
+                {isSyncing ? 'Synchronisation…' : '🔄 Synchroniser (Excel)'}
+              </Button>
+              <Button variant="primary" onClick={() => setIsAdding(true)}>
+                + Ajouter un coût
+              </Button>
+            </div>
           )}
         </div>
 
+        {syncStatus && (
+          <Alert type={syncStatus.startsWith('✓') ? 'success' : 'error'} className="mb-6">{syncStatus}</Alert>
+        )}
         {error && <Alert type="error" className="mb-6">{error}</Alert>}
 
         {/* Form d'ajout/édition */}
