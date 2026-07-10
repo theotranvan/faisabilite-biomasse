@@ -56,6 +56,23 @@ check('B2 conso sortie chaudières (AH5)', c2.consoSortieChaudieresRef!, 50066.4
 check('B2 conso kWhep élec ×2.3 (R5)', c2.consoKWhepEI, 138000);
 check('B2 coût annuel initial (X5)', c2.coutAnnuelEI, 13304.168);
 
+// Consommations calculées de l'état initial (colonne P, bouton « Calculer » du UserForm_initial)
+// et écart réelles/calculées (TextBox15) — retour client de juillet 2026.
+check('B1 conso initiale calculée (P6)', c1.consoInitialeCalculee, 31464);
+check('B1 écart réelles/calculées ((32000−31464)/32000)', c1.ecartConsoPct!, 0.01675);
+check('B2 conso initiale calculée (P5)', c2.consoInitialeCalculee, 58868);
+
+// Bâtiment 3 « essai ajout bât » (Donnees ligne 4) : 20 kW, rendements 80/85/85/90 → P4 = 70 189
+const bat3: Batiment = {
+  ...bat1, numero: 3,
+  etatInitial: { ...bat1.etatInitial, deperditions_kW: 20, rendementProduction: 80,
+    rendementDistribution: 85, rendementEmission: 85, rendementRegulation: 90,
+    consommationsCalculees: 0, consommationsReelles: 71000 },
+};
+const c3 = calculsBatimentComplet(bat3, 1977, 19, -7);
+check('B3 conso initiale calculée (P4)', c3.consoInitialeCalculee, 70189);
+check('B3 coût annuel initial (X4)', c3.coutAnnuelEI, 9124.57);
+
 // Pertes réseau : Excel = 3450 × kW/ml × ml (table Utile, DN50 = 0.012 kW/ml)
 check('Pertes réseau 500 ml DN50', calculPertesReseau(500, 0.012), 20700);
 

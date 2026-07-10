@@ -500,6 +500,77 @@ export function PDFExportButton({ affaireId, referenceAffaire, nomClient, ville,
       }
 
       // ═════════════════════════════════════════
+      // SECTION 1 bis: COMPARATIF CONSO CALCULEES / REELLES
+      // ═════════════════════════════════════════
+      if (bats.length > 0) {
+        y += 6;
+        sectionTitle('Comparatif consommations calculees / reelles');
+
+        checkPage(14);
+        setFill(BLUE);
+        pdf.rect(margin, y - 5, contentWidth, 8, 'F');
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        const cCols = [margin + 3, margin + 60, margin + 100, margin + 140];
+        pdf.text('Batiment', cCols[0], y - 0.5);
+        pdf.text('Conso calculee (kWh/an)', cCols[1], y - 0.5);
+        pdf.text('Conso reelle (kWh/an)', cCols[2], y - 0.5);
+        pdf.text('Ecart', cCols[3], y - 0.5);
+        y += 5;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+
+        let totCalc = 0;
+        let totReel = 0;
+        for (let i = 0; i < bats.length; i++) {
+          const bat = bats[i];
+          checkPage(7);
+          if (i % 2 === 0) {
+            setFill(GRAY_LIGHT);
+            pdf.rect(margin, y - 4, contentWidth, 6.5, 'F');
+          }
+          const calc = bat.conso_calculee || 0;
+          const reel = bat.conso_reelle || 0;
+          totCalc += calc;
+          totReel += reel;
+          pdf.setFontSize(8);
+          pdf.text((bat.designation || '').substring(0, 30), cCols[0], y);
+          pdf.text(calc > 0 ? fmtNum(calc) : '-', cCols[1], y);
+          pdf.text(reel > 0 ? fmtNum(reel) : '-', cCols[2], y);
+          const pct = bat.ecart_conso_pct != null ? bat.ecart_conso_pct * 100 : null;
+          if (pct !== null) {
+            const absPct = Math.abs(pct);
+            if (absPct <= 10) pdf.setTextColor(22, 163, 74);
+            else if (absPct <= 20) pdf.setTextColor(217, 119, 6);
+            else pdf.setTextColor(220, 38, 38);
+            pdf.text(`${pct > 0 ? '+' : ''}${pct.toFixed(1)} %`, cCols[3], y);
+            pdf.setTextColor(0, 0, 0);
+          } else {
+            pdf.text('-', cCols[3], y);
+          }
+          y += 6.5;
+        }
+        // Ligne TOTAL
+        checkPage(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('TOTAL', cCols[0], y);
+        pdf.text(totCalc > 0 ? fmtNum(totCalc) : '-', cCols[1], y);
+        pdf.text(totReel > 0 ? fmtNum(totReel) : '-', cCols[2], y);
+        if (totReel > 0 && totCalc > 0) {
+          const pctTot = ((totReel - totCalc) / totReel) * 100;
+          pdf.text(`${pctTot > 0 ? '+' : ''}${pctTot.toFixed(1)} %`, cCols[3], y);
+        }
+        pdf.setFont('helvetica', 'normal');
+        y += 7;
+        pdf.setFontSize(7);
+        setColor(GRAY);
+        pdf.text('Ecart = (reelles - calculees) / reelles. Un ecart < 10 % valide les deperditions saisies.', margin + 3, y);
+        pdf.setTextColor(0, 0, 0);
+        y += 6;
+      }
+
+      // ═════════════════════════════════════════
       // SECTION 2: ETIQUETTES DPE
       // ═════════════════════════════════════════
       y += 6;

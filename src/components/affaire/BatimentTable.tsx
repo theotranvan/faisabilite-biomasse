@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Form';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
 import { ENERGY_TARIFS, COEF_INTERMITTENCE, TYPES_INSTALLATION } from '@/lib/enums';
+import { calculConsoInitialeCalculee, calculEcartConsoPct } from '@/lib/calculs';
 
 interface Batiment {
   id: string;
@@ -41,6 +42,9 @@ interface BatimentTableProps {
   batiments: Batiment[];
   onSave: (batiments: Batiment[]) => Promise<void>;
   isLoading?: boolean;
+  djuRetenu?: number;
+  tempIntBase?: number;
+  tempExtBase?: number;
 }
 
 const TYPES_BATIMENT = [
@@ -58,7 +62,27 @@ const TYPES_ENERGIE = [
   { value: 'BOIS_DECHIQUETTE', label: 'Bois déchiquetté' },
 ];
 
-export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<BatimentTableProps, 'affaireId' | 'isLoading'>) {
+// Écart affiché en couleur : ≤10 % vert (déperditions cohérentes avec les factures),
+// ≤20 % orange, au-delà rouge (déperditions ou factures à revérifier).
+function ecartBadge(ecart: number | null) {
+  if (ecart === null) return null;
+  const pct = ecart * 100;
+  const abs = Math.abs(pct);
+  const cls = abs <= 10
+    ? 'bg-green-100 text-green-800 border-green-300'
+    : abs <= 20
+    ? 'bg-amber-100 text-amber-800 border-amber-300'
+    : 'bg-red-100 text-red-800 border-red-300';
+  return (
+    <span className={`inline-block px-2 py-0.5 rounded border text-sm font-semibold ${cls}`}>
+      {pct > 0 ? '+' : ''}{pct.toFixed(1)} %
+    </span>
+  );
+}
+
+const fmtKwh = (v: number) => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+
+export function BatimentTable({ batiments: initialBatiments, onSave, djuRetenu = 1977, tempIntBase = 19, tempExtBase = -7 }: Omit<BatimentTableProps, 'affaireId' | 'isLoading'>) {
   const [batiments, setBatiments] = useState<Batiment[]>(initialBatiments);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -66,6 +90,23 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
   const [activeTab, setActiveTab] = useState<'etat_initial' | 'etat_ref'>('etat_initial');
   const initialBatimentsRef = useRef(JSON.stringify(initialBatiments));
   const isDirty = JSON.stringify(batiments) !== initialBatimentsRef.current;
+
+  // Conso calculée en direct (formule Excel : coef × déperd × 24 × DJU / ((Tint−Text) × rdt moyen))
+  const consoCalculee = (b: Batiment) => calculConsoInitialeCalculee(
+    {
+      deperditions_kW: b.deperditions || 0,
+      rendementProduction: b.rendementProduction || 0,
+      rendementDistribution: b.rendementDistribution || 0,
+      rendementEmission: b.rendementEmission || 0,
+      rendementRegulation: b.rendementRegulation || 0,
+      coefIntermittence: b.coefIntermittence || 1,
+      consommationsCalculees: 0,
+      typeEnergie: b.typeEnergie,
+      tarification: b.tarification,
+      abonnement: b.abonnement,
+    },
+    djuRetenu, tempIntBase, tempExtBase
+  );
 
   // Warn user before leaving with unsaved changes
   useEffect(() => {
@@ -154,17 +195,17 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
     setSuccessMsg('');
     setIsSaving(true);
     try {
-      // Normalise les consommations : si l'utilisateur n'a rempli qu'un seul
-      // champ, on aligne l'autre (le coût utilise « calculée », le DPE/énergie
-      // primaire utilise « réelle » sinon « calculée »). Ainsi saisir l'un OU
-      // l'autre suffit à obtenir un coût actuel et un DPE corrects.
+      // La conso « calculée » est dérivée des déperditions (formule Excel) et
+      // stockée telle quelle ; la conso « réelle » reste la saisie factures.
+      // Le coût actuel utilise la calculée (comme l'Excel), le DPE/énergie
+      // primaire la réelle si saisie, sinon la calculée.
       const normalises = batiments.map(b => {
-        const calc = b.consommationsCalculees || 0;
+        const calc = consoCalculee(b);
         const reel = b.consommationsReelles || 0;
         return {
           ...b,
-          consommationsCalculees: calc || reel,
-          consommationsReelles: reel || calc,
+          consommationsCalculees: calc || b.consommationsCalculees || reel,
+          consommationsReelles: reel,
         };
       });
       setBatiments(normalises);
@@ -398,32 +439,98 @@ export function BatimentTable({ batiments: initialBatiments, onSave }: Omit<Bati
                       </div>
                     </div>
 
-                    {/* Consommation actuelle — indispensable au calcul du coût actuel et du DPE.
-                        Un seul champ : il alimente à la fois la conso « calculée » (→ coût) et
-                        « réelle » (→ DPE/énergie primaire) du modèle Excel, garantissant des
-                        résultats cohérents (impossible d'avoir coût et DPE sur deux bases différentes). */}
-                    <div className="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">⚡ Consommation annuelle actuelle</label>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <label className="block text-gray-600 mb-1">Consommation (kWh/an) — relevé sur factures</label>
-                          <input type="number" min="0" step="100"
-                            value={batiment.consommationsReelles ?? batiment.consommationsCalculees ?? 0}
-                            onChange={(e) => {
-                              const v = parseFloat(e.target.value) || 0;
-                              setBatiments(prev => prev.map(b => b.id === batiment.id
-                                ? { ...b, consommationsReelles: v, consommationsCalculees: v } : b));
-                            }}
-                            className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
+                    {/* Consommations : calculée (dérivée des déperditions, formule Excel) vs
+                        réelle (factures), avec l'écart — comme le formulaire « état initial »
+                        de l'Excel. La calculée alimente le coût actuel, la réelle le DPE. */}
+                    {(() => {
+                      const calc = consoCalculee(batiment);
+                      const ecart = calculEcartConsoPct(batiment.consommationsReelles, calc);
+                      return (
+                        <div className="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">⚡ Consommations annuelles (état initial)</label>
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <label className="block text-gray-600 mb-1">Consommations calculées (kWh/an)</label>
+                              <div className="w-full px-2 py-1 border border-gray-200 rounded bg-gray-50 font-semibold text-gray-900">
+                                {calc > 0 ? fmtKwh(calc) : '—'}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1 italic">
+                                Déperditions × 24 × DJU ({fmtKwh(djuRetenu)}) / ((Tint − Text) × rendement moyen)
+                              </p>
+                            </div>
+                            <div>
+                              <label className="block text-gray-600 mb-1">Consommations réelles (kWh/an) — factures</label>
+                              <input type="number" min="0" step="100"
+                                value={batiment.consommationsReelles ?? 0}
+                                onChange={(e) => updateBatiment(batiment.id, 'consommationsReelles', e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded" placeholder="ex : 240000" />
+                            </div>
+                            <div>
+                              <label className="block text-gray-600 mb-1">Écart réelles / calculées</label>
+                              <div className="py-1">
+                                {ecart !== null ? ecartBadge(ecart) : <span className="text-gray-400 text-sm italic">Saisir les réelles</span>}
+                              </div>
+                            </div>
+                          </div>
+                          {ecart !== null && Math.abs(ecart) > 0.2 && (
+                            <p className="text-xs text-red-600 mt-2">
+                              ⚠️ Écart supérieur à 20 % : vérifiez les déperditions, les rendements ou le relevé de factures.
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-2 italic">
+                            💡 La consommation calculée sert au coût de la situation actuelle ; la consommation réelle
+                            (factures) sert à l&apos;étiquette DPE et au contrôle de cohérence des déperditions.
+                          </p>
                         </div>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2 italic">
-                        💡 Consommation totale de chauffage du bâtiment (relevé sur factures). Sans cette valeur,
-                        le coût de la situation actuelle et l&apos;étiquette DPE ne peuvent pas être calculés.
-                      </p>
-                    </div>
+                      );
+                    })()}
                   </div>
                 ))}
+
+                {/* Comparatif consommations calculées / réelles (tous bâtiments) */}
+                <div className="mt-2 p-4 bg-white rounded border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3">📊 Comparatif consommations calculées / réelles</h4>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-gray-300 text-gray-700">
+                        <th className="text-left py-2 px-2">Bâtiment</th>
+                        <th className="text-right py-2 px-2">Conso calculée (kWh/an)</th>
+                        <th className="text-right py-2 px-2">Conso réelle (kWh/an)</th>
+                        <th className="text-right py-2 px-2">Écart</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batiments.map(b => {
+                        const calc = consoCalculee(b);
+                        const reel = b.consommationsReelles || 0;
+                        const ecart = calculEcartConsoPct(reel, calc);
+                        return (
+                          <tr key={b.id} className="border-b border-gray-200">
+                            <td className="py-2 px-2">{b.designation}</td>
+                            <td className="text-right py-2 px-2">{calc > 0 ? fmtKwh(calc) : '—'}</td>
+                            <td className="text-right py-2 px-2">{reel > 0 ? fmtKwh(reel) : '—'}</td>
+                            <td className="text-right py-2 px-2">{ecart !== null ? ecartBadge(ecart) : '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      {(() => {
+                        const totalCalc = batiments.reduce((s, b) => s + consoCalculee(b), 0);
+                        const totalReel = batiments.reduce((s, b) => s + (b.consommationsReelles || 0), 0);
+                        const ecartTotal = calculEcartConsoPct(totalReel, totalCalc);
+                        return (
+                          <tr className="border-t-2 border-gray-300 font-bold">
+                            <td className="py-2 px-2">TOTAL</td>
+                            <td className="text-right py-2 px-2">{totalCalc > 0 ? fmtKwh(totalCalc) : '—'}</td>
+                            <td className="text-right py-2 px-2">{totalReel > 0 ? fmtKwh(totalReel) : '—'}</td>
+                            <td className="text-right py-2 px-2">{ecartTotal !== null ? ecartBadge(ecartTotal) : '—'}</td>
+                          </tr>
+                        );
+                      })()}
+                    </tfoot>
+                  </table>
+                </div>
               </div>
             )}
 

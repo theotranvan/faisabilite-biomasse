@@ -587,6 +587,9 @@ export default function AffaireDetailPage() {
           {activeTab === 'batiments' && (
             <BatimentTable
               batiments={batiments}
+              djuRetenu={(affaire as any).djuRetenu ?? 1977}
+              tempIntBase={(affaire as any).tempIntBase ?? 19}
+              tempExtBase={(affaire as any).tempExtBase ?? -7}
               onSave={async (bats) => {
                 const savedBats = await saveBatiments(affaire.id, bats);
                 setBatiments(savedBats);
@@ -913,6 +916,7 @@ export default function AffaireDetailPage() {
                 key={`bio-${selectedChiffrageParc}`}
                 affaireId={affaire.id}
                 data={chiffrageBio[selectedChiffrageParc] || null}
+                chiffrageRefParc={chiffrageRef[selectedChiffrageParc] || null}
                 onSave={async (data) => {
                   await saveChiffrageBiomasse(affaire.id, data, selectedChiffrageParc);
                   setChiffrageBio(prev => ({ ...prev, [selectedChiffrageParc]: data }));
@@ -932,7 +936,14 @@ export default function AffaireDetailPage() {
 
           {activeTab === 'validation' && (
             <ValidationModule
-              data={{ batiments, parcs, chiffrageRefByParc: chiffrageRef, chiffrageBioByParc: chiffrageBio }}
+              data={{
+                batiments, parcs, chiffrageRefByParc: chiffrageRef, chiffrageBioByParc: chiffrageBio,
+                meteo: {
+                  djuRetenu: (affaire as any).djuRetenu ?? 1977,
+                  tempIntBase: (affaire as any).tempIntBase ?? 19,
+                  tempExtBase: (affaire as any).tempExtBase ?? -7,
+                },
+              }}
             />
           )}
 

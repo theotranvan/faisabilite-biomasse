@@ -18,6 +18,7 @@ import {
   calculEtiquetteEnergetique,
   calculEtiquetteGlobaleProjet,
   getEtiquetteCouleur,
+  calculMonotoneComplet,
 } from '@/lib/calculs';
 import type { Batiment } from '@/lib/calculs';
 
@@ -114,6 +115,9 @@ interface ParcResult {
     coutAnnuelRef: number;
     consoSortie: number;
     consoKWhepEI: number;
+    consoInitialeCalculee: number;
+    consoReelle: number;
+    ecartConsoPct: number | null;
     consoRefCalculees: number;
     deperditionsKW: number;
     deperditionsRefKW: number;
@@ -265,7 +269,7 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
           const fuelTypeInitial = batsInParc[0]?.etatInitial.typeEnergie || 'Fuel';
           const fuelTypeRef = batsInParc[0]?.etatReference?.typeEnergie || 'Gaz naturel';
           const fuelTypeBiomasse = parcConfig?.typeBiomasse === 'GRANULES' ? 'Granulé' : 'Plaquette';
-          const consoInitialeKwh = batsInParc.reduce((s, b) => s + (b.etatInitial.consommationsCalculees || b.etatInitial.consommationsReelles || 0), 0);
+          const consoInitialeKwh = batsInParc.reduce((s, b) => s + (b.calculs?.consoInitialeCalculee || b.etatInitial.consommationsReelles || 0), 0);
           const consoRefKwh = batsInParc.reduce((s, b) => s + (b.calculs?.consoRefCalculees || 0), 0);
 
           const co2Initial = calculCO2Emissions(consoInitialeKwh, getEmissionFactor(fuelTypeInitial, 'co2'));
@@ -289,6 +293,9 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               coutAnnuelRef: b.calculs?.coutAnnuelRef || 0,
               consoSortie: b.calculs?.consoSortieChaudieresRef || 0,
               consoKWhepEI,
+              consoInitialeCalculee: b.calculs?.consoInitialeCalculee || 0,
+              consoReelle: b.etatInitial.consommationsReelles || 0,
+              ecartConsoPct: b.calculs?.ecartConsoPct ?? null,
               consoRefCalculees: b.calculs?.consoRefCalculees || 0,
               consoRefPCS: b.calculs?.consoRefPCS || 0,
               deperditionsKW: b.etatInitial.deperditions_kW,
@@ -419,33 +426,27 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
             if (Array.isArray(temperatures) && temperatures.length > 0) {
               const deltaT = tempInt - tempExt;
               if (deltaT > 0) {
-                const depParDegre = (sel.puissance * 1000) / deltaT;
+                // Moteur partagé (lib/calculs/monotone) : applique la saison de
+                // chauffe de l'Excel (15/10 → 15/04) — sans ce filtre les besoins
+                // et la part base énergie étaient surestimés (heures d'été comptées).
                 const puissanceGenBase = affaire.parcs?.[0]?.puissanceChaudiereBois || 0;
-                const points = temperatures
-                  .map((t: number) => Math.max(0, depParDegre * (tempInt - t)))
-                  .filter((p: number) => p > 0)
-                  .sort((a: number, b: number) => b - a)
-                  .map((p: number, i: number) => ({
-                    heure: i,
-                    puissance: p / 1000,
-                    generateur: puissanceGenBase,
-                  }));
+                const mono = calculMonotoneComplet(
+                  temperatures, sel.puissance * 1000, tempInt, tempExt, puissanceGenBase
+                );
+                const points = mono.monotoneTriee.map((p, i) => ({
+                  heure: i,
+                  puissance: p.puissance / 1000,
+                  generateur: puissanceGenBase,
+                }));
                 setMonotoneChartData(points);
 
                 // Part base (formules Excel Monotone_2) : puissance = Pgén/Pmax,
                 // énergie = besoins couverts par le générateur / besoins totaux
                 if (points.length > 0 && puissanceGenBase > 0) {
-                  const puissanceMax = points[0].puissance;
-                  let besoinsTotaux = 0;
-                  let besoinsBase = 0;
-                  for (const pt of points) {
-                    besoinsTotaux += pt.puissance;
-                    besoinsBase += Math.min(pt.puissance, puissanceGenBase);
-                  }
                   setMonotoneStats({
-                    puissanceMax,
-                    partBasePuissance: puissanceMax > 0 ? (puissanceGenBase / puissanceMax) * 100 : 0,
-                    partBaseEnergie: besoinsTotaux > 0 ? (besoinsBase / besoinsTotaux) * 100 : 0,
+                    puissanceMax: mono.puissanceMax,
+                    partBasePuissance: mono.partBasePuissance,
+                    partBaseEnergie: mono.partBaseEnergie,
                   });
                 }
               }
@@ -824,6 +825,64 @@ export function ResultatsPage({ affaireId, batiments = [], chiffrageRefByParc = 
               </tr>
             </tbody>
           </table>
+        </div>
+      </Card>
+
+      {/* Comparatif consommations calculées / réelles (état initial) */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-gray-900">Consommations calculées vs réelles (état initial)</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            Consommation théorique dérivée des déperditions (formule Excel) comparée au relevé de factures — contrôle de cohérence de l&apos;étude
+          </p>
+        </CardHeader>
+        <div className="p-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left py-2 px-2">Bâtiment</th>
+                <th className="text-right py-2 px-2">Conso calculée (kWh/an)</th>
+                <th className="text-right py-2 px-2">Conso réelle (kWh/an)</th>
+                <th className="text-right py-2 px-2">Écart</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sel.batiments.map((bat, idx) => {
+                const pct = bat.ecartConsoPct !== null ? bat.ecartConsoPct * 100 : null;
+                const cls = pct === null ? '' : Math.abs(pct) <= 10 ? 'text-green-600' : Math.abs(pct) <= 20 ? 'text-amber-600' : 'text-red-600';
+                return (
+                  <tr key={idx} className="border-b border-gray-200">
+                    <td className="py-2 px-2">{bat.designation}</td>
+                    <td className="text-right py-2 px-2">{bat.consoInitialeCalculee > 0 ? bat.consoInitialeCalculee.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '—'}</td>
+                    <td className="text-right py-2 px-2">{bat.consoReelle > 0 ? bat.consoReelle.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '—'}</td>
+                    <td className={`text-right py-2 px-2 font-semibold ${cls}`}>
+                      {pct !== null ? `${pct > 0 ? '+' : ''}${pct.toFixed(1)} %` : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              {(() => {
+                const totalCalc = sel.batiments.reduce((s, b) => s + b.consoInitialeCalculee, 0);
+                const totalReel = sel.batiments.reduce((s, b) => s + b.consoReelle, 0);
+                const pct = totalReel > 0 ? ((totalReel - totalCalc) / totalReel) * 100 : null;
+                const cls = pct === null ? '' : Math.abs(pct) <= 10 ? 'text-green-600' : Math.abs(pct) <= 20 ? 'text-amber-600' : 'text-red-600';
+                return (
+                  <tr className="border-t-2 border-gray-300 font-bold">
+                    <td className="py-2 px-2">TOTAL</td>
+                    <td className="text-right py-2 px-2">{totalCalc > 0 ? totalCalc.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '—'}</td>
+                    <td className="text-right py-2 px-2">{totalReel > 0 ? totalReel.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '—'}</td>
+                    <td className={`text-right py-2 px-2 ${cls}`}>{pct !== null ? `${pct > 0 ? '+' : ''}${pct.toFixed(1)} %` : '—'}</td>
+                  </tr>
+                );
+              })()}
+            </tfoot>
+          </table>
+          <p className="text-xs text-gray-500 mt-3 italic">
+            💡 Un écart inférieur à 10 % valide les déperditions saisies. Au-delà de 20 %, vérifier les déperditions,
+            les rendements de l&apos;installation ou le relevé de factures.
+          </p>
         </div>
       </Card>
 
