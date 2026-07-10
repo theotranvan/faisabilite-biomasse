@@ -53,6 +53,8 @@ export interface ChiffrageParcRef {
 export interface CalculsBatiment {
   // État initial
   rendementMoyenEI: number;
+  consoInitialeCalculee: number; // kWh/an dérivés des déperditions (colonne P de l'Excel)
+  ecartConsoPct: number | null; // (réelles − calculées) / réelles ; null si pas de réelles
   consoKWhepEI: number;
   consoPCSEI: number;
   coutAnnuelEI: number;

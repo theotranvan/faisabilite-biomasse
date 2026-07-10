@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, Alert } from '@/components/ui/Layout';
+import { calculConsoInitialeCalculee, calculEcartConsoPct } from '@/lib/calculs';
 
 interface ValidationResult {
   isValid: boolean;
@@ -17,6 +18,7 @@ interface ValidationProps {
     // Chiffrages par numéro de parc (validation multi-parc)
     chiffrageRefByParc?: Record<number, any>;
     chiffrageBioByParc?: Record<number, any>;
+    meteo?: { djuRetenu: number; tempIntBase: number; tempExtBase: number };
   };
 }
 
@@ -45,6 +47,35 @@ export function ValidationModule({ data }: Omit<ValidationProps, 'affaireId'>) {
         }
         if (!bat.typeEnergie) {
           errors.push(`Bâtiment ${idx + 1}: Type d'énergie non défini`);
+        }
+
+        // Comparatif conso calculée / réelle : un écart > 20 % signale des
+        // déperditions, des rendements ou un relevé de factures à revérifier.
+        const meteo = data?.meteo;
+        if (meteo && bat.consommationsReelles > 0) {
+          const calc = calculConsoInitialeCalculee(
+            {
+              deperditions_kW: bat.deperditions || 0,
+              rendementProduction: bat.rendementProduction || 0,
+              rendementDistribution: bat.rendementDistribution || 0,
+              rendementEmission: bat.rendementEmission || 0,
+              rendementRegulation: bat.rendementRegulation || 0,
+              coefIntermittence: bat.coefIntermittence || 1,
+              consommationsCalculees: 0,
+              typeEnergie: bat.typeEnergie || '',
+              tarification: 0,
+              abonnement: 0,
+            },
+            meteo.djuRetenu, meteo.tempIntBase, meteo.tempExtBase
+          );
+          const ecart = calc > 0 ? calculEcartConsoPct(bat.consommationsReelles, calc) : null;
+          if (ecart !== null && Math.abs(ecart) > 0.2) {
+            warnings.push(
+              `Bâtiment ${idx + 1} (${bat.designation || '?'}) : écart de ${(ecart * 100).toFixed(0)} % entre consommation réelle (${Math.round(bat.consommationsReelles).toLocaleString('fr-FR')} kWh) et calculée (${calc.toLocaleString('fr-FR')} kWh) — vérifier déperditions, rendements ou factures`
+            );
+          }
+        } else if (meteo && (!bat.consommationsReelles || bat.consommationsReelles <= 0)) {
+          warnings.push(`Bâtiment ${idx + 1} (${bat.designation || '?'}) : consommation réelle (factures) non saisie — le comparatif calculée/réelle et le DPE ne pourront pas être établis`);
         }
       });
     }

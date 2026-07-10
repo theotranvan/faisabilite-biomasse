@@ -141,6 +141,54 @@ Le fichier audité est **identique octet pour octet** à `excel-source.xlsm` du 
   Le champ reste éditable : un utilisateur averti peut saisir 0,85/0,80 manuellement s'il veut une
   correction d'intermittence. Garde-fou ajouté au test de parité.
 
+### 2.12 bis Consommations calculées de l'état initial + comparatif calculées/réelles (retour client, 10 juillet 2026)
+* **Retour client (S. Rogala)** : « il manque le calcul des consommations et le comparatif
+  entre les consommations calculées et réelles ».
+* **Excel (`UserForm_initial`)** : le formulaire de saisie de l'état initial affiche
+  « Consommations calculées » (bouton Calculer, CommandButton5), « Consommations réelles »
+  (saisie factures) et « Écart » (TextBox15 = `(réelles − calculées)/réelles`). La colonne P
+  de `Donnees` stocke la calculée, la Q la réelle ; le coût annuel (X) et la conso théorique
+  PCS (T→U) sont assis sur la **calculée**.
+* **Formule** : `conso = coef intermittence × déperditions × 24 × DJU / ((19 − Text) × rendement moyen)`.
+  Deux arrondis du formulaire font partie des valeurs stockées et sont **reproduits** pour que
+  les études historiques du client se réconcilient : rendement moyen arrondi au % entier
+  (TextBox12 « 0 % »), consommation arrondie au kWh (TextBox13 « 0 »).
+  Vérifié : P6 = 31 464, P5 = 58 868, P4 = 70 189 (au kWh près).
+* **SaaS avant** : un seul champ « Consommation annuelle actuelle » recopié dans les deux
+  colonnes ; aucune consommation théorique calculée, aucun écart affiché.
+* **Corrigé** :
+  - `calculConsoInitialeCalculee` + `calculEcartConsoPct` dans `lib/calculs/batiment.ts` ;
+    la conso calculée alimente le coût annuel initial (fidèle à T=P de l'Excel), la réelle
+    reste la base du kWhep/DPE (fidèle à R5/R6) et du comparatif.
+  - Onglet **Bâtiments** : conso calculée affichée en direct (lecture seule), saisie de la
+    conso réelle (factures), badge d'écart coloré (vert ≤ 10 %, orange ≤ 20 %, rouge au-delà)
+    + tableau comparatif tous bâtiments avec total.
+  - **Synthèse & Résultats** : carte « Consommations calculées vs réelles » (par bâtiment + total).
+  - **API `/api/calculs`** : champs `conso_calculee`, `conso_reelle`, `ecart_conso_pct` par bâtiment.
+  - **Export PDF** : tableau « Comparatif consommations calculées / réelles ».
+  - **Validation** : avertissement si écart > 20 % ou si la conso réelle n'est pas saisie.
+  - 5 points de contrôle ajoutés au test de parité (P4/P5/P6, écart, X4).
+
+### 2.12 ter Monotone — saison de chauffe manquante (audit du 10 juillet 2026)
+* **Excel (`Monotone_1`)** : les formules de puissance appelée n'existent que pour les
+  heures 0..2519 (1ᵉʳ janvier → 15 avril) et 6888.. (15 octobre → 31 décembre) — les
+  heures d'été sont **exclues** des besoins même quand T < 19 °C (saison de chauffe).
+* **Code avant** : la monotone sommait les 8 760 heures → besoins totaux surestimés
+  (+27 % sur le classeur exemple : 76 907 kWh au lieu de 60 465) et « part base énergie »
+  (le % de couverture bois suggéré) faussée (99,72 % au lieu de 99,64 %).
+* **Corrigé** : filtre `estDansSaisonChauffe` (heure < 2520 ou ≥ 6888) dans
+  `genererDonneeMonotone` ; la page Résultats utilise désormais le moteur partagé
+  `calculMonotoneComplet` au lieu d'une réimplémentation en ligne (source de la dérive).
+* **Vérifié au centime** contre le classeur : puissance max 29,192 kW (AS2), besoins
+  totaux 60 465,115 kWh (AV3), besoins base 60 248,231 kWh (AW3), part base puissance
+  85,639 % (BA2), part base énergie 99,641 % (BA3).
+* Deux scripts de vérification permanents ajoutés à `npm test` :
+  `scripts/verify-donnees-reference.ts` (83 contrôles : DJU 96 départements, tarifs,
+  combustibles, sections réseau, facteurs CO₂/SO₂, 77 articles BDD coûts, 24 seuils DPE
+  lus dans les formules K26:U26, 96 360 températures horaires) et
+  `scripts/verify-formules-moteur.ts` (23 contrôles : monotone complète, bilan 20 ans,
+  annuités, chiffrage, plafond subventions, défauts P2/tarifs exploitation).
+
 ### 2.12 Divers
 * `frais_annexes` renvoyé par `/api/calculs` contenait en réalité la TVA, et
   `sous_total_chaufferie` contenait l'investissement HT — libellés corrigés (impact PDF).
@@ -229,6 +277,47 @@ blocages invisibles au build/aux tests ont été trouvés et corrigés :
 
 Parité Excel re-confirmée via l'API réelle : conso réf 31 291,55 / 58 901,74 (= cellules AE6/AE5),
 pertes DN63 = 29 325 kWh, annuité 2 607,93 (= L16), cap subventions 80 %, P2 inclus, bilan année 16.
+
+## 5 bis. Vérification exhaustive du 10 juillet 2026 (demande client « tout doit être conforme »)
+
+Audit indépendant complet : relecture du classeur cellule par cellule (openpyxl/xlsx + olevba),
+trois scripts de vérification permanents, et exécution réelle de l'application (PostgreSQL 18,
+`migrate deploy` + `db seed` + `next start`, parcours HTTP complet avec session NextAuth).
+
+**Écarts trouvés et corrigés :**
+
+1. **Monotone sans saison de chauffe** (§2.12 ter) — besoins surestimés ~+27 %, % couverture
+   bois suggéré faussé. Corrigé + page Résultats branchée sur le moteur partagé.
+2. **PUT `/api/affaires/[id]` ignorait `djuRetenu`** : le champ « DJU retenu » du formulaire
+   Données générales était envoyé par le front mais jamais persisté — la modification du DJU
+   par l'utilisateur était silencieusement perdue (tous les calculs restaient sur l'ancien DJU).
+   `tempExtBase`/`tempIntBase` sont aussi passés par `parseFloat` (robustesse).
+3. **`prisma db seed` cassé sous Node ≥ 20** (`node prisma/seed.ts` ne résout pas l'import
+   `../src/lib/data/bddCouts` sans extension) → commande seed basculée sur `tsx` — le
+   déploiement documenté (`migrate deploy && db seed`) refonctionne.
+4. **Défaut « subvention complémentaire » 25 %** dans le formulaire chiffrage biomasse :
+   n'existe pas dans l'Excel (3 lignes : COT ENR 45, départementale 20, DETR/DSIL 50) → 0.
+   **P2 biomasse** du formulaire : 0 → 1 200 € (= `solution biomasse` F14).
+5. **§4 bis résolu** : « Installation réseau hydraulique dans bât existants » du chiffrage bio
+   est désormais pré-rempli depuis la ligne réseau hydraulique du chiffrage référence du même
+   parc (lien Excel `chiffrage_bio!D23/E23 = chiffrage_ref!D20/E20`), modifiable.
+
+**Couverture de vérification (tout est vert, verrouillé par `npm test`) :**
+
+| Volet | Contrôles | Résultat |
+|---|---|---|
+| Tests calculs + régression + cas limites | 17 + 173 + 23 | ✓ |
+| Parité Excel feuille Donnees (P/Q/R/U/X, AE/AF/AH, écart) | 21 | ✓ |
+| Données de référence (`verify-donnees-reference.ts`) : DJU 96 dpts, tarifs, combustibles, sections, CO₂/SO₂, TEP, 77 articles BDD coûts, 24 seuils DPE lus dans les formules K26:U26, pondération étiquette globale, 96 360 T° horaires | 84 | ✓ |
+| Formules moteur (`verify-formules-moteur.ts`) : monotone complète (8 736 h au centime), bilan 20 ans année par année, annuités, chiffrage, plafond 80 %, défauts P2/tarifs | 23 | ✓ |
+| Runtime E2E (`verify-runtime-e2e.ts`, app réelle + base) : login → affaire (DJU auto dpt 18 = 2004,1) → 2 bâtiments du classeur → chiffrage → calculs → bilan → DPE → monotone → suppression | 30 | ✓ |
+
+**Écarts assumés (décisions documentées, pas des bugs)** : bugs Excel non reproduits (§3),
+tarif gaz 0,0978 (§4.1), intermittence 1 (§4.2), arrondis du formulaire état initial reproduits
+(§2.12 bis), stères en kWh/1600 (§2.9). Présentation : le « taux EnR&R » de la feuille
+`Déperditions et consommations` est exprimé dans le SaaS via le % de couverture bois / part
+base énergie ; le double scénario de subventions du `Bilan Actualisé` (toutes subventions vs
+COT ENR seule) est couvert par l'édition des taux de subvention (un seul scénario actif à la fois).
 
 ## 6. Sécurité d'accès — modèle implémenté et vérifié
 

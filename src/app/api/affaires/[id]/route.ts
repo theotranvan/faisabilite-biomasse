@@ -64,8 +64,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         latitude: data.latitude,
         longitude: data.longitude,
         notes: data.notes,
-        tempExtBase: data.tempExtBase,
-        tempIntBase: data.tempIntBase,
+        // DJU modifiable par l'utilisateur (le formulaire Données générales l'envoie —
+        // il était ignoré ici, la saisie n'était jamais persistée)
+        djuRetenu: data.djuRetenu != null ? parseFloat(data.djuRetenu) : undefined,
+        tempExtBase: data.tempExtBase != null ? parseFloat(data.tempExtBase) : undefined,
+        tempIntBase: data.tempIntBase != null ? parseFloat(data.tempIntBase) : undefined,
         augmentationFossile: data.augmentationFossile,
         augmentationBiomasse: data.augmentationBiomasse,
         tauxEmprunt: data.tauxEmprunt,

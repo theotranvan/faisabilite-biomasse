@@ -37,21 +37,46 @@ interface ChiffrageBiomAsseForms {
 interface ChiffrageBiomAsseFormsProps {
   affaireId: string;
   data?: Partial<ChiffrageBiomAsseForms>;
+  // Chiffrage référence du même parc — sert au pré-remplissage Excel
+  // (chiffrage_bio!D23/E23 = chiffrage_ref!D20/E20 : réseau hydraulique bâtiments)
+  chiffrageRefParc?: any;
   onSave: (data: ChiffrageBiomAsseForms) => Promise<void>;
+}
+
+// « Installation réseau hydraulique dans bâtiments existants » : l'Excel lie cette
+// ligne du chiffrage bio aux valeurs du chiffrage référence. On reproduit le lien
+// en pré-remplissage (modifiable) tant qu'aucun chiffrage bio n'a été enregistré.
+function installationReseauDepuisRef(chiffrageRef: any): number {
+  if (!chiffrageRef) return 0;
+  let lignes: any[] = chiffrageRef.travauxChaufferie;
+  if (!lignes && typeof chiffrageRef.lignesChaufferie === 'string') {
+    try { lignes = JSON.parse(chiffrageRef.lignesChaufferie); } catch { lignes = []; }
+  } else if (!lignes && Array.isArray(chiffrageRef.lignesChaufferie)) {
+    lignes = chiffrageRef.lignesChaufferie;
+  }
+  if (!Array.isArray(lignes)) return 0;
+  const ligne = lignes.find((l: any) => /r[ée]seau\s+hydraulique/i.test(l?.designation || ''));
+  if (!ligne) return 0;
+  return (Number(ligne.qte) || 0) * (Number(ligne.pu ?? ligne.prixUnitaire) || 0);
 }
 
 // Normalise un enregistrement BDD (noms de schéma : charpenteCouverture,
 // hydrauliqueChaufferie, tauxSubventionCotEnr, empruntBio…) OU déjà au format
 // formulaire vers le format attendu par le formulaire. Indispensable pour que les
 // données se rechargent après sauvegarde / changement de parc.
-function toFormBio(affaireId: string, data?: Partial<ChiffrageBiomAsseForms> | any): Partial<ChiffrageBiomAsseForms> {
+function toFormBio(affaireId: string, data?: Partial<ChiffrageBiomAsseForms> | any, chiffrageRefParc?: any): Partial<ChiffrageBiomAsseForms> {
   const defaults: Partial<ChiffrageBiomAsseForms> = {
     affaireId,
     vrd: 0, grosOeuvre: 0, charpente: 0, processBois: 0, chaudierAppoint: 0,
-    hydraulique: 0, reseauChaleur: 0, sousStation: 0, installationReseauBat: 0, autreTravaux: 0,
+    hydraulique: 0, reseauChaleur: 0, sousStation: 0,
+    // Pré-rempli depuis le chiffrage référence (lien Excel D23=chiffrage_ref!D20)
+    installationReseauBat: installationReseauDepuisRef(chiffrageRefParc), autreTravaux: 0,
+    // Taux Excel : frais annexes 3/9/2/5 %, subventions I31/I32/I33 = 45/20/50 %
+    // (pas de « subvention complémentaire » dans l'Excel → défaut 0)
     bureauControle: 0.03, maitriseOeuvre: 0.09, fraisDivers: 0.02, aleas: 0.05,
-    cotEnr: 45, aideDepartementale: 20, detrDsil: 50, subventionComplementaire: 25,
-    p2: 0, consoElecSupplement: 0, emprunt_biomasse: 0,
+    cotEnr: 45, aideDepartementale: 20, detrDsil: 50, subventionComplementaire: 0,
+    // P2 biomasse : 1 200 € (Excel « solution biomasse » F14)
+    p2: 1200, consoElecSupplement: 0, emprunt_biomasse: 0,
   };
   if (!data) return defaults;
   const pick = (form: any, schema: any, def: any) => form ?? schema ?? def;
@@ -82,8 +107,8 @@ function toFormBio(affaireId: string, data?: Partial<ChiffrageBiomAsseForms> | a
   };
 }
 
-export function ChiffrageBiomasseForms({ affaireId, data, onSave }: ChiffrageBiomAsseFormsProps) {
-  const [formData, setFormData] = useState<Partial<ChiffrageBiomAsseForms>>(() => toFormBio(affaireId, data));
+export function ChiffrageBiomasseForms({ affaireId, data, chiffrageRefParc, onSave }: ChiffrageBiomAsseFormsProps) {
+  const [formData, setFormData] = useState<Partial<ChiffrageBiomAsseForms>>(() => toFormBio(affaireId, data, chiffrageRefParc));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 

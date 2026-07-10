@@ -5,6 +5,8 @@
 
 export {
   calculRendementMoyen,
+  calculConsoInitialeCalculee,
+  calculEcartConsoPct,
   calculConsoKWhep,
   calculConsoPCS,
   calculCoutAnnuel,
@@ -47,6 +49,18 @@ export {
   PART_CONSO_10_JOURS_FROIDS,
   MASSE_VOLUMIQUE_CENDRES,
 } from '../../../lib/calculs/parc';
+
+export {
+  calculMonotoneComplet,
+  calculDeperditionsParDegre,
+  calculPuissanceAppeleePourTemp,
+  genererDonneeMonotone,
+  trierMonotone,
+  calculPartBase,
+  estDansSaisonChauffe,
+  SAISON_CHAUFFE_FIN_H,
+  SAISON_CHAUFFE_DEBUT_H,
+} from '../../../lib/calculs/monotone';
 
 export {
   calculBilan20Ans,

@@ -35,6 +35,20 @@ export function calculPuissanceAppeleePourTemp(
 }
 
 /**
+ * Saison de chauffe du classeur Excel (Monotone_1) : les formules de puissance
+ * appelée n'existent que pour les heures 0..2519 (1er janvier → 15 avril) et
+ * 6888.. (15 octobre → 31 décembre). Les heures d'été sont exclues des besoins
+ * même si T < Tint — sans ce filtre les besoins totaux et la part base énergie
+ * (% couverture bois suggéré) sont surestimés (~+27 % sur le classeur exemple).
+ */
+export const SAISON_CHAUFFE_FIN_H = 2520;   // 105 jours × 24 h → 15 avril
+export const SAISON_CHAUFFE_DEBUT_H = 6888; // 287 jours × 24 h → 15 octobre
+
+export function estDansSaisonChauffe(heure: number): boolean {
+  return heure < SAISON_CHAUFFE_FIN_H || heure >= SAISON_CHAUFFE_DEBUT_H;
+}
+
+/**
  * Generate monotone data from weather data
  * Returns array of { heure, temperature, puissance }
  */
@@ -49,6 +63,7 @@ export function genererDonneeMonotone(
       temperature: temp,
       puissance: calculPuissanceAppeleePourTemp(deperditionsParDegre, tempIntBase, temp),
     }))
+    .filter(p => estDansSaisonChauffe(p.heure)) // Saison de chauffe Excel (15/10 → 15/04)
     .filter(p => p.puissance > 0); // Only include hours with heating demand
 }
 

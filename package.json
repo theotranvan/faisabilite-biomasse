@@ -10,15 +10,16 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed.ts",
-    "test": "tsx tests/calculs.test.ts && tsx tests/regression.test.ts && tsx tests/parity-excel.test.ts && tsx scripts/edge-cases.test.ts",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "test": "tsx tests/calculs.test.ts && tsx tests/regression.test.ts && tsx tests/parity-excel.test.ts && tsx scripts/edge-cases.test.ts && tsx scripts/verify-donnees-reference.ts && tsx scripts/verify-formules-moteur.ts",
     "test:calculs": "tsx tests/calculs.test.ts",
     "test:regression": "tsx tests/regression.test.ts",
     "test:parity": "tsx tests/parity-excel.test.ts",
-    "test:parcours": "npm run prisma:seed && tsx scripts/test-parcours-complet.ts"
+    "test:parcours": "npm run prisma:seed && tsx scripts/test-parcours-complet.ts",
+    "test:excel": "tsx scripts/verify-donnees-reference.ts && tsx scripts/verify-formules-moteur.ts"
   },
   "prisma": {
-    "seed": "node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",

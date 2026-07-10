@@ -17,6 +17,45 @@ export function calculRendementMoyen(etat: EtatEnergie): number {
 }
 
 /**
+ * Consommations calculées de l'état initial (colonne P de la feuille Donnees).
+ * Reproduit le bouton « Calculer » du UserForm_initial de l'Excel (CommandButton5) :
+ *   conso = coef × (déperditions × 24 × DJU) / ((Tint − Text) × rendement moyen)
+ * Deux arrondis du formulaire Excel font partie du résultat que le client connaît
+ * (ses études historiques doivent se réconcilier) :
+ *   - le rendement moyen est arrondi au % entier (TextBox12 formaté "0 %") ;
+ *   - la consommation est arrondie au kWh entier (TextBox13 formaté "0").
+ * Vérifié sur la feuille Donnees : P6 = 31 464, P5 = 58 868, P4 = 70 189.
+ */
+export function calculConsoInitialeCalculee(
+  etat: EtatEnergie,
+  DJU: number,
+  tempInt: number = 19,
+  tempExt: number = -7
+): number {
+  const deltaT = tempInt - tempExt;
+  if (deltaT <= 0 || !etat.deperditions_kW || DJU <= 0) return 0;
+
+  const rendementMoyenArrondi = Math.round(calculRendementMoyen(etat) * 100) / 100;
+  if (rendementMoyenArrondi <= 0) return 0;
+
+  const coef = etat.coefIntermittence || 1;
+  return Math.round(coef * (etat.deperditions_kW * 24 * DJU) / (deltaT * rendementMoyenArrondi));
+}
+
+/**
+ * Écart entre consommations réelles (factures) et calculées (déperditions).
+ * Formule du UserForm_initial (TextBox14_AfterUpdate) : (réelles − calculées) / réelles.
+ * Retourne une fraction (0.05 = 5 %) ou null si les réelles ne sont pas saisies.
+ */
+export function calculEcartConsoPct(
+  consommationsReelles: number | undefined | null,
+  consoCalculee: number
+): number | null {
+  if (!consommationsReelles || consommationsReelles <= 0) return null;
+  return (consommationsReelles - consoCalculee) / consommationsReelles;
+}
+
+/**
  * Calculate consumption in kWhep (primary energy)
  * SI typeEnergie == "Electricité" → consoReelles × 2.3
  * SINON → consoReelles (ou consoCalculees si pas de réelles)
@@ -124,16 +163,33 @@ export function calculCoutAnnuelRef(
 }
 
 /**
- * Complete calculation for a building initial state
+ * Complete calculation for a building initial state.
+ * La consommation calculée est dérivée des déperditions (formule Excel, colonne P)
+ * dès que les données le permettent ; elle alimente le coût annuel (X = W + U×V,
+ * U venant de T = conso calculée) comme dans le classeur. La consommation réelle
+ * (factures) reste la base du kWhep/DPE et sert au comparatif (écart).
  */
-export function calculsBatimentInitial(batiment: Batiment): CalculsBatiment {
+export function calculsBatimentInitial(
+  batiment: Batiment,
+  DJU: number = 1977,
+  tempInt: number = 19,
+  tempExt: number = -7
+): CalculsBatiment {
   const etat = batiment.etatInitial;
-  
+
+  // Dérivation prioritaire ; retombe sur la valeur stockée puis les réelles
+  // (affaires historiques sans déperditions exploitables).
+  const consoDerivee = calculConsoInitialeCalculee(etat, DJU, tempInt, tempExt);
+  const consoCalculee = consoDerivee || etat.consommationsCalculees || etat.consommationsReelles || 0;
+  const etatEffectif: EtatEnergie = { ...etat, consommationsCalculees: consoCalculee };
+
   return {
     rendementMoyenEI: calculRendementMoyen(etat),
-    consoKWhepEI: calculConsoKWhep(etat),
-    consoPCSEI: calculConsoPCS(etat),
-    coutAnnuelEI: calculCoutAnnuel(etat),
+    consoInitialeCalculee: consoCalculee,
+    ecartConsoPct: calculEcartConsoPct(etat.consommationsReelles, consoCalculee),
+    consoKWhepEI: calculConsoKWhep(etatEffectif),
+    consoPCSEI: calculConsoPCS(etatEffectif),
+    coutAnnuelEI: calculCoutAnnuel(etatEffectif),
   };
 }
 
@@ -193,7 +249,7 @@ export function calculsBatimentComplet(
   tempInt: number = 19,
   tempExt: number = -7
 ): CalculsBatiment {
-  const calcEI = calculsBatimentInitial(batiment);
+  const calcEI = calculsBatimentInitial(batiment, DJU, tempInt, tempExt);
   const calcRef = calculsBatimentReference(batiment, DJU, tempInt, tempExt);
 
   return {
