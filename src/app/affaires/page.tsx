@@ -12,7 +12,17 @@ interface Affaire {
   departement: string;
   createdAt: string;
   statut: string;
+  derniereModification?: string;
 }
+
+// Date + heure au format français (ex : "10/07/2026 à 14:32")
+const formatDerniereModification = (iso?: string) => {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('fr-FR');
+  const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return `${date} à ${heure}`;
+};
 
 interface DeleteTarget {
   id: string;
@@ -170,6 +180,7 @@ export default function AffairesPage() {
                   <th className="text-left px-4 py-3 font-medium text-gray-700">Ville</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-700">Date</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-700">Statut</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">Dernière modification</th>
                   <th className="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -195,6 +206,9 @@ export default function AffairesPage() {
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
                           {status.label}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                        {formatDerniereModification(a.derniereModification)}
                       </td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-3">
                         <Link href={`/affaires/${a.id}`} className="text-blue-600 hover:underline font-medium">
