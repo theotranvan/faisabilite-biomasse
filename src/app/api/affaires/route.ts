@@ -12,14 +12,44 @@ export async function GET(_req: NextRequest) {
     const affaires = await db.affaire.findMany({
       where: affaireWhereForScope(scope),
       include: {
-        batiments: true,
-        parcs: true,
+        batiments: {
+          include: {
+            travauxIsolation: { select: { updatedAt: true } },
+          },
+        },
+        parcs: {
+          include: {
+            chiffrageRef: { select: { updatedAt: true } },
+            chiffrageBio: { select: { updatedAt: true } },
+          },
+        },
         user: { select: { nom: true, prenom: true } },
       },
       orderBy: { updatedAt: 'desc' },
     });
 
-    return NextResponse.json(affaires);
+    // Dernière modification réelle de l'étude : l'updatedAt de l'Affaire ne bouge
+    // que si l'onglet Données générales est édité, or la majorité du travail se
+    // fait sur les bâtiments/parcs/chiffrages (routes API séparées). On calcule
+    // donc le max sur l'affaire + tous ses enfants pour une vraie temporalité.
+    const withLastModified = affaires.map((a: any) => {
+      let derniereModification: Date = a.updatedAt;
+      const bump = (d: Date | null | undefined) => {
+        if (d && d > derniereModification) derniereModification = d;
+      };
+      for (const b of a.batiments) {
+        bump(b.updatedAt);
+        bump(b.travauxIsolation?.updatedAt);
+      }
+      for (const p of a.parcs) {
+        bump(p.updatedAt);
+        bump(p.chiffrageRef?.updatedAt);
+        bump(p.chiffrageBio?.updatedAt);
+      }
+      return { ...a, derniereModification };
+    });
+
+    return NextResponse.json(withLastModified);
   } catch (error) {
     console.error('[affaires/GET]', error);
     return NextResponse.json(
